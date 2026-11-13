@@ -1,0 +1,11 @@
+{
+  "format": "glaze-schema",
+  "format-version": 1,
+  "glz": 1,
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/api/health"
+    }
+  ]
+}

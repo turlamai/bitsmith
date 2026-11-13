@@ -1,0 +1,17 @@
+# Node
+node_modules/
+*.tsbuildinfo
+
+# Generated dist (raco glaze build)
+dist/
+
+# Racket
+compiled/
+**/compiled/
+
+# Local runs
+*.db
+*.db-*
+
+# macOS
+.DS_Store
