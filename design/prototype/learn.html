@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learn — ImageBench</title>
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('imagebench-theme');
+        if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+      } catch (error) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .workspace.learn-layout {
+      grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+    }
+    .learn-shell {
+      width: 100%;
+      margin-inline: auto;
+    }
+    .learn-toc {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      margin-top: 10px;
+    }
+    .learn-toc a {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 5px 7px;
+      border-radius: var(--radius-xs);
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.4;
+    }
+    .learn-toc a:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    .learn-toc .toc-num {
+      color: var(--faint);
+      font-family: var(--font-mono);
+      font-size: 9px;
+    }
+    .learn-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .learn-card {
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface-1);
+    }
+    .learn-card h3 {
+      font-size: 10.5px;
+      font-weight: 650;
+    }
+    .learn-card p {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.55;
+    }
+    .learn-card code,
+    .learn-section code {
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+    .before-list {
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface-1);
+      overflow: hidden;
+    }
+    .before-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .before-row:last-child { border-bottom: 0; }
+    .before-row .od-icon {
+      --od-icon-size: 14px;
+      flex: none;
+      margin-top: 1px;
+      color: var(--ok);
+    }
+    .before-row.is-warn .od-icon { color: var(--warn); }
+    .before-row strong {
+      display: block;
+      font-size: 11px;
+      font-weight: 650;
+    }
+    .before-row span {
+      display: block;
+      margin-top: 1px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.5;
+    }
+    @media (max-width: 900px) {
+      .workspace.learn-layout { display: flex; }
+      .learn-layout .main-scroll { min-width: 0; }
+    }
+    @media (max-width: 640px) {
+      .learn-row { grid-template-columns: 1fr; }
+      .statusbar .push { display: none; }
+      .statusbar .status-item { flex: none; }
+    }
+    .field-token:focus-visible {outline:2px solid var(--focus-ring);outline-offset:2px}
+    .learn-section .field .input {height:auto;min-height:var(--space-7);padding:var(--space-2);font-size:var(--text-sm)}
+    .learn-section details {margin-top:var(--space-4);border:1px solid var(--border);padding:var(--space-3);border-radius:var(--radius-sm)}
+    .learn-section summary {cursor:pointer;color:var(--accent)}
+    .sample-source {font:var(--text-xs)/var(--lh-relaxed) var(--font-mono);white-space:pre-wrap;overflow-wrap:anywhere;margin-top:var(--space-3)}
+    .checksum-step strong {overflow-wrap:anywhere}
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="../index.html" aria-label="ImageBench home">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+        </span>
+        <span class="brand-name">ImageBench</span>
+        <span class="brand-version">v0.1</span>
+      </a>
+      <a class="file-tab" href="records.html" aria-label="Current file: FBL_APP_combined.dat">
+        <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true" style="--od-icon-size:15px">
+          <path d="M6 3.5h8l4 4v13H6z"></path>
+          <path d="M14 3.5v4h4"></path>
+          <path d="M9 12h6M9 15.5h6"></path>
+        </svg>
+        <span class="file-name">FBL_APP_combined.dat</span>
+        <span class="format-chip">Intel HEX</span>
+      </a>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-actions">
+        <span class="local-state">Local only</span>
+        <a class="btn btn-sm" href="records.html">Back to records</a>
+        <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Switch to light theme">
+          <svg class="od-icon icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 15.2A8.2 8.2 0 0 1 8.8 4a8.4 8.4 0 1 0 11.2 11.2Z"></path>
+          </svg>
+          <svg class="od-icon icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="3.5"></circle>
+            <path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="workspace learn-layout">
+      <aside class="sidebar">
+        <nav class="side-nav" aria-label="Workbench sections">
+          <a class="side-nav-item" href="records.html">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 6.5h14M5 12h14M5 17.5h9"></path>
+            </svg>
+            Records <span class="side-nav-key">1</span>
+          </a>
+          <a class="side-nav-item" href="image.html">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="4" y="4" width="16" height="16" rx="1.5"></rect>
+              <path d="M4 10h16M4 15h16M9 4v16M15 4v16"></path>
+            </svg>
+            Image <span class="side-nav-key">2</span>
+          </a>
+          <a class="side-nav-item" href="operations.html">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7h10M18 7h2M4 17h3M11 17h9"></path>
+              <circle cx="16" cy="7" r="2"></circle>
+              <circle cx="9" cy="17" r="2"></circle>
+            </svg>
+            Operations <span class="side-nav-key">3</span>
+          </a>
+          <a class="side-nav-item" href="learn.html" aria-current="page">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4.5 5.5h6a2 2 0 0 1 2 2v11a2 2 0 0 0-2-2h-6z"></path>
+              <path d="M19.5 5.5h-4a2 2 0 0 0-2 2v11a2 2 0 0 1 2-2h4z"></path>
+            </svg>
+            Learn <span class="side-nav-key">4</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-scroll">
+          <div class="eyebrow">On this page</div>
+          <nav class="learn-toc" aria-label="Reference sections">
+            <a href="#anatomy"><span class="toc-num">01</span>Record anatomy</a>
+            <a href="#checksum"><span class="toc-num">02</span>Checksum arithmetic</a>
+            <a href="#gaps"><span class="toc-num">03</span>Gaps are not bytes</a>
+            <a href="#formats"><span class="toc-num">04</span>HEX, S-record, BIN</a>
+            <a href="#base"><span class="toc-num">05</span>Assumed base</a>
+            <a href="#before-write"><span class="toc-num">06</span>Before you write</a>
+          </nav>
+          <p class="sidebar-note">The sample used throughout is <code>FBL_APP_combined.dat</code>: 8 Intel HEX records, 7 of which verify.</p>
+          <div class="sidebar-foot">
+            <span>6 sections</span>
+            <a href="../DESIGN.md">Design notes</a>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-scroll">
+        <div class="learn-shell">
+          <div class="learn-hero">
+            <div class="eyebrow">Reference</div>
+            <h1>The rules behind the view.</h1>
+            <p>Nothing in ImageBench is magic: a record is a text line with a small arithmetic contract, and an address is either in the file or assumed by you. These six sections cover the difference.</p>
+          </div>
+
+          <section class="learn-section" id="anatomy" aria-labelledby="anatomyTitle">
+            <h2 id="anatomyTitle">01 · What a record actually is</h2>
+            <p class="section-intro">One Intel HEX line is a complete, self-describing packet. Count tells you how many data bytes follow; address says where they load; type says what the line means; checksum closes the packet.</p>
+
+            <div class="anatomy-card">
+              <div class="anatomy-head">
+                <span class="eyebrow">Intel HEX</span>
+                <h3>The failing record, field by field</h3>
+              </div>
+              <div class="anatomy-body">
+                <div class="record-anatomy" id="intelAnatomy" aria-label="Intel HEX byte fields"></div>
+                <div class="field-key">
+                  <div class="field-key-item"><span class="field-key-swatch count"></span><div><strong>Count · 04</strong><span>Four data bytes follow. A line is not a row of hex; the count defines its shape.</span></div></div>
+                  <div class="field-key-item"><span class="field-key-swatch address"></span><div><strong>Address · 8020</strong><span>Offset inside the current 64 KiB page. The type 04 record above supplies the upper bits.</span></div></div>
+                  <div class="field-key-item"><span class="field-key-swatch type"></span><div><strong>Type · 00</strong><span>00 is data. 01 ends the file, 02 and 04 extend the address, 03 and 05 are start addresses.</span></div></div>
+                  <div class="field-key-item"><span class="field-key-swatch data"></span><div><strong>Data · 48 B1 08 47</strong><span>The four payload bytes are preserved exactly; their instruction meaning depends on the target architecture.</span></div></div>
+                  <div class="field-key-item"><span class="field-key-swatch checksum"></span><div><strong>Checksum · 00</strong><span>Stored value. This one is wrong: arithmetic says 14. That is the single failing record in the sample.</span></div></div>
+                </div>
+                <p class="anatomy-note">The record occupies absolute address <code>0x08008020</code> because a preceding <code>:020000040800F2</code> line set the upper 16 bits to <code>0x0800</code>. Without that line the address would only be <code>0x8020</code>.</p>
+              </div>
+            </div>
+            <div class="anatomy-card" style="margin-top:var(--space-4)">
+              <div class="anatomy-head"><span class="eyebrow">Motorola S-record</span><h3>S7 termination · byte by byte</h3></div>
+              <div class="anatomy-body"><div class="record-anatomy" id="srecAnatomy" aria-label="S-record byte fields"></div>
+                <div class="field-key">
+                  <div class="field-key-item"><span class="field-key-swatch type"></span><div><strong>Type · S7</strong><span>Terminates an S3 stream and carries a 32-bit execution address.</span></div></div>
+                  <div class="field-key-item"><span class="field-key-swatch count"></span><div><strong>Count · 05</strong><span>Five bytes follow: four address bytes plus one checksum byte.</span></div></div>
+                  <div class="field-key-item"><span class="field-key-swatch address"></span><div><strong>Address · 00 00 00 00</strong><span>The execution address is 0x00000000; this is metadata, not a data write.</span></div></div>
+                  <div class="field-key-item"><span class="field-key-swatch data"></span><div><strong>Data · none</strong><span>S7 has no payload; S1, S2 and S3 carry data with 16-, 24- and 32-bit addresses.</span></div></div>
+                  <div class="field-key-item"><span class="field-key-swatch checksum"></span><div><strong>Checksum · FA</strong><span>The one's complement of count plus address bytes closes this record.</span></div></div>
+                </div>
+                <p class="anatomy-note">Hover or focus any byte for its role. The exact input is <code>S70500000000FA</code>.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="learn-section" id="checksum" aria-labelledby="checksumTitle">
+            <h2 id="checksumTitle">02 · How the checksum is computed</h2>
+            <p class="section-intro">Intel HEX uses a two's complement checksum. Add every byte after the colon except the checksum itself, keep the low byte, then complement and add one. The result must equal the stored byte.</p>
+
+            <div class="field" style="margin-block:var(--space-4)"><label for="checksumInput">Intel HEX record · edit a byte to recompute</label><input class="input" id="checksumInput" value=":0480200048B1084700" spellcheck="false" aria-describedby="checksumFeedback"></div>
+            <div class="checksum-steps" id="intelSteps"></div><p class="callout" id="checksumFeedback" aria-live="polite"></p>
+            <h3 style="margin-block:var(--space-4)">S-record · one's complement</h3>
+            <div class="checksum-steps" id="srecSteps"></div>
+            <p class="anatomy-note">ImageBench recomputes this for every line on every load. A failing checksum does not hide the data: the record stays in the table so you can decide whether to repair the byte or reject the file.</p>
+          </section>
+
+          <section class="learn-section" id="gaps" aria-labelledby="gapsTitle">
+            <h2 id="gapsTitle">03 · Gaps are not bytes</h2>
+            <p class="section-intro">A missing range in the record stream is not the same as a range filled with <code>0xFF</code>. One is an absence of information; the other is an explicit claim about the device.</p>
+
+            <div class="learn-row">
+              <div class="learn-card">
+                <h3>Gap</h3>
+                <p>No record covers the range. The map draws it as an empty striped band, and the tool refuses to pretend it knows what the flash holds there. In the sample, 32,736 bytes sit between the bootloader and the application.</p>
+              </div>
+              <div class="learn-card">
+                <h3>Explicit 0xFF</h3>
+                <p>A record actually contains 0xFF bytes. The sample has 16 such bytes at <code>0x08009FF0</code>. They can be verified, edited, and compared, because they exist in the file.</p>
+              </div>
+            </div>
+            <p class="anatomy-note">An erase operation turns covered bytes into explicit 0xFF records. A fill operation can also materialise a gap. Both are writes, and both go through the same conflict gate as any other staged change.</p>
+          </section>
+
+          <section class="learn-section" id="formats" aria-labelledby="formatsTitle">
+            <h2 id="formatsTitle">04 · HEX, S-record, BIN</h2>
+            <p class="section-intro">The container decides how much the file can prove. Content is sniffed rather than trusted from the extension, because a firmware renamed <code>.bin</code> is still text records.</p>
+
+            <div class="compare-table-wrap">
+              <table class="compare-table">
+                <thead>
+                  <tr><th>Property</th><th>Intel HEX</th><th>S19 / S-record</th><th>Raw BIN</th></tr>
+                </thead>
+                <tbody>
+                  <tr><th>Address in file</th><td>Yes — 16-bit plus type 02/04 extension</td><td>Yes — 16, 24 or 32-bit in the record</td><td>No — nothing but bytes</td></tr>
+                  <tr><th>Per-line checksum</th><td>Two's complement, low byte</td><td>One's complement, low byte</td><td>None</td></tr>
+                  <tr><th>End of file</th><td><code>:00000001FF</code></td><td>Termination record <code>S7/S8/S9</code></td><td>EOF only</td></tr>
+                  <tr><th>ASCII overhead</th><td>Typically ~3× at short line widths; varies with data length</td><td>Typically ~3× at short line widths; varies with address width</td><td>1× payload; padding may increase size</td></tr>
+                  <tr><th>Typical use</th><td>MCU tools and sparse flash images</td><td>Automotive / FBL image exchange; .s19 is a common extension</td><td>Contiguous flash dumps and direct programming</td></tr>
+                  <tr><th>Primary risk</th><td>Ignoring extended-address records or overlap</td><td>Wrong S1/S2/S3 width or count interpretation</td><td>Wrong base, silent gap padding, no per-record checksum</td></tr>
+                  <tr><th>Editable as text</th><td>Yes</td><td>Yes</td><td>No</td></tr>
+                  <tr><th>Base required</th><td>No</td><td>No</td><td>Yes — an assumption</td></tr>
+                  <tr><th>In this session</th><td>Sample file · recorded</td><td>Supported · recorded</td><td>Supported · assumed base</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="anatomy-note">S-record counts include the address and checksum bytes, unlike Intel HEX where the count covers data only. The checksum is also complemented differently: one's complement instead of two's. Do not reuse the same arithmetic across formats.</p>
+          </section>
+
+<details class="learn-section"><summary>Supplied source records · preserved verbatim</summary><h3>Intel HEX</h3><pre class="sample-source">:020000040800F2
+:200000000010020009590108FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7B
+:10001000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0
+:088000000050002001598A081C
+:088010002DE9F0470DF080F8A6
+:109FF000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF71
+:00000001FF</pre><h3>Motorola S-record</h3><pre class="sample-source">S0120000496D61676542656E63682D44454D4FD8
+S31D004000000050002001598A08FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF56
+S31D004000182DE9F0470DF080F800000000000000000000000000000000C8
+S3150054FFF0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFB7
+S70500000000FA</pre></details>
+          <section class="learn-section" id="base" aria-labelledby="baseTitle">
+            <h2 id="baseTitle">05 · Why a BIN needs a base</h2>
+            <p class="section-intro">A raw binary has no idea where it belongs in memory. ImageBench does not guess quietly: it asks for a base and marks every address downstream of that choice.</p>
+
+            <div class="assumption-banner" style="margin-top:12px">
+              <svg class="od-icon banner-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3.5 21 20H3z"></path>
+                <path d="M12 9v5M12 17.2v.1"></path>
+              </svg>
+              <div>
+                <strong>With base 0x08000000, the APP writes at 0x08008000. With base 0x00000000, the same bytes write to 0x00008000.</strong>
+                <p>The bytes never move; the interpretation does. That is why the assumed base is shown on every screen and why changing it re-draws the whole map instead of silently relabelling a few rows.</p>
+              </div>
+              <a class="btn btn-sm btn-quiet banner-action" href="image.html">See the BIN state</a>
+            </div>
+            <p class="anatomy-note">The sample is Intel HEX, so no base is invented. The BIN state exists to make the assumption visible: it is a working choice, not a property of the file.</p>
+          </section>
+
+          <section class="learn-section" id="before-write" aria-labelledby="beforeTitle">
+            <h2 id="beforeTitle">06 · Before you write</h2>
+            <p class="section-intro">Reading is cheap; writing is not. These are the checks ImageBench keeps in front of you, in the order they matter.</p>
+
+            <div class="before-list">
+              <div class="before-row">
+                <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m4.5 12.5 4.3 4.3L19.5 6.8"></path></svg>
+                <div><strong>Every record verifies, or you know why not</strong><span>The sample has seven verified records and one failure with its arithmetic shown. A failing record is never silently repaired.</span></div>
+              </div>
+              <div class="before-row">
+                <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m4.5 12.5 4.3 4.3L19.5 6.8"></path></svg>
+                <div><strong>You know which addresses are recorded</strong><span>Intel HEX and S-record supply addresses. A BIN base is an assumption and stays labelled as one.</span></div>
+              </div>
+              <div class="before-row is-warn">
+                <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 21 20H3z"></path><path d="M12 9v5M12 17.2v.1"></path></svg>
+                <div><strong>Every overlap has an order</strong><span>Staged operations that claim the same bytes produce a conflict. Choosing a resolution records which intent wins; it never hides the overlap.</span></div>
+              </div>
+              <div class="before-row">
+                <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m4.5 12.5 4.3 4.3L19.5 6.8"></path></svg>
+                <div><strong>Nothing is written until you apply</strong><span>Operations change a working copy in this browser. The source file on disk stays untouched, and the gate stays closed while a conflict is open.</span></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <footer class="statusbar">
+      <span class="status-item"><span class="status-dot ok"></span><strong>Reference</strong> · 6 sections</span>
+      <span class="status-item hide-sm">Sample · 8 records · 7 verify</span>
+      <span class="status-item hide-sm">Intel HEX · recorded addresses</span>
+      <span class="status-item push">Content first · extensions are only a hint</span>
+      <span class="status-item hide-sm"><span class="kbd">1</span>–<span class="kbd">4</span> views</span>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+
+      const byId = id => document.getElementById(id);
+      const hx = n => n.toString(16).toUpperCase().padStart(2,'0');
+      function byteToken(text,kind,label){const el=document.createElement('span');el.className='field-token is-'+kind;el.textContent=text;el.tabIndex=0;el.title=label;el.setAttribute('aria-label',label+' · '+text);return el;}
+      const intelFields=[[':','colon','Start marker'],['04','count','Data byte count'],['80','address','Address high byte'],['20','address','Address low byte'],['00','type','Data record type'],['48','data','Payload byte 1'],['B1','data','Payload byte 2'],['08','data','Payload byte 3'],['47','data','Payload byte 4'],['00','checksum','Stored checksum']];
+      const srecFields=[['S7','type','32-bit termination record'],['05','count','Address plus checksum count'],...Array.from({length:4},(_,i)=>['00','address','Execution address byte '+(i+1)]),['FA','checksum','Stored checksum']];
+      intelFields.forEach(f=>byId('intelAnatomy').append(byteToken(...f)));srecFields.forEach(f=>byId('srecAnatomy').append(byteToken(...f)));
+      function steps(host,bytes,stored,ones){const sum=bytes.reduce((n,b)=>n+b,0),low=sum&255,expected=ones?(~low)&255:(-low)&255;const content=[['1 · Sum bytes',bytes.map(hx).join(' + ')+' = 0x'+hx(sum),'Count, address, and data; Intel HEX also includes type.'],['2 · Low byte','0x'+hx(sum)+' & FF = '+hx(low),'Discard carries above eight bits.'],['3 · Complement',(ones?'FF − ':'100 − ')+hx(low)+' = '+hx(expected),ones?"One’s complement, masked to eight bits.":"Two’s complement, masked to eight bits."],['4 · Compare',hx(stored)+(stored===expected?' = ':' ≠ ')+hx(expected),(stored===expected?'PASS':'FAIL')+' · stored versus computed']];host.replaceChildren(...content.map(([label,value,note])=>{const box=document.createElement('div');box.className='checksum-step';const l=document.createElement('span');l.className='step-num';l.textContent=label;const strong=document.createElement('strong');strong.textContent=value;const p=document.createElement('p');p.textContent=note;box.append(l,strong,p);return box;}));return expected;}
+      function updateChecksum(){const raw=byId('checksumInput').value.trim();if(!/^:(?:[0-9a-f]{2}){5,}$/i.test(raw)){byId('intelSteps').replaceChildren();byId('checksumFeedback').textContent='Enter a colon followed by complete hexadecimal byte pairs (count, address, type, data, checksum).';return;}const b=raw.slice(1).match(/../g).map(x=>parseInt(x,16));if(b.length!==b[0]+5){byId('intelSteps').replaceChildren();byId('checksumFeedback').textContent='Count mismatch: count declares '+b[0]+' data bytes; line contains '+(b.length-5)+'.';return;}const expected=steps(byId('intelSteps'),b.slice(0,-1),b.at(-1),false);byId('checksumFeedback').textContent=b.at(-1)===expected?'PASS · checksum computed from the current input.':'FAIL · stored '+hx(b.at(-1))+'; expected '+hx(expected)+'. Input is preserved; no repair is applied.';}
+      byId('checksumInput').addEventListener('input',updateChecksum);updateChecksum();steps(byId('srecSteps'),[5,0,0,0,0],250,true);
+
+      function updateThemeLabel() {
+        const button = document.querySelector('[data-theme-toggle]');
+        if (!button) return;
+        const isLight = document.documentElement.dataset.theme === 'light';
+        button.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
+      }
+
+      document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+          document.documentElement.dataset.theme = next;
+          try { localStorage.setItem('imagebench-theme', next); } catch (error) {}
+          updateThemeLabel();
+        });
+      });
+      updateThemeLabel();
+
+      document.addEventListener('keydown', function (event) {
+        if (event.metaKey || event.ctrlKey || event.altKey) return;
+        if (event.target.matches('input, textarea, select')) return;
+        const routes = { '1': 'records.html', '2': 'image.html', '3': 'operations.html', '4': 'learn.html' };
+        if (routes[event.key]) window.location.href = routes[event.key];
+      });
+    })();
+  </script>
+</body>
+</html>

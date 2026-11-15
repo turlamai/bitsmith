@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operations — ImageBench</title>
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('imagebench-theme');
+        if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+      } catch (error) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .ops-sidebar-note {
+      margin-top: 12px;
+      padding: 9px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface-1);
+      color: var(--faint);
+      font-size: 9.5px;
+      line-height: 1.5;
+    }
+    .ops-sidebar-note strong {
+      display: block;
+      margin-bottom: 2px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .op-selected-title {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      color: var(--faint);
+      font-size: 9px;
+      font-weight: 650;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+    .op-detail-scroll {
+      padding-bottom: 40px;
+    }
+    .op-param-value {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 30px;
+      padding: 5px 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      background: var(--inset);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      word-break: break-all;
+    }
+    .op-param-value .badge {
+      margin-left: auto;
+    }
+    .op-static-note {
+      margin-top: 8px;
+      color: var(--faint);
+      font-size: 9.5px;
+      line-height: 1.5;
+    }
+    .apply-state {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--faint);
+      font-size: 9.5px;
+      line-height: 1.4;
+    }
+    .apply-state .od-icon {
+      --od-icon-size: 13px;
+      color: var(--ok);
+      flex: none;
+    }
+    .gate-blocked .od-icon { color: var(--fail); }
+    .gate-blocked { color: var(--fail); }
+    @media (max-width: 1100px) {
+      .ops-page .inspector { display: none; }
+    }
+    @media (max-width: 900px) {
+      .ops-page .sidebar { display: none; }
+      .ops-page .workspace { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .ops-page .statusbar .push { display: none; }
+      .ops-page .statusbar .status-item { flex: none; }
+    }
+
+    .compact-operation { display:none; margin:var(--space-4); }
+    .op-output { margin-top:var(--space-3); padding:var(--space-3); background:var(--inset); border:1px solid var(--border); border-radius:var(--radius-sm); font:var(--text-xs)/var(--lh-relaxed) var(--font-mono); white-space:pre-wrap; overflow-wrap:anywhere; }
+    .ops-page .diff-copy { white-space:normal; overflow:visible; overflow-wrap:anywhere; }
+    .ops-page .diff-row { grid-template-columns:var(--space-4) minmax(0,1fr); }
+    .ops-page .mini-map-track { display:flex; gap:0; }
+    .map-part { display:block; min-width:2px; height:100%; background:var(--app); }
+    .map-part.fbl {background:var(--fbl)} .map-part.gap {background:var(--gap-bg); border-block:1px dashed var(--gap)}
+    .map-part.changed {background:var(--accent)}
+    .ops-page .op-apply-bar { flex-wrap:wrap; }
+    .ops-page .crc-value {font-size:var(--text-xl);overflow-wrap:anywhere}
+    .ops-page .main-pane {min-width:0}
+    .ops-page dialog { max-width:min(560px,90vw); background:var(--surface-1); color:var(--text); border:1px solid var(--border-strong); border-radius:var(--radius-md); padding:var(--space-6); }
+    .ops-page dialog:not([open]) {display:none}
+    .ops-page dialog::backdrop {background:color-mix(in srgb,var(--bg) 80%,transparent)}
+    .ops-page dialog p {margin-block:var(--space-4);color:var(--muted)}
+    .ops-page .field .help {color:var(--muted)}
+    @media(max-width:1100px){.ops-page .workspace {grid-template-columns:var(--sidebar-w) minmax(0,1fr)}}
+    @media(max-width:900px){.compact-operation {display:flex}.ops-page .workspace {grid-template-columns:minmax(0,1fr)}}
+  </style>
+</head>
+<body class="ops-page">
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="../index.html" aria-label="ImageBench home">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+        </span>
+        <span class="brand-name">ImageBench</span>
+        <span class="brand-version">v0.1</span>
+      </a>
+      <a class="file-tab" href="records.html" aria-label="Current file: FBL_APP_combined.dat">
+        <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true" style="--od-icon-size:15px">
+          <path d="M6 3.5h8l4 4v13H6z"></path>
+          <path d="M14 3.5v4h4"></path>
+          <path d="M9 12h6M9 15.5h6"></path>
+        </svg>
+        <span class="file-name">FBL_APP_combined.dat</span>
+        <span class="format-chip">Intel HEX</span>
+        <span class="op-badge">working copy</span>
+      </a>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-actions">
+        <span class="local-state">Local only</span>
+        <span class="badge" id="stagedCount">7 operations</span>
+        <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Switch to light theme">
+          <svg class="od-icon icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 15.2A8.2 8.2 0 0 1 8.8 4a8.4 8.4 0 1 0 11.2 11.2Z"></path>
+          </svg>
+          <svg class="od-icon icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="3.5"></circle>
+            <path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="sidebar">
+        <nav class="side-nav" aria-label="Workbench sections">
+          <a class="side-nav-item" href="records.html">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 6.5h14M5 12h14M5 17.5h9"></path>
+            </svg>
+            Records <span class="side-nav-key">1</span>
+          </a>
+          <a class="side-nav-item" href="image.html">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="4" y="4" width="16" height="16" rx="1.5"></rect>
+              <path d="M4 10h16M4 15h16M9 4v16M15 4v16"></path>
+            </svg>
+            Image <span class="side-nav-key">2</span>
+          </a>
+          <a class="side-nav-item" href="operations.html" aria-current="page">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7h10M18 7h2M4 17h3M11 17h9"></path>
+              <circle cx="16" cy="7" r="2"></circle>
+              <circle cx="9" cy="17" r="2"></circle>
+            </svg>
+            Operations <span class="side-nav-key">3</span>
+          </a>
+          <a class="side-nav-item" href="learn.html">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4.5 5.5h6a2 2 0 0 1 2 2v11a2 2 0 0 0-2-2h-6z"></path>
+              <path d="M19.5 5.5h-4a2 2 0 0 0-2 2v11a2 2 0 0 1 2-2h4z"></path>
+            </svg>
+            Learn <span class="side-nav-key">4</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-scroll">
+          <div class="eyebrow" style="margin-bottom:7px">Available operations</div>
+          <div class="op-list" id="opList" role="list"></div>
+          <p class="ops-sidebar-note"><strong>Staged, never written.</strong> Parameters below preview changes to a local working copy. The source file on disk is not touched.</p>
+          <div class="sidebar-foot">
+            <span id="sideFoot">Preview before apply</span>
+            <a href="../DESIGN.md">Design notes</a>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-pane">
+        <div class="main-toolbar">
+          <h1>Operations</h1>
+          <span class="toolbar-sub" id="toolbarSub">Working copy · 0x08000000–0x08009FFF</span>
+          <div class="toolbar-spacer"></div>
+          <span class="badge" id="gateBadge">Gate blocked</span>
+          <a class="btn btn-sm" href="image.html">Inspect bytes</a>
+        </div>
+
+        <div class="main-scroll op-detail-scroll">
+          <label class="field compact-operation"><span>Operation</span><select class="select" id="compactOperation" aria-label="Choose operation"></select></label><div class="operation-detail" id="operationDetail"></div>
+        </div>
+      </main>
+
+      <aside class="inspector" aria-label="Apply gate">
+        <div class="inspector-scroll">
+          <div class="inspector-section">
+            <div class="inspector-title"><span>Apply gate</span><span class="badge badge-fail" id="gatePill">Blocked</span></div>
+            <div class="check-list" id="gateChecks"></div>
+          </div>
+          <div class="inspector-section">
+            <div class="inspector-title"><span>Scope</span><span class="mono" id="scopeRecords">7 operations</span></div>
+            <dl class="kv-list" id="scopeList">
+              <dt>Source</dt><dd>FBL_APP_combined.dat</dd>
+              <dt>Format</dt><dd>Intel HEX</dd>
+              <dt>Span</dt><dd>40 KiB</dd>
+              <dt>Target</dt><dd>working copy</dd>
+            </dl>
+          </div>
+          <div class="inspector-section">
+            <div class="inspector-title"><span>Why this gate exists</span></div>
+            <p class="callout">A conflict is not a warning you can dismiss. It is an overlap between two input images. Change the APP base so their address ranges do not overlap before applying.</p>
+          </div>
+          <div class="inspector-section">
+            <div class="inspector-title"><span>Session</span></div>
+            <p class="callout" id="sessionNote">Changes stay in this page. Reset restores the supplied sample.</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="statusbar">
+      <span class="status-item"><span class="status-dot warn" id="statusDot"></span><strong id="statusGate">Gate blocked</strong><span id="statusApplyNote"> · not applied</span></span>
+      <span class="status-item hide-sm">Staged <strong id="statusStaged">3</strong> · conflicts <strong id="statusConflicts">1</strong></span>
+      <span class="status-item hide-sm">Recorded addresses · Intel HEX</span>
+      <span class="status-item push" id="statusHint">Resolve the conflict to enable apply</span>
+      <span class="status-item hide-sm"><span class="kbd">1</span>–<span class="kbd">4</span> views</span>
+    </footer>
+  </div>
+
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+  <dialog id="confirmApply" aria-labelledby="confirmTitle"><h2 id="confirmTitle">Apply the preview?</h2><p id="confirmCopy"></p><div class="topbar-actions"><button class="btn" id="cancelApply" type="button">Back to preview</button><button class="btn btn-primary" id="commitApply" type="button">Apply to working copy</button></div></dialog>
+  <script>
+  (() => {
+    'use strict';
+    const SAMPLE = [
+      ':020000040800F2',
+      ':200000000010020009590108FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7B',
+      ':10001000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0',
+      ':088000000050002001598A081C',
+      ':088010002DE9F0470DF080F8A6',
+      ':109FF000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF71',
+      ':0480200048B1084700',
+      ':00000001FF'
+    ];
+    const $ = id => document.getElementById(id);
+    const esc = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const hex = (n,w=8) => Math.trunc(n).toString(16).toUpperCase().padStart(w,'0');
+    const addr = n => '0x'+hex(n);
+    const parse = value => {
+      if(!/^(?:0x[0-9a-f]+|[0-9]+)$/i.test(String(value).trim())) throw Error('Use a decimal number or a hexadecimal number beginning with 0x.');
+      const n=Number(value); if(!Number.isSafeInteger(n)) throw Error('Value is outside the supported integer range.'); return n;
+    };
+    function loadSample(){let upper=0;const map=new Map();SAMPLE.forEach(line=>{const b=line.slice(1).match(/../g).map(x=>parseInt(x,16));if(b[3]===4)upper=((b[4]<<8)|b[5])*65536;if(b[3]===0)for(let i=0;i<b[0];i++)map.set(upper+b[1]*256+b[2]+i,b[4+i]);});return map;}
+    const original=loadSample(); let working=new Map(original), format='HEX', revision=0, selected='fill', candidate=null, pending=null;
+    const specs=[
+      {id:'fill',name:'Fill',desc:'Materialise a missing range',fields:[['start','Start address','0x08000020'],['end','End address · inclusive','0x08007FFF'],['value','Fill value','0xFF',['0x00','0xFF']]]},
+      {id:'pad',name:'Pad to alignment',desc:'Extend the final segment',fields:[['alignment','Alignment · bytes','0x1000'],['value','Pad value','0xFF',['0x00','0xFF']]]},
+      {id:'offset',name:'Offset',desc:'Relocate absolute addresses',fields:[['delta','Signed offset','0x8000']]},
+      {id:'crop',name:'Crop',desc:'Keep an inclusive address range',fields:[['start','First address to keep','0x08008000'],['end','Last address to keep','0x08009FFF']]},
+      {id:'merge',name:'Merge',desc:'FBL + APP → combined image',fields:[['base','APP destination base','0x08008000'],['scenario','Placement','Separate ranges',['Separate ranges','Overlap FBL · error']]]},
+      {id:'convert',name:'Convert',desc:'Make the output strategy explicit',fields:[['target','Target format','SREC',['HEX','SREC','BIN']],['width','S-record address width','S3',['S1','S2','S3']],['line','Data bytes per line','16',['16','32']],['value','Gap fill value','0xFF',['0x00','0xFF']],['base','BIN base address','0x08000000']]},
+      {id:'crc',name:'CRC',desc:'Compute from actual working bytes',fields:[['preset','Preset','CRC-32/MPEG-2',['CRC-32/MPEG-2','CRC-32/ISO-HDLC','CRC-16/XMODEM','sum8']],['start','Start address','0x08008000'],['end','End address · inclusive','0x08009FFF'],['value','Unmapped-byte policy','0xFF',['0xFF','0x00','Reject gaps']]]}
+    ];
+    const values=Object.fromEntries(specs.map(op=>[op.id,Object.fromEntries(op.fields.map(f=>[f[0],f[2]]))]));
+    const presets={
+      'CRC-32/MPEG-2':{bits:32,poly:0x04C11DB7,init:0xFFFFFFFF,xor:0xFFFFFFFF,reflect:false,note:'Automotive project preset · xorout follows the supplied brief (0xFFFFFFFF). Conventional MPEG-2 uses xorout 0x00000000.'},
+      'CRC-32/ISO-HDLC':{bits:32,poly:0x04C11DB7,init:0xFFFFFFFF,xor:0xFFFFFFFF,reflect:true,note:'zlib-compatible · reflected input and output.'},
+      'CRC-16/XMODEM':{bits:16,poly:0x1021,init:0,xor:0,reflect:false,note:'16-bit result · no reflection.'},
+      'sum8':{bits:8,poly:0,init:0,xor:0,reflect:false,note:'Add bytes modulo 256; this is an additive checksum.'}
+    };
+    function ranges(map){const keys=[...map.keys()].sort((a,b)=>a-b),out=[];for(const a of keys){const last=out.at(-1);if(last&&a===last[1]+1)last[1]=a;else out.push([a,a]);}return out;}
+    function bounds(map){const r=ranges(map);return r.length?[r[0][0],r.at(-1)[1]]:[0,0];}
+    function rangeInput(v){const a=parse(v.start),b=parse(v.end);if(a>b)throw Error('Start must be at or below end.');if(b>0xFFFFFFFF)throw Error('Address exceeds 0xFFFFFFFF.');if(b-a+1>1048576)throw Error('Keep this local preview to 1 MiB or less.');return[a,b];}
+    function digest(bytes,p){if(p.bits===8)return bytes.reduce((a,b)=>(a+b)&255,0);let c=p.init;for(const b of bytes){if(p.reflect){c^=b;for(let k=0;k<8;k++)c=(c>>>1)^((c&1)?0xEDB88320:0);}else if(p.bits===16){c^=b<<8;for(let k=0;k<8;k++)c=((c<<1)^((c&0x8000)?p.poly:0))&65535;}else{c^=b<<24;for(let k=0;k<8;k++)c=((c<<1)^((c&0x80000000)?p.poly:0))>>>0;}}return (c^p.xor)>>>0;}
+    function record(address,data,target,width){
+      if(target==='SREC'){const n={S1:2,S2:3,S3:4}[width],a=[];for(let i=n-1;i>=0;i--)a.push(Math.floor(address/2**(i*8))&255);const b=[data.length+n+1,...a,...data];return width+b.map(x=>hex(x,2)).join('')+hex((~b.reduce((s,x)=>s+x,0))&255,2);}
+      const b=[data.length,(address>>>8)&255,address&255,0,...data];return ':'+b.map(x=>hex(x,2)).join('')+hex((-b.reduce((s,x)=>s+x,0))&255,2);
+    }
+    function records(map,target='HEX',width='S3',line=16){let out=[],upper=-1;for(const [a,b] of ranges(map)){for(let at=a;at<=b;){const size=Math.min(line,b-at+1,65536-(at%65536));if(target==='HEX'&&Math.floor(at/65536)!==upper){upper=Math.floor(at/65536);const u=[2,0,0,4,upper>>>8,upper&255];out.push(':'+u.map(x=>hex(x,2)).join('')+hex((-u.reduce((s,x)=>s+x,0))&255,2));}const bytes=Array.from({length:size},(_,i)=>map.get(at+i));out.push(record(at,bytes,target,width));at+=size;}}if(target==='HEX')out.push(':00000001FF');else out.push(({S1:'S9030000FC',S2:'S804000000FB',S3:'S70500000000FA'})[width]);return out;}
+    function compute(){
+      const v=values[selected],after=new Map(working);let note='',outFormat=format,output='',crc=null;
+      if(selected==='fill'){const[a,b]=rangeInput(v),value=parse(v.value);for(let x=a;x<=b;x++)after.set(x,value);note=`Fill ${addr(a)}–${addr(b)} with ${v.value}.`;}
+      if(selected==='pad'){const n=parse(v.alignment);if(!n||n>1048576||(n&(n-1)))throw Error('Alignment must be a power of two, from 1 through 1048576.');const end=bounds(working)[1],stop=Math.ceil((end+1)/n)*n;if(stop>0x100000000)throw Error('Padding exceeds the 32-bit address space.');for(let a=end+1;a<stop;a++)after.set(a,parse(v.value));note=stop===end+1?'Already aligned; no bytes added.':`Append ${stop-end-1} bytes through ${addr(stop-1)}.`;}
+      if(selected==='offset'){const text=v.delta.trim(),negative=text.startsWith('-'),n=parse(negative?text.slice(1):text)*(negative?-1:1);after.clear();working.forEach((b,a)=>{if(a+n<0||a+n>0xFFFFFFFF)throw Error('Relocation would leave the 32-bit address space.');after.set(a+n,b);});note=`Relocate every populated address by ${n<0?'-':'+'}${addr(Math.abs(n))}; payload stays unchanged.`;}
+      if(selected==='crop'){const[a,b]=rangeInput(v);for(const x of after.keys())if(x<a||x>b)after.delete(x);if(!after.size)throw Error('This crop would produce an empty image. Choose a range containing data.');note=`Keep ${addr(a)}–${addr(b)}; remove all other populated bytes.`;}
+      if(selected==='merge'){const base=v.scenario.startsWith('Overlap')?0x08000010:parse(v.base);after.clear();const fbl=[...original].filter(([a])=>a<0x08000020),app=[...original].filter(([a])=>a>=0x08008000);for(const[a,b]of fbl)after.set(a,b);for(const[a,b]of app){const dest=base+a-0x08008000;if(dest>0xFFFFFFFF)throw Error('APP end exceeds the 32-bit address space.');if(after.has(dest))throw Error(`Overlap conflict: FBL + APP both cover ${addr(dest)}. Set APP base to 0x08008000 or another non-overlapping range.`);after.set(dest,b);}note=`FBL @ 0x08000000 + APP @ ${addr(base)} → merged image. Inputs are the supplied sample segments.`;}
+      if(selected==='convert'){
+        outFormat=v.target;const[lo,hi]=bounds(after);if(v.target==='BIN'){const base=parse(v.base);if(base>lo)throw Error('BIN base must be at or below the first populated address.');if(hi-base+1>1048576)throw Error('BIN output exceeds the 1 MiB preview limit.');for(let a=base;a<=hi;a++)if(!after.has(a))after.set(a,parse(v.value));output=`BIN base ${addr(base)} · ${after.size} bytes
+`+Array.from({length:Math.min(64,after.size)},(_,i)=>hex(after.get(base+i),2)).join(' ');note='BIN materialises every hole with the chosen fill value. Address metadata is replaced by the explicit base assumption.';}
+        else {if(v.target==='SREC'&&hi>({S1:0xFFFF,S2:0xFFFFFF,S3:0xFFFFFFFF}[v.width]))throw Error(`${v.width} cannot encode ${addr(hi)}. Use S3 for the supplied absolute addresses; no implicit truncation or relocation.`);const lines=records(after,v.target,v.width,Number(v.line));output=lines.slice(0,8).join('\n')+(lines.length>8?`
+… ${lines.length} generated records total`:'');note=`${v.target} · ${v.line} data bytes per line${v.target==='SREC'?' · '+v.width:''}. Sparse ranges remain sparse; gap fill applies only to BIN.`;}
+      }
+      if(selected==='crc'){const[a,b]=rangeInput(v),bytes=[],p=presets[v.preset];let gaps=0;for(let x=a;x<=b;x++){if(!working.has(x)){gaps++;if(v.value==='Reject gaps')throw Error(`Unmapped byte at ${addr(x)}. Select an explicit fill policy or narrow the range.`);}bytes.push(working.has(x)?working.get(x):parse(v.value));}crc={value:hex(digest(bytes,p),p.bits/4),p,count:bytes.length,gaps};note=`Read-only · ${bytes.length} bytes processed; ${gaps} unmapped bytes ${gaps?'substituted with '+v.value:'encountered'}. No stored CRC is assumed.`;}
+      let added=0,removed=0,changed=0;const changes=[];
+      for(const[a,b]of working)if(!after.has(a)){removed++;if(changes.length<12)changes.push(['−',`${addr(a)}  ${hex(b,2)} → absent`]);}else if(after.get(a)!==b){changed++;if(changes.length<12)changes.push(['~',`${addr(a)}  ${hex(b,2)} → ${hex(after.get(a),2)}`]);}
+      for(const[a,b]of after)if(!working.has(a)){added++;if(changes.length<12)changes.push(['+',`${addr(a)}  absent → ${hex(b,2)}`]);}
+      return {after,note,outFormat,output,crc,added,removed,changed,changes,revision};
+    }
+    function mapHTML(map,lo,hi){let parts=[],at=lo;for(const[a,b]of ranges(map)){if(a>at)parts.push([a-at,'gap',`${addr(at)}–${addr(a-1)} unmapped`]);parts.push([b-a+1,a<0x08008000?'fbl':'app',`${addr(a)}–${addr(b)} populated`]);at=b+1;}if(at<=hi)parts.push([hi-at+1,'gap',`${addr(at)}–${addr(hi)} unmapped`]);return parts.map(([n,c,title])=>`<span class="map-part ${c}" style="flex:${n}" title="${title}" aria-label="${title}"></span>`).join('');}
+    function preview(){
+      candidate=null;let error='';try{candidate=compute();}catch(e){error=e.message;}
+      const blocked=!!error,c=candidate;const [wl,wh]=bounds(working),[al,ah]=c?bounds(c.after):[wl,wh],lo=Math.min(wl,al),hi=Math.max(wh,ah);
+      let recordDiff='';
+      if(c){
+        const beforeLines=records(working),v=values[selected];
+        const afterLines=selected==='convert'&&v.target!=='BIN'?records(c.after,v.target,v.width,Number(v.line)):records(c.after);
+        const beforeSet=new Set(beforeLines),afterSet=new Set(afterLines);
+        const removedLines=beforeLines.filter(line=>!afterSet.has(line)),addedLines=afterLines.filter(line=>!beforeSet.has(line));
+        const sourceDiff=removedLines.slice(0,4).map(line=>'− '+line).concat(addedLines.slice(0,4).map(line=>'+ '+line));
+        recordDiff='<details class="callout"><summary>Affected records · −'+removedLines.length+' / +'+addedLines.length+'</summary><pre class="op-output">'+esc(sourceDiff.length?sourceDiff.join('\n'):'No record bytes change.')+'</pre><p class="mini-note">Canonical output comparison; up to four removed and four added lines shown. '+(selected==='convert'&&v.target==='BIN'?'BIN output has no record envelope; the canonical HEX view above describes the materialised byte changes.':'Checksums in these new records are computed from their output bytes.')+'</p></details>';
+      }
+      $('previewContent').innerHTML=`<div class="mini-map">${[['Before',working],['After',c?c.after:working]].map(([label,map])=>`<div class="mini-map-row"><span class="mini-map-label">${label}</span><span class="mini-map-track" role="img" aria-label="${label}: ${map.size} populated bytes across ${ranges(map).length} segments">${mapHTML(map,lo,hi)}</span><span class="mini-map-meta">${map.size} B</span></div>`).join('')}</div><p class="mini-note mono">${addr(lo)}–${addr(hi)} · shared linear scale · gaps are unmapped</p>`+
+      (error?`<div class="conflict-callout" role="alert"><div><strong>${selected==='merge'?'FBL + APP → blocked':'Preview unavailable'}</strong><p>${esc(error)}</p></div></div>`:`<p class="callout">${esc(c.note)}</p><div class="diff-list"><div class="diff-row"><span class="diff-mark">Δ</span><span class="diff-copy">Affected bytes: +${c.added} / −${c.removed} / changed ${c.changed}</span></div>${c.changes.map(([sign,text])=>`<div class="diff-row ${sign==='+'?'is-add':sign==='−'?'is-remove':'is-warn'}"><span class="diff-mark">${sign}</span><span class="diff-copy">${text}</span></div>`).join('')}</div><p class="mini-note">${c.added+c.removed+c.changed>12?'First 12 affected bytes shown. ':''}Before: ${records(working).length} canonical HEX records. After: ${records(c.after).length} canonical HEX records. Raw input lines remain unchanged.</p>${recordDiff}${c.output?`<pre class="op-output" aria-label="Conversion output preview">${esc(c.output)}</pre>`:''}${c.crc?`<div class="crc-readout"><span class="crc-label">Computed ${esc(values.crc.preset)}</span><output class="crc-value">0x${c.crc.value}</output><span class="badge">live · no comparison</span></div><div class="crc-params"><span>poly <b>${addr(c.crc.p.poly)}</b></span><span>init <b>${addr(c.crc.p.init)}</b></span><span>xorout <b>${addr(c.crc.p.xor)}</b></span><span>refin / refout <b>${c.crc.p.reflect?'yes / yes':'no / no'}</b></span></div><p class="callout">${esc(c.crc.p.note)}</p>`:''}`);
+      $('applyBtn').disabled=blocked||selected==='crc';$('gateBadge').textContent=blocked?'Blocked':selected==='crc'?'Read-only':'Preview ready';$('gateBadge').className='badge '+(blocked?'badge-fail':'badge-ok');
+      $('gatePill').textContent=blocked?'Blocked':'Ready';$('gatePill').className='badge '+(blocked?'badge-fail':'badge-ok');
+      $('gateChecks').innerHTML=`<p class="callout ${blocked?'is-fail':''}">${blocked?esc(error):'Absolute addresses retained. Parameters previewed. Apply requires confirmation.'}</p>`;
+      $('scopeRecords').textContent=working.size+' bytes';$('scopeList').innerHTML=`<dt>Source</dt><dd>FBL_APP_combined.dat</dd><dt>Working format</dt><dd>${esc(format)}</dd><dt>Revision</dt><dd>${revision}</dd><dt>Populated bytes</dt><dd>${working.size}</dd><dt>Span</dt><dd>${addr(wl)}–${addr(wh)}</dd>`;
+      $('statusGate').textContent=blocked?'Apply blocked':selected==='crc'?'Digest computed':'Preview ready';$('statusDot').className='status-dot '+(blocked?'fail':'ok');$('statusApplyNote').textContent=' · revision '+revision;$('statusStaged').textContent='1';$('statusConflicts').textContent=blocked?'1':'0';$('statusHint').textContent='Working copy only';$('sideFoot').textContent=working.size+' populated bytes · '+format;$('sessionNote').textContent='Revision '+revision+'. Apply commits this preview in this page; Reset restores the sample. Other views retain their independent sample sessions.';
+    }
+    function render(){const op=specs.find(o=>o.id===selected),v=values[selected];
+      $('opList').innerHTML=specs.map(o=>`<button type="button" class="op-item" data-op="${o.id}" aria-current="${o.id===selected}"><span class="op-main"><span class="op-name" style="display:block">${o.name}</span><span class="op-desc" style="display:block">${o.desc}</span></span><span class="op-badge">${o.id==='crc'?'read':'edit'}</span></button>`).join('');
+      $('compactOperation').innerHTML=specs.map(o=>`<option value="${o.id}" ${o.id===selected?'selected':''}>${o.name}</option>`).join('');
+      $('operationDetail').innerHTML=`<div class="op-detail-head"><div class="op-detail-title"><h2>${op.name}</h2><p>${op.desc}. Edit parameters, inspect the before/after effect, then apply to the local working copy.</p></div></div><div class="op-body"><section class="form-section"><div class="form-section-head"><h3>Parameters</h3><span class="mini-note">absolute addresses</span></div><div class="form-section-body"><div class="form-grid">${op.fields.map(([key,label,,options])=>`<div class="field"><label for="param-${key}">${label}</label>${options?`<select class="select" id="param-${key}" data-param="${key}">${options.map(x=>`<option ${x===v[key]?'selected':''}>${esc(x)}</option>`).join('')}</select>`:`<input class="input" id="param-${key}" data-param="${key}" value="${esc(v[key])}" spellcheck="false" autocomplete="off">`}</div>`).join('')}</div><p class="help">Ranges are inclusive. Preview is bounded to 1 MiB. Apply affects this page only.</p></div></section><section class="preview-section"><div class="preview-section-head"><h3>Before / after preview</h3><span class="mini-note">recomputed from parameters</span></div><div class="preview-body" id="previewContent" aria-live="polite"></div></section></div><div class="op-apply-bar"><button class="btn" id="resetBtn" type="button">Reset sample</button><span class="toolbar-spacer"></span><button class="btn btn-primary" id="applyBtn" type="button">Review and apply</button></div>`;
+      if(selected==='convert'){ $('param-width').disabled=v.target!=='SREC';$('param-base').disabled=v.target!=='BIN';$('param-value').disabled=v.target!=='BIN';$('param-line').disabled=v.target==='BIN'; }
+      preview();
+    }
+    $('opList').addEventListener('click',e=>{const b=e.target.closest('[data-op]');if(b){selected=b.dataset.op;render();}});
+    $('compactOperation').addEventListener('change',e=>{selected=e.target.value;render();});
+    $('operationDetail').addEventListener('input',e=>{if(e.target.dataset.param){values[selected][e.target.dataset.param]=e.target.value;preview();}});
+    $('operationDetail').addEventListener('change',e=>{if(e.target.dataset.param){values[selected][e.target.dataset.param]=e.target.value;if(selected==='convert'&&e.target.dataset.param==='target'){render();$('param-target').focus();}else preview();}});
+    const dialog=$('confirmApply');
+    $('operationDetail').addEventListener('click',e=>{if(e.target.id==='resetBtn'){working=new Map(original);format='HEX';revision++;render();$('resetBtn').focus();}if(e.target.id==='applyBtn'&&candidate){pending=candidate;$('confirmCopy').textContent=`${candidate.note} Add ${candidate.added}, remove ${candidate.removed}, change ${candidate.changed} bytes. Source files remain untouched.`;dialog.showModal();$('cancelApply').focus();}});
+    $('cancelApply').addEventListener('click',()=>dialog.close());
+    $('commitApply').addEventListener('click',()=>{if(pending&&pending.revision===revision){working=new Map(pending.after);format=pending.outFormat;revision++;dialog.close();render();$('statusGate').textContent='Applied to working copy';$('applyBtn').focus();}pending=null;});
+    dialog.addEventListener('close',()=>{const b=$('applyBtn');if(b)b.focus();});
+    const theme=document.querySelector('[data-theme-toggle]');function themeLabel(){theme.setAttribute('aria-label',document.documentElement.dataset.theme==='light'?'Switch to dark theme':'Switch to light theme');}theme.addEventListener('click',()=>{const t=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=t;try{localStorage.setItem('imagebench-theme',t);}catch(e){}themeLabel();});themeLabel();
+    document.addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey||e.target.matches('input,select,textarea')||dialog.open)return;const route={'1':'records.html','2':'image.html','3':'operations.html','4':'learn.html'}[e.key];if(route)location.href=route;});
+    render();
+  })();
+  </script>
+</body>
+</html>

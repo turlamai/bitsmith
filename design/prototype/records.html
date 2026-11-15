@@ -1,0 +1,1194 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Record view — ImageBench</title>
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('imagebench-theme');
+        if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+      } catch (error) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .record-summary-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-1);
+    }
+    .summary-stat {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 6px;
+      color: var(--faint);
+      font-size: 9.5px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .summary-stat strong {
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+    .record-legend {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-left: auto;
+    }
+    .record-legend .type-chip {
+      font-size: 8.5px;
+      padding: 1px 5px;
+    }
+    .table-note {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px 18px;
+      color: var(--faint);
+      font-size: 9.5px;
+      line-height: 1.5;
+    }
+    .table-note .od-icon {
+      --od-icon-size: 12px;
+      flex: none;
+    }
+    .record-row:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: -2px;
+    }
+    .row-failure {
+      color: var(--fail);
+      font-weight: 600;
+    }
+    .type-cell .type-chip {
+      text-decoration: none;
+    }
+    .type-cell button.type-chip:hover {
+      border-color: var(--ff);
+      color: var(--ff);
+    }
+    .type-explain-icon {
+      --od-icon-size: 10px;
+      opacity: 0.85;
+    }
+    .gap-block {
+      margin-top: 13px;
+    }
+    .gap-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 5px 7px;
+      color: var(--faint);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      border-bottom: 1px solid var(--border);
+    }
+    .gap-row:last-child { border-bottom: 0; }
+    .gap-row .gap-range { color: var(--muted); }
+    .gap-row .gap-len { white-space: nowrap; }
+    .empty-side {
+      padding: 18px 14px;
+      color: var(--faint);
+      font-size: 10.5px;
+      line-height: 1.55;
+    }
+    .empty-side strong {
+      display: block;
+      color: var(--text);
+      font-size: 11px;
+      margin-bottom: 3px;
+    }
+    .banner-row {
+      padding: 12px 16px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="../index.html" aria-label="ImageBench home">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+        </span>
+        <span class="brand-name">ImageBench</span>
+        <span class="brand-version">v0.1</span>
+      </a>
+      <a class="file-tab" href="records.html" id="topFileTab" aria-label="Current file: FBL_APP_combined.dat">
+        <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true" style="--od-icon-size:15px">
+          <path d="M6 3.5h8l4 4v13H6z"></path>
+          <path d="M14 3.5v4h4"></path>
+          <path d="M9 12h6M9 15.5h6"></path>
+        </svg>
+        <span class="file-name" id="topFileName">FBL_APP_combined.dat</span>
+        <span class="format-chip" id="topFormat">Intel HEX</span>
+      </a>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-actions">
+        <span class="local-state">Local only</span>
+        <button class="btn btn-primary btn-sm" id="openFirmware" type="button">
+          <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3.5 7.5h6l2 2h9v9.5h-17z"></path>
+            <path d="M3.5 7.5V5h6l2 2"></path>
+          </svg>
+          Open firmware
+        </button>
+        <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Switch to light theme">
+          <svg class="od-icon icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 15.2A8.2 8.2 0 0 1 8.8 4a8.4 8.4 0 1 0 11.2 11.2Z"></path>
+          </svg>
+          <svg class="od-icon icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="3.5"></circle>
+            <path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="sidebar">
+        <nav class="side-nav" aria-label="Workbench sections">
+          <a class="side-nav-item" href="records.html" aria-current="page">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 6.5h14M5 12h14M5 17.5h9"></path>
+            </svg>
+            Records <span class="side-nav-key">1</span>
+          </a>
+          <a class="side-nav-item" href="image.html">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="4" y="4" width="16" height="16" rx="1.5"></rect>
+              <path d="M4 10h16M4 15h16M9 4v16M15 4v16"></path>
+            </svg>
+            Image <span class="side-nav-key">2</span>
+          </a>
+          <a class="side-nav-item" href="operations.html">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7h10M18 7h2M4 17h3M11 17h9"></path>
+              <circle cx="16" cy="7" r="2"></circle>
+              <circle cx="9" cy="17" r="2"></circle>
+            </svg>
+            Operations <span class="side-nav-key">3</span>
+          </a>
+          <a class="side-nav-item" href="learn.html">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4.5 5.5h6a2 2 0 0 1 2 2v11a2 2 0 0 0-2-2h-6z"></path>
+              <path d="M19.5 5.5h-4a2 2 0 0 0-2 2v11a2 2 0 0 1 2-2h4z"></path>
+            </svg>
+            Learn <span class="side-nav-key">4</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-scroll">
+          <div id="fileSummary">
+            <div class="file-summary">
+              <div class="file-summary-head">
+                <div class="eyebrow" style="margin-bottom:6px">Source file · content detected</div>
+                <div class="file-name-row">
+                  <svg class="od-icon file-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6 3.5h8l4 4v13H6z"></path>
+                    <path d="M14 3.5v4h4"></path>
+                  </svg>
+                  <h2 id="fileName">FBL_APP_combined.dat</h2>
+                  <button class="icon-btn" id="closeFile" type="button" aria-label="Close file" style="margin-left:auto;width:24px;height:24px;margin-right:-4px">
+                    <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true" style="--od-icon-size:13px">
+                      <path d="M6 6l12 12M18 6 6 18"></path>
+                    </svg>
+                  </button>
+                </div>
+                <p class="file-subline" id="fileSubline">Intel HEX — sniffed by content; extension was <code style="font-family:var(--font-mono);color:var(--muted)">.dat</code></p>
+              </div>
+              <dl class="file-meta-grid">
+                <div class="meta-row"><dt>Address range</dt><dd id="fileRange">0x08000000–0x08009FFF</dd></div>
+                <div class="meta-row"><dt>Data bytes</dt><dd id="fileBytes">84 B / 40 KiB span</dd></div>
+                <div class="meta-row"><dt>Records</dt><dd id="fileRecords">8</dd></div>
+              </dl>
+              <div class="verify-strip is-fail" id="verifyStrip">
+                <div class="verify-count" id="verifyCount">7 / 8</div>
+                <div class="verify-copy"><strong>records OK · 1 FAILED</strong>Checksums computed from the bytes on every load.</div>
+              </div>
+              <div style="padding:0 12px 12px">
+                <div class="section-label">Segments</div>
+                <div class="segment-list" id="segmentList">
+                  <div class="segment-row is-fbl">
+                    <span class="segment-swatch"></span>
+                    <div class="segment-main"><div class="segment-name">FBL</div><div class="segment-addr">0x08000000 +0x20</div></div>
+                    <div class="segment-size">32 B</div>
+                  </div>
+                  <div class="segment-row is-gap">
+                    <span class="segment-swatch"></span>
+                    <div class="segment-main"><div class="segment-name">GAP</div><div class="segment-addr">0x08000020–0x08007FFF</div></div>
+                    <div class="segment-size">0x7FE0</div>
+                  </div>
+                  <div class="segment-row is-app">
+                    <span class="segment-swatch"></span>
+                    <div class="segment-main"><div class="segment-name">APP</div><div class="segment-addr">0x08008000–0x08009FFF</div></div>
+                    <div class="segment-size">8 KiB</div>
+                  </div>
+                  <div class="segment-row is-ff">
+                    <span class="segment-swatch"></span>
+                    <div class="segment-main"><div class="segment-name">Explicit 0xFF</div><div class="segment-addr">0x08009FF0–0x08009FFF</div></div>
+                    <div class="segment-size">16 B</div>
+                  </div>
+                </div>
+                <div class="gap-block">
+                  <div class="section-label">Gap list</div>
+                  <div class="gap-row"><span class="gap-range">0x08000020–0x08007FFF</span><span class="gap-len">32,736 B</span></div>
+                </div>
+                <p class="sidebar-note">APP starts at base offset <code style="font-family:var(--font-mono);color:var(--muted)">0x8000</code>. The gap is <code style="font-family:var(--font-mono);color:var(--muted)">0x7FE0</code> bytes between the last FBL byte and the first APP byte.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="emptySide" hidden>
+            <div class="empty-side">
+              <strong>No file open</strong>
+              Open an Intel HEX, S-record, or BIN file to inspect its records. Content sniffing decides the format; the extension is only a hint.
+            </div>
+          </div>
+
+          <div class="sidebar-foot">
+            <span>Content first · direct manipulation</span>
+            <a href="../DESIGN.md">Design notes</a>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-pane">
+        <div class="main-toolbar">
+          <h1>Record view</h1>
+          <span class="toolbar-sub" id="toolbarSub">8 records · live checksum verification</span>
+          <div class="toolbar-spacer"></div>
+          <div class="toolbar-group" id="recordActions">
+            <button class="btn btn-sm btn-quiet" id="jumpFail" type="button">
+              <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3.5 21 20H3z"></path>
+                <path d="M12 9v5M12 17.2v.1"></path>
+              </svg>
+              Jump to failure
+            </button>
+            <button class="btn btn-sm" id="verifyAll" type="button">
+              <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m5 12.5 4.2 4.2L19 7"></path>
+              </svg>
+              Verify all
+            </button>
+          </div>
+        </div>
+
+        <div class="main-scroll" id="recordLoaded">
+          <div class="record-summary-bar">
+            <span class="summary-stat"><strong>84</strong> data bytes</span>
+            <span class="summary-stat"><strong>0x08000000</strong> first address</span>
+            <span class="summary-stat"><strong>0x08009FFF</strong> last address</span>
+            <span class="summary-stat"><strong id="summaryValid">7 / 8</strong> valid</span>
+            <div class="record-legend" aria-label="Record type legend">
+              <span class="type-chip"><span class="type-hex">00</span> Data</span>
+              <span class="type-chip"><span class="type-hex">01</span> EOF</span>
+              <span class="type-chip"><span class="type-hex">02</span> Ext segment</span>
+              <span class="type-chip"><span class="type-hex">03</span> Start segment</span>
+              <span class="type-chip type-04"><span class="type-hex">04</span> Ext linear</span>
+              <span class="type-chip"><span class="type-hex">05</span> Start linear</span>
+            </div>
+          </div>
+
+          <div class="table-shell">
+            <div class="table-scroll">
+              <table class="data-table" aria-label="Intel HEX records">
+                <thead>
+                  <tr>
+                    <th class="col-index" style="text-align:right">#</th>
+                    <th class="col-raw">Raw line</th>
+                    <th style="text-align:right">Bytes</th>
+                    <th>Address</th>
+                    <th>Absolute</th>
+                    <th>Type</th>
+                    <th>Data</th>
+                    <th style="text-align:right">Checksum</th>
+                    <th>Verdict</th>
+                  </tr>
+                </thead>
+                <tbody id="recordBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <p class="table-note">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="8.5"></circle>
+              <path d="M12 11v5M12 8v.1"></path>
+            </svg>
+            Addresses in the absolute column are derived from the active extended-address record. Hover a record type for the compact legend; open record 01 for the full 04 explainer.
+          </p>
+        </div>
+
+        <div class="empty-workspace" id="emptyWorkspace" hidden>
+          <div class="drop-zone" id="dropZone">
+            <div class="drop-mark" aria-hidden="true">
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <h2 id="emptyTitle">Open a firmware image</h2>
+            <p id="emptyCopy">Drop an Intel HEX, Motorola S-record, or raw BIN file here. ImageBench sniffs the content — extensions lie, and real-world files often arrive extensionless.</p>
+            <div class="drop-actions">
+              <button class="btn btn-primary" id="emptyOpen" type="button">Choose file…</button>
+              <button class="btn" id="restoreSample" type="button">Restore sample image</button>
+            </div>
+            <div class="drop-formats">Intel HEX · S-record · BIN</div>
+          </div>
+        </div>
+      </main>
+
+      <aside class="inspector" aria-label="Record inspector">
+        <div class="pane-head">
+          <h2>Record inspector</h2>
+          <span class="pane-count" id="inspectorCount">08 / 08</span>
+        </div>
+        <div class="inspector-scroll" id="inspectorBody"></div>
+      </aside>
+    </div>
+
+    <footer class="statusbar">
+      <span class="status-item"><span class="status-dot ok" id="statusDot"></span><strong id="statusFormat">Intel HEX</strong> · content-sniffed</span>
+      <span class="status-item status-item-hide">Records <strong id="statusRecords">8</strong></span>
+      <span class="status-item">Checksum <strong id="statusChecksum">7 / 8</strong></span>
+      <span class="status-item hide-sm">ASCII · one record per line</span>
+      <span class="status-item push"><span class="kbd">Esc</span> close popovers</span>
+    </footer>
+  </div>
+
+  <div class="explain-pop" id="type04Pop" role="dialog" aria-labelledby="type04Title" hidden>
+    <div class="pop-head">
+      <div>
+        <h3 id="type04Title">Record type 04 — Extended Linear Address</h3>
+        <p>Sets the upper 16 bits for following data records.</p>
+      </div>
+      <button class="icon-btn" id="closeType04" type="button" aria-label="Close explainer">
+        <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 6l12 12M18 6 6 18"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="pop-body">
+      <p><strong>Why it exists.</strong> A data record only carries a 16-bit address, but flash often lives in a 32-bit address space. Type 04 supplies the missing upper half.</p>
+      <div class="pop-byte-anatomy" aria-label="Byte anatomy of the type 04 record">
+        <span class="is-count">02</span>
+        <span class="is-address">0000</span>
+        <span class="is-type">04</span>
+        <span>0800</span>
+        <span class="is-checksum">F2</span>
+      </div>
+      <p style="margin-top:7px"><span class="mono" style="color:var(--text)">0x0800 &lt;&lt; 16 = 0x08000000</span>. The next data record at low address <span class="mono" style="color:var(--text)">0x0000</span> becomes absolute address <span class="mono" style="color:var(--text)">0x08000000</span>.</p>
+      <dl class="pop-kv">
+        <dt>Affects</dt><dd>All following data records</dd>
+        <dt>Until</dt><dd>Another 02 / 04 or EOF</dd>
+        <dt>Record data</dt><dd>2 bytes, big-endian base</dd>
+      </dl>
+      <p>Type 02 is the older segment form: the base is shifted 4 bits instead of 16. Both exist because toolchains and legacy programmers still emit them.</p>
+    </div>
+    <div class="pop-foot"><span class="kbd">Esc</span> close · click another type chip to explain it</div>
+  </div>
+
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+  <input class="visually-hidden" type="file" id="fileInput" accept=".hex,.ihex,.ihx,.srec,.s19,.s28,.s37,.mot,.bin,.dat,.img">
+
+  <script>
+    (function () {
+      'use strict';
+
+      const SAMPLE_LINES = [
+        ':020000040800F2',
+        ':200000000010020009590108FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7B',
+        ':10001000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0',
+        ':088000000050002001598A081C',
+        ':088010002DE9F0470DF080F8A6',
+        ':109FF000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF71',
+        ':0480200048B1084700',
+        ':00000001FF'
+      ];
+
+      const TYPE_NAMES = {
+        0: 'Data',
+        1: 'EOF',
+        2: 'Ext segment',
+        3: 'Start segment',
+        4: 'Ext linear',
+        5: 'Start linear'
+      };
+
+      const S_TYPE_NAMES = {
+        '0': 'Header',
+        '1': 'Data 16',
+        '2': 'Data 24',
+        '3': 'Data 32',
+        '5': 'Count',
+        '7': 'Start 32',
+        '8': 'Start 24',
+        '9': 'Start 16'
+      };
+
+      const state = {
+        name: 'FBL_APP_combined.dat',
+        ext: 'dat',
+        format: 'intel',
+        formatLabel: 'Intel HEX',
+        sample: true,
+        records: [],
+        selected: -1,
+        openExplain: false,
+        popAnchor: null,
+        binMode: false
+      };
+
+      const elements = {
+        body: document.body,
+        recordBody: document.getElementById('recordBody'),
+        inspectorBody: document.getElementById('inspectorBody'),
+        inspectorCount: document.getElementById('inspectorCount'),
+        fileName: document.getElementById('fileName'),
+        fileSubline: document.getElementById('fileSubline'),
+        fileRange: document.getElementById('fileRange'),
+        fileBytes: document.getElementById('fileBytes'),
+        fileRecords: document.getElementById('fileRecords'),
+        verifyStrip: document.getElementById('verifyStrip'),
+        verifyCount: document.getElementById('verifyCount'),
+        segmentList: document.getElementById('segmentList'),
+        summaryValid: document.getElementById('summaryValid'),
+        toolbarSub: document.getElementById('toolbarSub'),
+        recordLoaded: document.getElementById('recordLoaded'),
+        emptyWorkspace: document.getElementById('emptyWorkspace'),
+        emptySide: document.getElementById('emptySide'),
+        fileSummary: document.getElementById('fileSummary'),
+        emptyTitle: document.getElementById('emptyTitle'),
+        emptyCopy: document.getElementById('emptyCopy'),
+        recordActions: document.getElementById('recordActions'),
+        topFileName: document.getElementById('topFileName'),
+        topFormat: document.getElementById('topFormat'),
+        statusFormat: document.getElementById('statusFormat'),
+        statusRecords: document.getElementById('statusRecords'),
+        statusChecksum: document.getElementById('statusChecksum'),
+        statusDot: document.getElementById('statusDot'),
+        typePop: document.getElementById('type04Pop'),
+        toastStack: document.getElementById('toastStack'),
+        fileInput: document.getElementById('fileInput'),
+        dropZone: document.getElementById('dropZone'),
+        topFileTab: document.getElementById('topFileTab')
+      };
+
+      function esc(value) {
+        return String(value).replace(/[&<>"']/g, function (character) {
+          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character];
+        });
+      }
+
+      function hex(value, width) {
+        return value.toString(16).toUpperCase().padStart(width || 2, '0');
+      }
+
+      function formatAddress(value, width) {
+        if (value === null || value === undefined) return '—';
+        return '0x' + value.toString(16).toUpperCase().padStart(width || 8, '0');
+      }
+
+      function parseHexPairs(source) {
+        const pairs = [];
+        for (let index = 0; index < source.length; index += 2) {
+          pairs.push(parseInt(source.slice(index, index + 2), 16));
+        }
+        return pairs;
+      }
+
+      function parseIntelRecords(text) {
+        const lines = text.split(/\r?\n/).map(function (line) { return line.trim(); }).filter(Boolean);
+        const records = [];
+        let base = 0;
+        lines.forEach(function (raw, index) {
+          if (raw.charAt(0) !== ':') {
+            records.push({
+              malformed: true,
+              raw: raw,
+              index: index,
+              ok: false,
+              type: -1,
+              typeHex: '??',
+              typeName: 'Malformed',
+              count: 0,
+              address: 0,
+              absolute: null,
+              data: [],
+              dataHex: '',
+              stored: null,
+              expected: null,
+              sum: null
+            });
+            return;
+          }
+          const body = raw.slice(1);
+          if (body.length % 2 !== 0 || !/^[0-9A-Fa-f]*$/.test(body)) {
+            records.push({
+              malformed: true,
+              raw: raw,
+              index: index,
+              ok: false,
+              type: -1,
+              typeHex: '??',
+              typeName: 'Malformed',
+              count: 0,
+              address: 0,
+              absolute: null,
+              data: [],
+              dataHex: '',
+              stored: null,
+              expected: null,
+              sum: null
+            });
+            return;
+          }
+          const bytes = parseHexPairs(body);
+          const count = bytes[0];
+          const address = ((bytes[1] || 0) << 8) | (bytes[2] || 0);
+          const type = bytes[3];
+          const data = bytes.slice(4, 4 + count);
+          const stored = bytes[4 + count];
+          let sum = 0;
+          for (let byteIndex = 0; byteIndex < 4 + count; byteIndex += 1) {
+            sum += bytes[byteIndex] || 0;
+          }
+          const expected = (0x100 - (sum & 0xFF)) & 0xFF;
+          const ok = data.length === count && stored === expected;
+
+          let absolute = null;
+          if (type === 0) {
+            absolute = base + address;
+          } else if (type === 2) {
+            if (data.length >= 2) base = ((data[0] << 8) | data[1]) << 4;
+            absolute = base;
+          } else if (type === 4) {
+            if (data.length >= 2) base = ((data[0] << 8) | data[1]) << 16;
+            absolute = base;
+          } else if (type === 3) {
+            if (data.length >= 4) absolute = (((data[0] << 8) | data[1]) << 4) + ((data[2] << 8) | data[3]);
+          } else if (type === 5) {
+            if (data.length >= 4) absolute = ((data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3]) >>> 0;
+          }
+
+          records.push({
+            raw: raw,
+            index: index,
+            ok: ok,
+            type: type,
+            typeHex: hex(type),
+            typeName: TYPE_NAMES[type] || 'Unknown',
+            count: count,
+            address: address,
+            absolute: absolute,
+            data: data,
+            dataHex: data.map(function (byte) { return hex(byte); }).join(' '),
+            stored: stored,
+            expected: expected,
+            sum: sum,
+            bytes: bytes,
+            addressWidth: 4
+          });
+        });
+        return records;
+      }
+
+      function parseSRecords(text) {
+        const lines = text.split(/\r?\n/).map(function (line) { return line.trim(); }).filter(Boolean);
+        const records = [];
+        const addressLengths = { '0': 2, '1': 2, '2': 3, '3': 4, '5': 2, '6': 3, '7': 4, '8': 3, '9': 2 };
+        lines.forEach(function (raw, index) {
+          const typeChar = raw.charAt(1);
+          const addressLength = addressLengths[typeChar];
+          if (raw.charAt(0).toUpperCase() !== 'S' || !addressLength) {
+            records.push({
+              malformed: true,
+              raw: raw,
+              index: index,
+              ok: false,
+              type: -1,
+              typeHex: '??',
+              typeName: 'Malformed',
+              count: 0,
+              address: 0,
+              absolute: null,
+              data: [],
+              dataHex: '',
+              stored: null,
+              expected: null,
+              sum: null
+            });
+            return;
+          }
+          const count = parseInt(raw.slice(2, 4), 16);
+          const payload = raw.slice(4);
+          const bytes = parseHexPairs(payload);
+          const addressBytes = bytes.slice(0, addressLength);
+          const data = bytes.slice(addressLength, bytes.length - 1);
+          const stored = bytes[bytes.length - 1];
+          const sum = count + addressBytes.reduce(function (total, value) { return total + value; }, 0) + data.reduce(function (total, value) { return total + value; }, 0);
+          const expected = 0xFF - (sum & 0xFF);
+          const ok = bytes.length === count && stored === expected;
+          const address = addressBytes.reduce(function (total, value) { return (total << 8) | value; }, 0);
+          records.push({
+            raw: raw,
+            index: index,
+            ok: ok,
+            type: typeChar,
+            typeHex: 'S' + typeChar,
+            typeName: S_TYPE_NAMES[typeChar] || 'Unknown',
+            count: count,
+            address: address,
+            absolute: ['1', '2', '3'].includes(typeChar) ? address : (['7', '8', '9'].includes(typeChar) ? address : null),
+            data: data,
+            dataHex: data.map(function (byte) { return hex(byte); }).join(' '),
+            stored: stored,
+            expected: expected,
+            sum: sum,
+            bytes: bytes,
+            addressWidth: 8
+          });
+        });
+        return records;
+      }
+
+      function getDataRecords(records) {
+        return records.filter(function (record) {
+          return record.ok && !record.malformed && (
+            (state.format === 'intel' && record.type === 0) ||
+            (state.format === 'srec' && ['1', '2', '3'].includes(record.type))
+          );
+        });
+      }
+
+      function getStats(records) {
+        const valid = records.filter(function (record) { return record.ok; }).length;
+        const dataRecords = getDataRecords(records);
+        const starts = dataRecords.map(function (record) { return record.absolute; }).filter(function (value) { return value !== null; });
+        const ends = dataRecords.map(function (record) { return record.absolute + record.data.length - 1; }).filter(function (value) { return value >= 0; });
+        const min = starts.length ? Math.min.apply(null, starts) : null;
+        const max = ends.length ? Math.max.apply(null, ends) : null;
+        const byteCount = dataRecords.reduce(function (total, record) { return total + record.data.length; }, 0);
+        return { valid: valid, total: records.length, min: min, max: max, byteCount: byteCount, dataRecords: dataRecords };
+      }
+
+      function sampleSegments() {
+        return [
+          { kind: 'fbl', name: 'FBL', address: '0x08000000 +0x20', size: '32 B' },
+          { kind: 'gap', name: 'GAP', address: '0x08000020–0x08007FFF', size: '0x7FE0' },
+          { kind: 'app', name: 'APP', address: '0x08008000–0x08009FFF', size: '8 KiB' },
+          { kind: 'ff', name: 'Explicit 0xFF', address: '0x08009FF0–0x08009FFF', size: '16 B' }
+        ];
+      }
+
+      function buildSegments(records) {
+        const dataRecords = getDataRecords(records).slice().sort(function (a, b) { return a.absolute - b.absolute; });
+        if (!dataRecords.length) return [];
+        const ranges = [];
+        dataRecords.forEach(function (record) {
+          const start = record.absolute;
+          const end = start + record.data.length - 1;
+          const last = ranges[ranges.length - 1];
+          if (last && start <= last.end + 1) {
+            last.end = Math.max(last.end, end);
+          } else {
+            ranges.push({ start: start, end: end });
+          }
+        });
+        const segments = [];
+        ranges.forEach(function (range, index) {
+          segments.push({
+            kind: index === 0 ? 'fbl' : 'app',
+            name: index === 0 ? 'IMAGE' : 'IMAGE ' + (index + 1),
+            address: formatAddress(range.start) + '–' + formatAddress(range.end),
+            size: (range.end - range.start + 1).toLocaleString('en-US') + ' B'
+          });
+          const next = ranges[index + 1];
+          if (next && next.start > range.end + 1) {
+            const gapLength = next.start - range.end - 1;
+            segments.push({
+              kind: 'gap',
+              name: 'GAP',
+              address: formatAddress(range.end + 1) + '–' + formatAddress(next.start - 1),
+              size: gapLength.toLocaleString('en-US') + ' B'
+            });
+          }
+        });
+        return segments;
+      }
+
+      function renderSegments() {
+        const segments = state.sample ? sampleSegments() : buildSegments(state.records);
+        elements.segmentList.innerHTML = segments.map(function (segment) {
+          const swatchClass = segment.kind === 'ff' ? 'segment-row is-ff' : 'segment-row is-' + segment.kind;
+          return '<div class="' + swatchClass + '">' +
+            '<span class="segment-swatch"></span>' +
+            '<div class="segment-main"><div class="segment-name">' + esc(segment.name) + '</div><div class="segment-addr">' + esc(segment.address) + '</div></div>' +
+            '<div class="segment-size">' + esc(segment.size) + '</div>' +
+          '</div>';
+        }).join('');
+
+        const gaps = segments.filter(function (segment) { return segment.kind === 'gap'; });
+        const gapBlock = document.querySelector('.gap-block');
+        if (gapBlock) {
+          if (!gaps.length) {
+            gapBlock.innerHTML = '<div class="section-label">Gap list</div><div class="gap-row"><span class="gap-range">No gaps between data ranges</span><span class="gap-len">—</span></div>';
+          } else {
+            gapBlock.innerHTML = '<div class="section-label">Gap list</div>' + gaps.map(function (gap) {
+              return '<div class="gap-row"><span class="gap-range">' + esc(gap.address) + '</span><span class="gap-len">' + esc(gap.size) + '</span></div>';
+            }).join('');
+          }
+        }
+      }
+
+      function renderSummary() {
+        const stats = getStats(state.records);
+        const failCount = stats.total - stats.valid;
+        elements.fileName.textContent = state.name;
+        elements.topFileName.textContent = state.name;
+        elements.topFormat.textContent = state.formatLabel;
+        elements.statusFormat.textContent = state.formatLabel;
+        const extText = state.ext ? '<code style="font-family:var(--font-mono);color:var(--muted)">.' + esc(state.ext) + '</code>' : 'no extension';
+        elements.fileSubline.innerHTML = esc(state.formatLabel) + ' — sniffed by content; extension was ' + extText;
+        elements.fileRange.textContent = stats.min === null ? 'No data records' : formatAddress(stats.min) + '–' + formatAddress(stats.max);
+        elements.fileBytes.textContent = stats.byteCount + ' B / ' + (stats.min === null ? '—' : Math.ceil((stats.max - stats.min + 1) / 1024) + ' KiB span');
+        elements.fileRecords.textContent = stats.total;
+        elements.verifyCount.textContent = stats.valid + ' / ' + stats.total;
+        elements.verifyStrip.classList.toggle('is-fail', failCount > 0);
+        const verifyCopy = elements.verifyStrip.querySelector('.verify-copy');
+        verifyCopy.innerHTML = '<strong>records OK · ' + failCount + ' FAILED</strong>Checksums computed from the bytes on every load.';
+        elements.summaryValid.textContent = stats.valid + ' / ' + stats.total;
+        elements.toolbarSub.textContent = stats.total + ' records · live checksum verification';
+        elements.statusRecords.textContent = stats.total;
+        elements.statusChecksum.textContent = stats.valid + ' / ' + stats.total;
+        elements.statusDot.className = 'status-dot ' + (failCount ? 'fail' : 'ok');
+        elements.topFileTab.setAttribute('aria-label', 'Current file: ' + state.name);
+        renderSegments();
+      }
+
+      function typeCell(record, index) {
+        if (record.malformed) {
+          return '<span class="type-chip type-fail"><span class="type-hex">??</span> Malformed</span>';
+        }
+        if (state.format === 'intel' && record.type === 4) {
+          return '<button class="type-chip type-04" type="button" data-explain="04" aria-expanded="false" aria-controls="type04Pop" style="font:inherit">' +
+            '<span class="type-hex">04</span> Ext linear' +
+            '<svg class="od-icon type-explain-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 11v5M12 8v.1"></path></svg>' +
+          '</button>';
+        }
+        const failClass = record.ok ? '' : ' type-fail';
+        return '<span class="type-chip' + failClass + '"><span class="type-hex">' + esc(record.typeHex) + '</span> ' + esc(record.typeName) + '</span>';
+      }
+
+      function renderTable() {
+        elements.recordBody.innerHTML = state.records.map(function (record, index) {
+          const selected = index === state.selected;
+          const classes = 'record-row' + (record.ok ? '' : ' is-failed') + (selected ? ' is-selected' : '');
+          const dataPreview = record.data && record.data.length
+            ? record.data.slice(0, 8).map(function (byte) { return hex(byte); }).join(' ') + (record.data.length > 8 ? ' …' : '')
+            : '—';
+          const absolute = record.absolute === null
+            ? '—'
+            : formatAddress(record.absolute, record.addressWidth || 8) + (state.format === 'intel' && record.type === 4 ? ' <span class="faint">base</span>' : '');
+          const stored = record.stored === null || record.stored === undefined ? '—' : hex(record.stored);
+          const checksum = record.stored === null || record.stored === undefined
+            ? '<span class="faint">—</span>'
+            : '<span class="' + (record.ok ? 'cks-ok' : 'cks-fail') + '">' + stored + '</span>';
+          let html = '<tr class="' + classes + '" data-index="' + index + '" tabindex="0" aria-selected="' + (selected ? 'true' : 'false') + '">' +
+            '<td class="col-index">' + String(index + 1).padStart(2, '0') + '</td>' +
+            '<td class="col-raw"><span class="raw-record" title="' + esc(record.raw) + '">' + esc(record.raw) + '</span></td>' +
+            '<td class="num-cell">' + (record.malformed ? '—' : hex(record.count)) + '</td>' +
+            '<td class="num-cell">' + (record.malformed ? '—' : '0x' + hex(record.address, 4)) + '</td>' +
+            '<td class="addr-cell">' + absolute + '</td>' +
+            '<td class="type-cell">' + typeCell(record, index) + '</td>' +
+            '<td class="data-cell" title="' + esc(record.dataHex || '') + '">' + dataPreview + '</td>' +
+            '<td class="cks-cell">' + checksum + '</td>' +
+            '<td><span class="verdict ' + (record.ok ? '' : 'is-fail') + '">' + (record.ok ? 'OK' : 'FAILED') + '</span></td>' +
+          '</tr>';
+
+          if (!record.ok && !record.malformed) {
+            const sumTokens = (record.bytes || []).slice(0, 4 + record.count).map(function (byte) { return hex(byte); }).join(' + ');
+            html += '<tr class="math-row"><td colspan="9"><div class="math-panel">' +
+              '<span class="math-label">Checksum math</span>' +
+              '<span>sum</span><span class="math-token">' + esc(sumTokens) + '</span>' +
+              '<span class="math-arrow">=</span><span class="math-token">0x' + record.sum.toString(16).toUpperCase() + '</span>' +
+              '<span class="math-arrow">→</span><span class="math-token">two’s complement = 0x' + hex(record.expected) + '</span>' +
+              '<span class="math-arrow">→</span><span class="math-token">expected 0x' + hex(record.expected) + ' · found 0x' + hex(record.stored) + '</span>' +
+              '<span class="math-result">FAIL</span>' +
+            '</div></td></tr>';
+          }
+          return html;
+        }).join('');
+
+        Array.prototype.forEach.call(elements.recordBody.querySelectorAll('.record-row'), function (row) {
+          row.addEventListener('click', function () {
+            selectRecord(Number(row.dataset.index), false);
+          });
+          row.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              selectRecord(Number(row.dataset.index), false);
+            }
+          });
+        });
+
+        Array.prototype.forEach.call(elements.recordBody.querySelectorAll('[data-explain="04"]'), function (button) {
+          button.addEventListener('click', function (event) {
+            event.stopPropagation();
+            selectRecord(0, false);
+            openExplain(button);
+          });
+        });
+      }
+
+      function renderInspector() {
+        const record = state.records[state.selected];
+        if (!record) {
+          elements.inspectorBody.innerHTML = '<div class="empty-side"><strong>No record selected</strong>Choose a record to inspect its fields and live checksum.</div>';
+          elements.inspectorCount.textContent = '— / —';
+          return;
+        }
+        const stats = getStats(state.records);
+        const number = String(state.selected + 1).padStart(2, '0');
+        elements.inspectorCount.textContent = number + ' / ' + String(state.records.length).padStart(2, '0');
+        const dataFull = record.data && record.data.length ? record.data.map(function (byte) { return hex(byte); }).join(' ') : '—';
+        const absolute = record.absolute === null ? '—' : formatAddress(record.absolute, record.addressWidth || 8);
+        const stored = record.stored === null || record.stored === undefined ? '—' : '0x' + hex(record.stored);
+        const expected = record.expected === null || record.expected === undefined ? '—' : '0x' + hex(record.expected);
+        let verdictCopy = '';
+        if (!record.ok && !record.malformed) {
+          verdictCopy = '<div class="callout is-fail" style="margin-top:10px"><strong>Checksum mismatch.</strong> The bytes sum to <span class="mono">0x' + record.sum.toString(16).toUpperCase() + '</span>; two’s complement gives <span class="mono">0x' + hex(record.expected) + '</span>, but the line stores <span class="mono">0x' + hex(record.stored) + '</span>. The row stays visible so you can decide whether to repair or reject it.</div>';
+        } else if (record.type === 4 && state.format === 'intel') {
+          verdictCopy = '<div class="callout" style="margin-top:10px"><strong>This record sets a base.</strong> It writes no flash bytes. Its <span class="mono">0800</span> payload becomes the upper 16 bits <span class="mono">0x08000000</span> for the records that follow.</div>';
+        } else if (record.ok) {
+          verdictCopy = '<div class="callout" style="margin-top:10px"><strong>Checksum verified.</strong> The stored check byte matches the two’s complement of the preceding bytes.</div>';
+        }
+        const checks = [
+          { ok: record.ok, label: record.ok ? 'This record verifies' : 'This record fails checksum' },
+          { ok: true, label: 'Fields decoded from the raw line' },
+          { ok: true, label: 'Absolute address derived from active base' }
+        ];
+        elements.inspectorBody.innerHTML =
+          '<div class="inspector-section">' +
+            '<div class="inspector-title"><span>Record ' + number + '</span><span class="' + (record.ok ? 'badge-ok' : 'badge-fail') + ' badge">' + (record.ok ? 'verified' : 'failed') + '</span></div>' +
+            '<div class="raw-line-box">' + esc(record.raw) + '</div>' +
+            '<dl class="kv-list" style="margin-top:10px">' +
+              '<dt>Type</dt><dd>' + esc(record.typeHex) + ' · ' + esc(record.typeName) + '</dd>' +
+              '<dt>Byte count</dt><dd>' + (record.malformed ? '—' : '0x' + hex(record.count)) + '</dd>' +
+              '<dt>Record address</dt><dd>' + (record.malformed ? '—' : '0x' + hex(record.address, 4)) + '</dd>' +
+              '<dt>Absolute</dt><dd>' + absolute + '</dd>' +
+              '<dt>Stored check</dt><dd>' + stored + '</dd>' +
+              '<dt>Expected</dt><dd>' + expected + '</dd>' +
+            '</dl>' +
+            verdictCopy +
+          '</div>' +
+          '<div class="inspector-section">' +
+            '<div class="inspector-title"><span>Payload</span><span class="mono">' + (record.data ? record.data.length : 0) + ' bytes</span></div>' +
+            '<div class="raw-line-box" style="word-break:break-word">' + esc(dataFull) + '</div>' +
+          '</div>' +
+          '<div class="inspector-section">' +
+            '<div class="inspector-title"><span>File verification</span><span class="mono">' + stats.valid + ' / ' + stats.total + '</span></div>' +
+            '<div class="check-list">' + checks.map(function (check) {
+              return '<div class="check-row' + (check.ok ? '' : ' is-fail') + '">' +
+                '<svg class="od-icon check-icon" viewBox="0 0 24 24" aria-hidden="true">' +
+                  (check.ok ? '<path d="m5 12.5 4.2 4.2L19 7"></path>' : '<path d="M6 6l12 12M18 6 6 18"></path>') +
+                '</svg><span>' + check.label + '</span></div>';
+            }).join('') + '</div>' +
+            '<div class="callout" style="margin-top:9px">Live verification recomputes every record from its bytes. No verdict is hard-coded in the interface.</div>' +
+          '</div>';
+      }
+
+      function selectRecord(index, scroll) {
+        if (!state.records[index]) return;
+        state.selected = index;
+        Array.prototype.forEach.call(elements.recordBody.querySelectorAll('.record-row'), function (row) {
+          const selected = Number(row.dataset.index) === index;
+          row.classList.toggle('is-selected', selected);
+          row.setAttribute('aria-selected', selected ? 'true' : 'false');
+        });
+        renderInspector();
+        if (scroll) {
+          const row = elements.recordBody.querySelector('.record-row[data-index="' + index + '"]');
+          if (row) row.scrollIntoView({ block: 'center', inline: 'nearest' });
+        }
+      }
+
+      function positionPopover(popover, anchor) {
+        const rect = anchor.getBoundingClientRect();
+        const width = popover.offsetWidth;
+        const height = popover.offsetHeight;
+        let left = rect.left - 12;
+        let top = rect.bottom + 8;
+        left = Math.min(Math.max(12, left), window.innerWidth - width - 12);
+        if (top + height > window.innerHeight - 42) {
+          top = Math.max(10, rect.top - height - 8);
+        }
+        popover.style.left = left + 'px';
+        popover.style.top = top + 'px';
+      }
+
+      function openExplain(anchor, focusClose) {
+        state.popAnchor = anchor;
+        elements.typePop.hidden = false;
+        state.openExplain = true;
+        Array.prototype.forEach.call(elements.recordBody.querySelectorAll('[data-explain="04"]'), function (button) {
+          button.setAttribute('aria-expanded', button === anchor ? 'true' : 'false');
+        });
+        positionPopover(elements.typePop, anchor);
+        if (focusClose !== false) {
+          const closeButton = document.getElementById('closeType04');
+          if (closeButton) closeButton.focus({ preventScroll: true });
+        }
+      }
+
+      function closeExplain(restoreFocus) {
+        if (!state.openExplain) return;
+        state.openExplain = false;
+        elements.typePop.hidden = true;
+        Array.prototype.forEach.call(elements.recordBody.querySelectorAll('[data-explain="04"]'), function (button) {
+          button.setAttribute('aria-expanded', 'false');
+        });
+        if (restoreFocus && state.popAnchor && document.contains(state.popAnchor)) state.popAnchor.focus({ preventScroll: true });
+      }
+
+      function setEmptyState(binMode, message) {
+        state.binMode = Boolean(binMode);
+        elements.recordLoaded.hidden = true;
+        elements.emptyWorkspace.hidden = false;
+        elements.fileSummary.hidden = true;
+        elements.emptySide.hidden = false;
+        elements.recordActions.style.visibility = 'hidden';
+        elements.inspectorBody.innerHTML = '<div class="empty-side"><strong>No record selected</strong>Open a file to inspect its records.</div>';
+        elements.inspectorCount.textContent = '— / —';
+        elements.fileName.textContent = 'No file open';
+        elements.topFileName.textContent = 'No file open';
+        elements.topFormat.textContent = '—';
+        elements.statusFormat.textContent = 'No file';
+        elements.statusRecords.textContent = '0';
+        elements.statusChecksum.textContent = '—';
+        elements.statusDot.className = 'status-dot';
+        elements.toolbarSub.textContent = 'No file loaded';
+        elements.emptyTitle.textContent = binMode ? 'This BIN has no records' : 'Open a firmware image';
+        elements.emptyCopy.innerHTML = binMode
+          ? 'Binary images carry no address or record structure. The bytes can still be viewed in Image view, where the base address is explicitly treated as an assumption.'
+          : (message || 'Drop an Intel HEX, Motorola S-record, or raw BIN file here. ImageBench sniffs the content — extensions lie, and real-world files often arrive extensionless.');
+        if (state.openExplain) closeExplain();
+      }
+
+      function setLoadedState() {
+        elements.recordLoaded.hidden = false;
+        elements.emptyWorkspace.hidden = true;
+        elements.fileSummary.hidden = false;
+        elements.emptySide.hidden = true;
+        elements.recordActions.style.visibility = 'visible';
+        elements.binMode = false;
+        elements.emptyTitle.textContent = 'Open a firmware image';
+        elements.emptyCopy.textContent = 'Drop an Intel HEX, Motorola S-record, or raw BIN file here. ImageBench sniffs the content — extensions lie, and real-world files often arrive extensionless.';
+      }
+
+      function loadRecords(records, format, fileName, options) {
+        if (!records.length) throw new Error('No records found');
+        state.records = records;
+        state.format = format;
+        state.formatLabel = format === 'intel' ? 'Intel HEX' : 'Motorola S-record';
+        state.name = fileName;
+        state.ext = (fileName.match(/\.([^.]+)$/) || [])[1] || '';
+        state.sample = Boolean(options && options.sample);
+        state.selected = Math.max(0, records.findIndex(function (record) { return !record.ok; }));
+        if (state.selected < 0) state.selected = 0;
+        setLoadedState();
+        renderSummary();
+        renderTable();
+        renderInspector();
+        if (state.openExplain) closeExplain();
+        requestAnimationFrame(function () {
+          const anchor = elements.recordBody.querySelector('[data-explain="04"]');
+          if (anchor && state.sample) openExplain(anchor, false);
+        });
+      }
+
+      function loadSample(showToast) {
+        const records = parseIntelRecords(SAMPLE_LINES.join('\n'));
+        loadRecords(records, 'intel', 'FBL_APP_combined.dat', { sample: true });
+        if (showToast) toast('Sample image restored · 7 of 8 records verify', 'ok');
+      }
+
+      async function loadFile(file) {
+        try {
+          const buffer = await file.arrayBuffer();
+          const bytes = new Uint8Array(buffer);
+          const headBytes = bytes.slice(0, 4096);
+          const head = new TextDecoder('utf-8', { fatal: false }).decode(headBytes);
+          const trimmed = head.replace(/^\uFEFF/, '').trimStart();
+          let format = null;
+          if (trimmed.charAt(0) === ':') format = 'intel';
+          else if (/^S[0-9A-Fa-f]/m.test(trimmed)) format = 'srec';
+          else format = 'bin';
+
+          if (format === 'bin') {
+            setEmptyState(true);
+            toast('BIN detected · no record structure; the extension is not trusted', 'warn');
+            return;
+          }
+
+          let records;
+          const text = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+          if (format === 'intel') {
+            records = parseIntelRecords(text);
+          } else {
+            records = parseSRecords(text);
+          }
+          const dataRecords = records.filter(function (record) {
+            return !record.malformed && record.ok;
+          });
+          if (!dataRecords.length) {
+            setEmptyState(false, 'No valid records were found. Check that the file is Intel HEX or Motorola S-record and try again.');
+            toast('Could not decode this file as records', 'fail');
+            return;
+          }
+          loadRecords(records, format, file.name, { sample: false });
+          toast('Loaded ' + records.length + ' records · content detected as ' + (format === 'intel' ? 'Intel HEX' : 'S-record'), 'ok');
+        } catch (error) {
+          toast('Could not read that file: ' + error.message, 'fail');
+        }
+      }
+
+      function toast(message, tone) {
+        const node = document.createElement('div');
+        node.className = 'toast' + (tone === 'fail' ? ' is-fail' : tone === 'warn' ? ' is-warn' : '');
+        node.innerHTML =
+          '<svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">' +
+            (tone === 'fail' || tone === 'warn'
+              ? '<path d="M12 3.5 21 20H3z"></path><path d="M12 9v5M12 17.2v.1"></path>'
+              : '<path d="m5 12.5 4.2 4.2L19 7"></path>') +
+          '</svg><span>' + esc(message) + '</span>';
+        elements.toastStack.appendChild(node);
+        window.setTimeout(function () {
+          node.style.opacity = '0';
+          node.style.transform = 'translateY(4px)';
+          window.setTimeout(function () { node.remove(); }, 180);
+        }, 3400);
+      }
+
+      function updateThemeLabel() {
+        const button = document.querySelector('[data-theme-toggle]');
+        if (!button) return;
+        const isLight = document.documentElement.dataset.theme === 'light';
+        button.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
+      }
+
+      document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+          document.documentElement.dataset.theme = next;
+          try { localStorage.setItem('imagebench-theme', next); } catch (error) {}
+          updateThemeLabel();
+        });
+      });
+      updateThemeLabel();
+
+      document.getElementById('closeFile').addEventListener('click', function () {
+        setEmptyState(false);
+        toast('File closed · workspace emptied', 'ok');
+      });
+      document.getElementById('openFirmware').addEventListener('click', function () {
+        elements.fileInput.click();
+      });
+      document.getElementById('emptyOpen').addEventListener('click', function () {
+        elements.fileInput.click();
+      });
+      document.getElementById('restoreSample').addEventListener('click', function () { loadSample(true); });
+      document.getElementById('jumpFail').addEventListener('click', function () {
+        const failedIndex = state.records.findIndex(function (record) { return !record.ok; });
+        if (failedIndex < 0) {
+          toast('Every record verifies', 'ok');
+          return;
+        }
+        selectRecord(failedIndex, true);
+        const row = elements.recordBody.querySelector('.record-row[data-index="' + failedIndex + '"]');
+        if (row) row.focus({ preventScroll: true });
+      });
+      document.getElementById('verifyAll').addEventListener('click', function () {
+        const stats = getStats(state.records);
+        toast(stats.valid + ' of ' + stats.total + ' records verified · recomputed from bytes', stats.valid === stats.total ? 'ok' : 'warn');
+        renderSummary();
+        renderInspector();
+      });
+      document.getElementById('closeType04').addEventListener('click', function () { closeExplain(true); });
+      document.getElementById('type04Pop').addEventListener('click', function (event) {
+        event.stopPropagation();
+      });
+      elements.fileInput.addEventListener('change', function (event) {
+        const file = event.target.files && event.target.files[0];
+        if (file) loadFile(file);
+        elements.fileInput.value = '';
+      });
+      elements.dropZone.addEventListener('dragover', function (event) {
+        event.preventDefault();
+        elements.dropZone.classList.add('drag-active');
+      });
+      elements.dropZone.addEventListener('dragleave', function () {
+        elements.dropZone.classList.remove('drag-active');
+      });
+      elements.dropZone.addEventListener('drop', function (event) {
+        event.preventDefault();
+        elements.dropZone.classList.remove('drag-active');
+        const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+        if (file) loadFile(file);
+      });
+
+      document.addEventListener('click', function (event) {
+        if (!state.openExplain) return;
+        if (elements.typePop.contains(event.target)) return;
+        if (event.target.closest('[data-explain="04"]')) return;
+        closeExplain(false);
+      });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && state.openExplain) {
+          closeExplain(true);
+          return;
+        }
+        if (event.metaKey || event.ctrlKey || event.altKey) {
+          if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'o') {
+            event.preventDefault();
+            elements.fileInput.click();
+          }
+          return;
+        }
+        if (event.target.matches('input, textarea, select')) return;
+        if (event.key === '1' || event.key === '2' || event.key === '3' || event.key === '4') {
+          const routes = { '1': 'records.html', '2': 'image.html', '3': 'operations.html', '4': 'learn.html' };
+          window.location.href = routes[event.key];
+        }
+      });
+      document.querySelector('.table-scroll').addEventListener('scroll', function () {
+        if (state.openExplain && state.popAnchor) {
+          closeExplain(false);
+        }
+      });
+      window.addEventListener('resize', function () {
+        if (state.openExplain && state.popAnchor) positionPopover(elements.typePop, state.popAnchor);
+      });
+
+      loadSample(false);
+    })();
+  </script>
+</body>
+</html>
