@@ -1,9 +1,7 @@
 # design/ — 唯一设计真源
 
-- `DESIGN.md`：品牌契约（Brief / 设计原则 / Tokens 语义 / 组件词汇 / 不变式 / 平台差异 / Exit 条件）。
-- `prototype/`：原型 HTML（单文件、零外部依赖、亮暗双主题）+ `shared.css`。
+- `DESIGN.md`：品牌与交互契约，含设计原则、token 语义、不变式和验收条件。
+- `index.html`：直接打开 Records 工作台的默认入口，随原型入库。
+- `prototype/`：可交互 HTML、共享 CSS 与本地脚本，零外部运行依赖，支持亮暗主题。
 
-OpenDesign 项目承载**设计期打磨**；打磨到位落账到这里（cp + 检查 + commit）。
-再生成或换设备从本目录重灌。改界面先改原型再改代码（tlai-prototype-flow）。
-
-`index.html` 导航页只存在于 OpenDesign 项目，不进 git。
+OpenDesign 承载设计期打磨；设计源文件在这里落账并 commit/push。换设备从本目录同构重灌，保留相对路径与运行依赖。不再生成或保留页面目录。改界面先改原型再改代码（tlai-prototype-flow）。
