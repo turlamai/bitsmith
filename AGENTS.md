@@ -1,4 +1,4 @@
-# ImageBench agent contract
+# Binlet agent contract
 
 Professional firmware-image workbench, glaze line. Local by design.
 
