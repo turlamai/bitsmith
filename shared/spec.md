@@ -70,6 +70,9 @@ batch recipes / CI.
 - 2026-11-13 header templates + diff → phase 2.
 - 2026-11-13 repo private until first release (family convention: public at
   release time).
+- 2026-11-19 repo public ahead of release: required for
+  bitsmith.jrtx.site on GitHub Pages (free plan has no Pages for private
+  repos); supersedes the 2026-11-13 privacy decision for this repo.
 - 2026-11-13 family synergy: flashpilot already embeds Intel HEX / S-record /
   BIN models — extracting a shared family parsing library is the preferred
   path when implementation starts (check catalog first).
