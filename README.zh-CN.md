@@ -1,12 +1,14 @@
-# ImageBench
+# Binlet
+
+> Formerly **ImageBench**. The public repository URL remains under `turlamai/imagebench` until the repository slug is renamed in GitHub settings.
 
 **看懂、检查并编辑固件镜像的本地工作台。**
 
 [English](README.md) · **简体中文**
 
-[产品主页](https://jrtx.site/products/imagebench/) · [源码](https://github.com/turlamai/imagebench) · [问题与反馈](https://github.com/turlamai/imagebench/issues)
+[产品主页](https://jrtx.site/products/binlet/) · [源码](https://github.com/turlamai/imagebench) · [问题与反馈](https://github.com/turlamai/imagebench/issues)
 
-> **开发预览——原型阶段。** ImageBench 尚不是可用于生产的编辑器，也没有经过验证的安装包。生产固件必须独立复核后才能使用。目前不规划收费、试用到期或付费功能门禁。
+> **开发预览——原型阶段。** Binlet 尚不是可用于生产的编辑器，也没有经过验证的安装包。生产固件必须独立复核后才能使用。目前不规划收费、试用到期或付费功能门禁。
 
 ## 解决什么问题
 
@@ -29,7 +31,7 @@ Intel HEX、Motorola S-record（S19/SREC）和原始 BIN 文件，应按**地址
 
 ## 相关产品
 
-[FlashPilot](https://github.com/turlamai/flashpilot) 负责声明式 ECU 刷写。ImageBench 负责检查、准备镜像，FlashPilot 负责通过总线与 ECU 通信。
+[FlashPilot](https://github.com/turlamai/flashpilot) 负责声明式 ECU 刷写。Binlet 负责检查、准备镜像，FlashPilot 负责通过总线与 ECU 通信。
 
 ## 开发与反馈
 
