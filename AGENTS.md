@@ -1,4 +1,4 @@
-# Ingot agent contract
+# Bitsmith agent contract
 
 Professional firmware-image workbench, glaze line. Local by design.
 

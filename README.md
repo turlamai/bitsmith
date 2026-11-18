@@ -1,14 +1,14 @@
-# Ingot
+# Bitsmith
 
-> Formerly **ImageBench**, then briefly **Binlet**. The repository slug is now `turlamai/ingot`.
+> Formerly **ImageBench**, then briefly **Binlet** and **Ingot**. The repository slug is now `turlamai/bitsmith`.
 
 **A local workbench for understanding and editing firmware images.**
 
 **English** · [简体中文](README.zh-CN.md)
 
-[Product homepage](https://jrtx.site/products/ingot/) · [Source](https://github.com/turlamai/ingot) · [Issues and feedback](https://github.com/turlamai/ingot/issues)
+[Product homepage](https://jrtx.site/products/bitsmith/) · [Source](https://github.com/turlamai/bitsmith) · [Issues and feedback](https://github.com/turlamai/bitsmith/issues)
 
-> **Development preview — prototype stage.** Ingot is not a production-ready editor and has no verified installers. Do not use it to prepare production firmware without independent verification. No purchase, trial expiry or paid feature gate is planned during this development phase.
+> **Development preview — prototype stage.** Bitsmith is not a production-ready editor and has no verified installers. Do not use it to prepare production firmware without independent verification. No purchase, trial expiry or paid feature gate is planned during this development phase.
 
 ## What it is for
 
@@ -23,7 +23,7 @@ Firmware engineers handling Intel HEX, Motorola S-record (S19/SREC) and raw BIN 
 
 ## Platforms and getting started
 
-Designed for macOS, Windows and Linux, using a Racket domain engine and a system-WebView UI via [Glaze](https://github.com/turlamai/glaze). **No tested native installer or clean-install guide is available yet.** Explore the [repository](https://github.com/turlamai/ingot) and [design](design/) instead of downloading an unverified package.
+Designed for macOS, Windows and Linux, using a Racket domain engine and a system-WebView UI via [Glaze](https://github.com/turlamai/glaze). **No tested native installer or clean-install guide is available yet.** Explore the [repository](https://github.com/turlamai/bitsmith) and [design](design/) instead of downloading an unverified package.
 
 ## Data and privacy
 
@@ -31,11 +31,11 @@ The intended workflow is fully local. Firmware contents must not be sent to onli
 
 ## Related tools
 
-[FlashPilot](https://github.com/turlamai/flashpilot) consumes firmware images during a declared ECU flashing workflow. Ingot prepares or inspects an image; FlashPilot owns communication with the ECU.
+[FlashPilot](https://github.com/turlamai/flashpilot) consumes firmware images during a declared ECU flashing workflow. Bitsmith prepares or inspects an image; FlashPilot owns communication with the ECU.
 
 ## Development and feedback
 
-Review current work in [Issues](https://github.com/turlamai/ingot/issues). Please report a minimal **synthetic** sample image, expected and actual addresses/checksums, and platform information; never upload confidential production firmware.
+Review current work in [Issues](https://github.com/turlamai/bitsmith/issues). Please report a minimal **synthetic** sample image, expected and actual addresses/checksums, and platform information; never upload confidential production firmware.
 
 ## License
 
