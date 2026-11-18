@@ -1,12 +1,14 @@
-# ImageBench
+# Binlet
+
+> Formerly **ImageBench**. The public repository URL remains under `turlamai/imagebench` until the repository slug is renamed in GitHub settings.
 
 **A local workbench for understanding and editing firmware images.**
 
 **English** · [简体中文](README.zh-CN.md)
 
-[Product homepage](https://jrtx.site/products/imagebench/) · [Source](https://github.com/turlamai/imagebench) · [Issues and feedback](https://github.com/turlamai/imagebench/issues)
+[Product homepage](https://jrtx.site/products/binlet/) · [Source](https://github.com/turlamai/imagebench) · [Issues and feedback](https://github.com/turlamai/imagebench/issues)
 
-> **Development preview — prototype stage.** ImageBench is not a production-ready editor and has no verified installers. Do not use it to prepare production firmware without independent verification. No purchase, trial expiry or paid feature gate is planned during this development phase.
+> **Development preview — prototype stage.** Binlet is not a production-ready editor and has no verified installers. Do not use it to prepare production firmware without independent verification. No purchase, trial expiry or paid feature gate is planned during this development phase.
 
 ## What it is for
 
@@ -29,7 +31,7 @@ The intended workflow is fully local. Firmware contents must not be sent to onli
 
 ## Related tools
 
-[FlashPilot](https://github.com/turlamai/flashpilot) consumes firmware images during a declared ECU flashing workflow. ImageBench prepares or inspects an image; FlashPilot owns communication with the ECU.
+[FlashPilot](https://github.com/turlamai/flashpilot) consumes firmware images during a declared ECU flashing workflow. Binlet prepares or inspects an image; FlashPilot owns communication with the ECU.
 
 ## Development and feedback
 
