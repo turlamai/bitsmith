@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Learn — Binlet</title>
+  <title>Learn — Ingot</title>
   <script>
     (function () {
       try {
-        var saved = (localStorage.getItem('binlet-theme') || localStorage.getItem('imagebench-theme'));
+        var saved = (localStorage.getItem('ingot-theme') || localStorage.getItem('imagebench-theme'));
         if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
       } catch (error) {}
     })();
@@ -128,13 +128,13 @@
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <a class="brand" href="../index.html" aria-label="Binlet home">
+      <a class="brand" href="../index.html" aria-label="Ingot home">
         <span class="brand-mark" aria-hidden="true">
           <span></span><span></span><span></span><span></span>
           <span></span><span></span><span></span><span></span>
           <span></span><span></span><span></span><span></span>
         </span>
-        <span class="brand-name">Binlet</span>
+        <span class="brand-name">Ingot</span>
         <span class="brand-version">v0.1</span>
       </a>
       <a class="file-tab" href="records.html" aria-label="Current file: FBL_APP_combined.dat">
@@ -218,7 +218,7 @@
           <div class="learn-hero">
             <div class="eyebrow">Reference</div>
             <h1>The rules behind the view.</h1>
-            <p>Nothing in Binlet is magic: a record is a text line with a small arithmetic contract, and an address is either in the file or assumed by you. These six sections cover the difference.</p>
+            <p>Nothing in Ingot is magic: a record is a text line with a small arithmetic contract, and an address is either in the file or assumed by you. These six sections cover the difference.</p>
           </div>
 
           <section class="learn-section" id="anatomy" aria-labelledby="anatomyTitle">
@@ -265,7 +265,7 @@
             <div class="checksum-steps" id="intelSteps"></div><p class="callout" id="checksumFeedback" aria-live="polite"></p>
             <h3 style="margin-block:var(--space-4)">S-record · one's complement</h3>
             <div class="checksum-steps" id="srecSteps"></div>
-            <p class="anatomy-note">Binlet recomputes this for every line on every load. A failing checksum does not hide the data: the record stays in the table so you can decide whether to repair the byte or reject the file.</p>
+            <p class="anatomy-note">Ingot recomputes this for every line on every load. A failing checksum does not hide the data: the record stays in the table so you can decide whether to repair the byte or reject the file.</p>
           </section>
 
           <section class="learn-section" id="gaps" aria-labelledby="gapsTitle">
@@ -323,7 +323,7 @@ S3150054FFF0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFB7
 S70500000000FA</pre></details>
           <section class="learn-section" id="base" aria-labelledby="baseTitle">
             <h2 id="baseTitle">05 · Why a BIN needs a base</h2>
-            <p class="section-intro">A raw binary has no idea where it belongs in memory. Binlet does not guess quietly: it asks for a base and marks every address downstream of that choice.</p>
+            <p class="section-intro">A raw binary has no idea where it belongs in memory. Ingot does not guess quietly: it asks for a base and marks every address downstream of that choice.</p>
 
             <div class="assumption-banner" style="margin-top:12px">
               <svg class="od-icon banner-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -341,7 +341,7 @@ S70500000000FA</pre></details>
 
           <section class="learn-section" id="before-write" aria-labelledby="beforeTitle">
             <h2 id="beforeTitle">06 · Before you write</h2>
-            <p class="section-intro">Reading is cheap; writing is not. These are the checks Binlet keeps in front of you, in the order they matter.</p>
+            <p class="section-intro">Reading is cheap; writing is not. These are the checks Ingot keeps in front of you, in the order they matter.</p>
 
             <div class="before-list">
               <div class="before-row">
@@ -401,7 +401,7 @@ S70500000000FA</pre></details>
         button.addEventListener('click', function () {
           const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
           document.documentElement.dataset.theme = next;
-          try { localStorage.setItem('binlet-theme', next); } catch (error) {}
+          try { localStorage.setItem('ingot-theme', next); } catch (error) {}
           updateThemeLabel();
         });
       });

@@ -1,14 +1,14 @@
-# Binlet
+# Ingot
 
-> Formerly **ImageBench**. The public repository URL remains under `turlamai/imagebench` until the repository slug is renamed in GitHub settings.
+> Formerly **ImageBench**, then briefly **Binlet**. The repository slug is now `turlamai/ingot`.
 
 **看懂、检查并编辑固件镜像的本地工作台。**
 
 [English](README.md) · **简体中文**
 
-[产品主页](https://jrtx.site/products/binlet/) · [源码](https://github.com/turlamai/imagebench) · [问题与反馈](https://github.com/turlamai/imagebench/issues)
+[产品主页](https://jrtx.site/products/ingot/) · [源码](https://github.com/turlamai/ingot) · [问题与反馈](https://github.com/turlamai/ingot/issues)
 
-> **开发预览——原型阶段。** Binlet 尚不是可用于生产的编辑器，也没有经过验证的安装包。生产固件必须独立复核后才能使用。目前不规划收费、试用到期或付费功能门禁。
+> **开发预览——原型阶段。** Ingot 尚不是可用于生产的编辑器，也没有经过验证的安装包。生产固件必须独立复核后才能使用。目前不规划收费、试用到期或付费功能门禁。
 
 ## 解决什么问题
 
@@ -23,7 +23,7 @@ Intel HEX、Motorola S-record（S19/SREC）和原始 BIN 文件，应按**地址
 
 ## 平台与使用
 
-目标平台为 macOS、Windows 和 Linux，使用 Racket 领域引擎及 [Glaze](https://github.com/turlamai/glaze) 系统 WebView UI。**当前没有完成验证的原生安装包和干净安装流程。** 请查看[源码](https://github.com/turlamai/imagebench)与[设计资料](design/)，不要将未验证的构建用于正式固件。
+目标平台为 macOS、Windows 和 Linux，使用 Racket 领域引擎及 [Glaze](https://github.com/turlamai/glaze) 系统 WebView UI。**当前没有完成验证的原生安装包和干净安装流程。** 请查看[源码](https://github.com/turlamai/ingot)与[设计资料](design/)，不要将未验证的构建用于正式固件。
 
 ## 数据与隐私
 
@@ -31,11 +31,11 @@ Intel HEX、Motorola S-record（S19/SREC）和原始 BIN 文件，应按**地址
 
 ## 相关产品
 
-[FlashPilot](https://github.com/turlamai/flashpilot) 负责声明式 ECU 刷写。Binlet 负责检查、准备镜像，FlashPilot 负责通过总线与 ECU 通信。
+[FlashPilot](https://github.com/turlamai/flashpilot) 负责声明式 ECU 刷写。Ingot 负责检查、准备镜像，FlashPilot 负责通过总线与 ECU 通信。
 
 ## 开发与反馈
 
-在 [Issues](https://github.com/turlamai/imagebench/issues) 提交**合成的**最小测试镜像，写明预期与实际地址/校验和及平台信息；不要上传保密生产固件。
+在 [Issues](https://github.com/turlamai/ingot/issues) 提交**合成的**最小测试镜像，写明预期与实际地址/校验和及平台信息；不要上传保密生产固件。
 
 ## 许可证
 

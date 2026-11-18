@@ -3,5 +3,5 @@
 (provide strings)
 
 (define strings
-  (hasheq 'app-name "Binlet"
+  (hasheq 'app-name "Ingot"
           'tagline "Understand and master firmware images"))

@@ -1,4 +1,4 @@
-# Binlet Product Spec
+# Ingot Product Spec
 
 Single source of truth for scope and product decisions. UI truth lives in
 `design/prototype/`; engine truth lives in `shared/engine/`.
@@ -57,7 +57,11 @@ batch recipes / CI.
   doubles as first product UI). rivet rejected for cost on this UI class.
 - 2026-11-18 name: **Binlet** — concise product brand for firmware image editing;
   supersedes the previous ImageBench decision. Avoids names already used by
-  existing hex-editor projects; keep the GitHub slug until administrative rename.
+  existing hex-editor projects.
+- 2026-11-18 rename: **Ingot** — binlet rejected as off-style, imagesmith as
+  too long; short concrete metallurgy noun matches keel/kiln/glaze; the ingot
+  is the prepared image handed to FlashPilot. GitHub slug renamed to
+  turlamai/ingot.
 - 2026-11-13 previous name: **ImageBench** (HexView taken by an existing
   commercial tool; FlashForge collides with a 3D printer brand).
 - 2026-11-13 header templates + diff → phase 2.

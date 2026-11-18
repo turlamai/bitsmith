@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Operations — Binlet</title>
+  <title>Operations — Ingot</title>
   <script>
     (function () {
       try {
-        var saved = (localStorage.getItem('binlet-theme') || localStorage.getItem('imagebench-theme'));
+        var saved = (localStorage.getItem('ingot-theme') || localStorage.getItem('imagebench-theme'));
         if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
       } catch (error) {}
     })();
@@ -116,13 +116,13 @@
 <body class="ops-page">
   <div class="app-shell">
     <header class="topbar">
-      <a class="brand" href="../index.html" aria-label="Binlet home">
+      <a class="brand" href="../index.html" aria-label="Ingot home">
         <span class="brand-mark" aria-hidden="true">
           <span></span><span></span><span></span><span></span>
           <span></span><span></span><span></span><span></span>
           <span></span><span></span><span></span><span></span>
         </span>
-        <span class="brand-name">Binlet</span>
+        <span class="brand-name">Ingot</span>
         <span class="brand-version">v0.1</span>
       </a>
       <a class="file-tab" href="records.html" aria-label="Current file: FBL_APP_combined.dat">
@@ -352,7 +352,7 @@
     $('cancelApply').addEventListener('click',()=>dialog.close());
     $('commitApply').addEventListener('click',()=>{if(pending&&pending.revision===revision){working=new Map(pending.after);format=pending.outFormat;revision++;dialog.close();render();$('statusGate').textContent='Applied to working copy';$('applyBtn').focus();}pending=null;});
     dialog.addEventListener('close',()=>{const b=$('applyBtn');if(b)b.focus();});
-    const theme=document.querySelector('[data-theme-toggle]');function themeLabel(){theme.setAttribute('aria-label',document.documentElement.dataset.theme==='light'?'Switch to dark theme':'Switch to light theme');}theme.addEventListener('click',()=>{const t=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=t;try{localStorage.setItem('binlet-theme',t);}catch(e){}themeLabel();});themeLabel();
+    const theme=document.querySelector('[data-theme-toggle]');function themeLabel(){theme.setAttribute('aria-label',document.documentElement.dataset.theme==='light'?'Switch to dark theme':'Switch to light theme');}theme.addEventListener('click',()=>{const t=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=t;try{localStorage.setItem('ingot-theme',t);}catch(e){}themeLabel();});themeLabel();
     document.addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey||e.target.matches('input,select,textarea')||dialog.open)return;const route={'1':'records.html','2':'image.html','3':'operations.html','4':'learn.html'}[e.key];if(route)location.href=route;});
     render();
   })();

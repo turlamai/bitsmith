@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Image view — Binlet</title>
+  <title>Image view — Ingot</title>
   <script>
     (function () {
       try {
-        var saved = (localStorage.getItem('binlet-theme') || localStorage.getItem('imagebench-theme'));
+        var saved = (localStorage.getItem('ingot-theme') || localStorage.getItem('imagebench-theme'));
         if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
       } catch (error) {}
     })();
@@ -225,13 +225,13 @@
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <a class="brand" href="../index.html" aria-label="Binlet home">
+      <a class="brand" href="../index.html" aria-label="Ingot home">
         <span class="brand-mark" aria-hidden="true">
           <span></span><span></span><span></span><span></span>
           <span></span><span></span><span></span><span></span>
           <span></span><span></span><span></span><span></span>
         </span>
-        <span class="brand-name">Binlet</span>
+        <span class="brand-name">Ingot</span>
         <span class="brand-version">v0.1</span>
       </a>
       <a class="file-tab" href="records.html" id="topFileTab" aria-label="Current file: FBL_APP_combined.bin">
@@ -359,7 +359,7 @@
               </svg>
               <div>
                 <strong>BIN carries no address information — base 0x08000000 is an assumption you set</strong>
-                <p>No address records were found. Binlet is displaying the bytes at the working base. Check this base against the device memory map before writing.</p>
+                <p>No address records were found. Ingot is displaying the bytes at the working base. Check this base against the device memory map before writing.</p>
               </div>
               <button class="btn btn-sm btn-quiet banner-action" id="focusBase" type="button">Base details</button>
             </div>
@@ -911,7 +911,7 @@
         button.addEventListener('click', function () {
           const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
           document.documentElement.dataset.theme = next;
-          try { localStorage.setItem('binlet-theme', next); } catch (error) {}
+          try { localStorage.setItem('ingot-theme', next); } catch (error) {}
           updateThemeLabel();
         });
       });
