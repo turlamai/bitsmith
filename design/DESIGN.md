@@ -5,11 +5,11 @@
 3. [ ] HIG checklist passes: content first, direct manipulation, immediate feedback, error prevention, keyboard access, non-color feedback, consistent navigation. Final review remains open.
 4. [ ] User is satisfied. Only the user can close this condition.
 
-# ImageBench design contract
+# Binlet design contract
 
 ## Brief
 
-Project identifier: `imagebench`. Brand in prose: **ImageBench**. A local firmware-image workbench for embedded and FBL developers, built on a Racket engine and system WebView through glaze. The prototype is the editable first UI baseline, not a marketing site. Product business logic belongs in the Racket engine; the local JavaScript here demonstrates the interaction contract for later typed RPC integration.
+Project identifier: `binlet`. Brand in prose: **Binlet**. A local firmware-image workbench for embedded and FBL developers, built on a Racket engine and system WebView through glaze. The prototype is the editable first UI baseline, not a marketing site. Product business logic belongs in the Racket engine; the local JavaScript here demonstrates the interaction contract for later typed RPC integration.
 
 Entry: `index.html`. Screens: `prototype/records.html`, `prototype/image.html`, `prototype/operations.html`, `prototype/learn.html`. Shared visual source: `prototype/shared.css`. No external fonts, CDN, assets or build step.
 
