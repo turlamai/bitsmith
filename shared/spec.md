@@ -1,4 +1,4 @@
-# ImageBench Product Spec
+# Binlet Product Spec
 
 Single source of truth for scope and product decisions. UI truth lives in
 `design/prototype/`; engine truth lives in `shared/engine/`.
@@ -55,8 +55,11 @@ batch recipes / CI.
 
 - 2026-11-13 line: **glaze** (dense table/visualization resident UI; prototype
   doubles as first product UI). rivet rejected for cost on this UI class.
-- 2026-11-13 name: **ImageBench** (HexView taken by existing commercial tool;
-  FlashForge collides with 3D printer brand).
+- 2026-11-18 name: **Binlet** — concise product brand for firmware image editing;
+  supersedes the previous ImageBench decision. Avoids names already used by
+  existing hex-editor projects; keep the GitHub slug until administrative rename.
+- 2026-11-13 previous name: **ImageBench** (HexView taken by an existing
+  commercial tool; FlashForge collides with a 3D printer brand).
 - 2026-11-13 header templates + diff → phase 2.
 - 2026-11-13 repo private until first release (family convention: public at
   release time).
