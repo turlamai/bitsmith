@@ -1,12 +1,12 @@
 # Bitsmith
 
+**产品：**[产品主页](https://jrtx.site/products/bitsmith/) · **支持：**[问题与反馈](https://github.com/turlamai/bitsmith/issues) · [当前交付策略](https://github.com/turlamai/turlamai.github.io/blob/master/PORTFOLIO.zh-CN.md)
+
 > Formerly **ImageBench**, then briefly **Binlet** and **Ingot**. The repository slug is now `turlamai/bitsmith`.
 
 **看懂、检查并编辑固件镜像的本地工作台。**
 
 [English](README.md) · **简体中文**
-
-[产品主页](https://jrtx.site/products/bitsmith/) · [源码](https://github.com/turlamai/bitsmith) · [问题与反馈](https://github.com/turlamai/bitsmith/issues)
 
 > **开发预览——原型阶段。** Bitsmith 尚不是可用于生产的编辑器，也没有经过验证的安装包。生产固件必须独立复核后才能使用。目前不规划收费、试用到期或付费功能门禁。
 
