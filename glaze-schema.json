@@ -4,8 +4,412 @@
   "glz": 1,
   "routes": [
     {
-      "method": "POST",
+      "method": "GET",
       "path": "/api/health"
+    },
+    {
+      "method": "POST",
+      "path": "/api/app/meta"
+    },
+    {
+      "method": "POST",
+      "path": "/api/i18n/strings"
+    },
+    {
+      "method": "POST",
+      "path": "/api/workspace/state"
+    },
+    {
+      "method": "POST",
+      "path": "/api/records/view"
+    },
+    {
+      "method": "POST",
+      "path": "/api/image/view"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ops/specs"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ops/preview"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ops/apply"
+    },
+    {
+      "method": "POST",
+      "path": "/api/workspace/reset"
+    },
+    {
+      "method": "POST",
+      "path": "/api/workspace/close"
+    },
+    {
+      "method": "POST",
+      "path": "/api/workspace/open"
+    },
+    {
+      "method": "POST",
+      "path": "/api/workspace/save"
+    },
+    {
+      "method": "POST",
+      "path": "/api/learn/checksum"
+    },
+    {
+      "method": "POST",
+      "path": "/api/learn/srec-steps"
+    },
+    {
+      "method": "POST",
+      "path": "/api/workspace/load-source"
     }
-  ]
+  ],
+  "schema": {
+    "commands": [
+      {
+        "errors": [],
+        "name": "appMeta",
+        "parameters": [
+          {
+            "name": "lang",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          }
+        ],
+        "result": {
+          "kind": "scalar",
+          "name": "Value"
+        }
+      },
+      {
+        "errors": [],
+        "name": "health",
+        "parameters": [],
+        "result": {
+          "kind": "reference",
+          "name": "Health"
+        }
+      },
+      {
+        "errors": [],
+        "name": "i18nStrings",
+        "parameters": [
+          {
+            "name": "lang",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          }
+        ],
+        "result": {
+          "kind": "scalar",
+          "name": "Value"
+        }
+      },
+      {
+        "errors": [],
+        "name": "imageView",
+        "parameters": [
+          {
+            "name": "lang",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          },
+          {
+            "name": "limit",
+            "type": {
+              "kind": "scalar",
+              "name": "Int64"
+            }
+          }
+        ],
+        "result": {
+          "kind": "scalar",
+          "name": "Value"
+        }
+      },
+      {
+        "errors": [],
+        "name": "learnChecksum",
+        "parameters": [
+          {
+            "name": "line",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          },
+          {
+            "name": "lang",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          }
+        ],
+        "result": {
+          "kind": "scalar",
+          "name": "Value"
+        }
+      },
+      {
+        "errors": [],
+        "name": "learnSrecSteps",
+        "parameters": [
+          {
+            "name": "lang",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          }
+        ],
+        "result": {
+          "kind": "scalar",
+          "name": "Value"
+        }
+      },
+      {
+        "errors": [],
+        "name": "opsApply",
+        "parameters": [
+          {
+            "name": "op",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          },
+          {
+            "name": "expectRevision",
+            "type": {
+              "kind": "scalar",
+              "name": "Int64"
+            }
+          },
+          {
+            "name": "lang",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          }
+        ],
+        "result": {
+          "kind": "scalar",
+          "name": "Value"
+        }
+      },
+      {
+        "errors": [],
+        "name": "opsPreview",
+        "parameters": [
+          {
+            "name": "op",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          },
+          {
+            "name": "lang",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          }
+        ],
+        "result": {
+          "kind": "scalar",
+          "name": "Value"
+        }
+      },
+      {
+        "errors": [],
+        "name": "opsSpecs",
+        "parameters": [
+          {
+            "name": "lang",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          }
+        ],
+        "result": {
+          "kind": "scalar",
+          "name": "Value"
+        }
+      },
+      {
+        "errors": [],
+        "name": "recordsView",
+        "parameters": [
+          {
+            "name": "lang",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          }
+        ],
+        "result": {
+          "kind": "scalar",
+          "name": "Value"
+        }
+      },
+      {
+        "errors": [],
+        "name": "workspaceClose",
+        "parameters": [
+          {
+            "name": "lang",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          }
+        ],
+        "result": {
+          "kind": "scalar",
+          "name": "Value"
+        }
+      },
+      {
+        "errors": [],
+        "name": "workspaceLoadSource",
+        "parameters": [
+          {
+            "name": "source",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          },
+          {
+            "name": "name",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          },
+          {
+            "name": "lang",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          }
+        ],
+        "result": {
+          "kind": "scalar",
+          "name": "Value"
+        }
+      },
+      {
+        "errors": [],
+        "name": "workspaceOpen",
+        "parameters": [
+          {
+            "name": "lang",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          }
+        ],
+        "result": {
+          "kind": "scalar",
+          "name": "Value"
+        }
+      },
+      {
+        "errors": [],
+        "name": "workspaceReset",
+        "parameters": [
+          {
+            "name": "lang",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          }
+        ],
+        "result": {
+          "kind": "scalar",
+          "name": "Value"
+        }
+      },
+      {
+        "errors": [],
+        "name": "workspaceSave",
+        "parameters": [
+          {
+            "name": "lang",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          }
+        ],
+        "result": {
+          "kind": "scalar",
+          "name": "Value"
+        }
+      },
+      {
+        "errors": [],
+        "name": "workspaceState",
+        "parameters": [
+          {
+            "name": "lang",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          }
+        ],
+        "result": {
+          "kind": "scalar",
+          "name": "Value"
+        }
+      }
+    ],
+    "contract": 1,
+    "enums": [],
+    "events": [],
+    "id": "glaze-routes",
+    "records": [
+      {
+        "fields": [
+          {
+            "name": "ok",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          },
+          {
+            "name": "version",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          }
+        ],
+        "name": "Health"
+      }
+    ],
+    "revision": 1,
+    "states": []
+  }
 }

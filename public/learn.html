@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learn — Bitsmith</title>
+  <script>
+    (function () {
+      try {
+        var saved = (localStorage.getItem('bitsmith-theme') || localStorage.getItem('imagebench-theme'));
+        if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+      } catch (error) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .workspace.learn-layout {
+      grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+    }
+    .learn-shell {
+      width: 100%;
+      margin-inline: auto;
+    }
+    .learn-toc {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      margin-top: 10px;
+    }
+    .learn-toc a {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 5px 7px;
+      border-radius: var(--radius-xs);
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.4;
+    }
+    .learn-toc a:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    .learn-toc .toc-num {
+      color: var(--faint);
+      font-family: var(--font-mono);
+      font-size: 9px;
+    }
+    .learn-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .learn-card {
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface-1);
+    }
+    .learn-card h3 {
+      font-size: 10.5px;
+      font-weight: 650;
+    }
+    .learn-card p {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.55;
+    }
+    .learn-card code,
+    .learn-section code {
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+    .before-list {
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface-1);
+      overflow: hidden;
+    }
+    .before-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .before-row:last-child { border-bottom: 0; }
+    .before-row .od-icon {
+      --od-icon-size: 14px;
+      flex: none;
+      margin-top: 1px;
+      color: var(--ok);
+    }
+    .before-row.is-warn .od-icon { color: var(--warn); }
+    .before-row strong {
+      display: block;
+      font-size: 11px;
+      font-weight: 650;
+    }
+    .before-row span {
+      display: block;
+      margin-top: 1px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.5;
+    }
+    @media (max-width: 900px) {
+      .workspace.learn-layout { display: flex; }
+      .learn-layout .main-scroll { min-width: 0; }
+    }
+    @media (max-width: 640px) {
+      .learn-row { grid-template-columns: 1fr; }
+      .statusbar .push { display: none; }
+      .statusbar .status-item { flex: none; }
+    }
+    .field-token:focus-visible {outline:2px solid var(--focus-ring);outline-offset:2px}
+    .learn-section .field .input {height:auto;min-height:var(--space-7);padding:var(--space-2);font-size:var(--text-sm)}
+    .learn-section details {margin-top:var(--space-4);border:1px solid var(--border);padding:var(--space-3);border-radius:var(--radius-sm)}
+    .learn-section summary {cursor:pointer;color:var(--accent)}
+    .sample-source {font:var(--text-xs)/var(--lh-relaxed) var(--font-mono);white-space:pre-wrap;overflow-wrap:anywhere;margin-top:var(--space-3)}
+    .checksum-step strong {overflow-wrap:anywhere}
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="records.html" aria-label="Bitsmith home">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+        </span>
+        <span class="brand-name">Bitsmith</span>
+        <span class="brand-version">v0.1</span>
+      </a>
+      <a class="file-tab" href="records.html" aria-label="Current file: FBL_APP_combined.dat">
+        <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true" style="--od-icon-size:15px">
+          <path d="M6 3.5h8l4 4v13H6z"></path>
+          <path d="M14 3.5v4h4"></path>
+          <path d="M9 12h6M9 15.5h6"></path>
+        </svg>
+        <span class="file-name">FBL_APP_combined.dat</span>
+        <span class="format-chip">Intel HEX</span>
+      </a>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-actions">
+        <span class="local-state" data-i18n="topbar.local">Local only</span>
+        <button class="btn btn-primary btn-sm" id="openFirmware" type="button">
+          <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3.5 7.5h6l2 2h9v9.5h-17z"></path>
+            <path d="M3.5 7.5V5h6l2 2"></path>
+          </svg>
+          <span data-i18n="btn.open">Open firmware</span>
+        </button>
+        <button class="btn btn-sm btn-quiet" id="saveFirmware" type="button">
+          <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 5h11l3 3v11H5z"></path>
+            <path d="M8 5v5h7V5M8 19v-6h8v6"></path>
+          </svg>
+          <span data-i18n="btn.save">Save</span>
+        </button>
+        <a class="btn btn-sm" href="records.html" data-i18n="learn.back">Back to records</a>
+        <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Switch to light theme">
+          <svg class="od-icon icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 15.2A8.2 8.2 0 0 1 8.8 4a8.4 8.4 0 1 0 11.2 11.2Z"></path>
+          </svg>
+          <svg class="od-icon icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="3.5"></circle>
+            <path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="workspace learn-layout">
+      <aside class="sidebar">
+        <nav class="side-nav" aria-label="Workbench sections">
+          <a class="side-nav-item" href="records.html">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 6.5h14M5 12h14M5 17.5h9"></path>
+            </svg>
+            <span data-i18n="nav.records">Records</span> <span class="side-nav-key">1</span>
+          </a>
+          <a class="side-nav-item" href="image.html">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="4" y="4" width="16" height="16" rx="1.5"></rect>
+              <path d="M4 10h16M4 15h16M9 4v16M15 4v16"></path>
+            </svg>
+            <span data-i18n="nav.image">Image</span> <span class="side-nav-key">2</span>
+          </a>
+          <a class="side-nav-item" href="operations.html">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7h10M18 7h2M4 17h3M11 17h9"></path>
+              <circle cx="16" cy="7" r="2"></circle>
+              <circle cx="9" cy="17" r="2"></circle>
+            </svg>
+            <span data-i18n="nav.operations">Operations</span> <span class="side-nav-key">3</span>
+          </a>
+          <a class="side-nav-item" href="learn.html" aria-current="page">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4.5 5.5h6a2 2 0 0 1 2 2v11a2 2 0 0 0-2-2h-6z"></path>
+              <path d="M19.5 5.5h-4a2 2 0 0 0-2 2v11a2 2 0 0 1 2-2h4z"></path>
+            </svg>
+            <span data-i18n="nav.learn">Learn</span> <span class="side-nav-key">4</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-scroll">
+          <div class="eyebrow" data-i18n="learn.on-this-page">On this page</div>
+          <nav class="learn-toc" aria-label="Reference sections">
+            <a href="#anatomy"><span class="toc-num">01</span data-i18n="toc.1">Record anatomy</a>
+            <a href="#checksum"><span class="toc-num">02</span data-i18n="toc.2">Checksum arithmetic</a>
+            <a href="#gaps"><span class="toc-num">03</span data-i18n="toc.3">Gaps are not bytes</a>
+            <a href="#formats"><span class="toc-num">04</span data-i18n="toc.4">HEX, S-record, BIN</a>
+            <a href="#base"><span class="toc-num">05</span data-i18n="toc.5">Assumed base</a>
+            <a href="#before-write"><span class="toc-num">06</span data-i18n="toc.6">Before you write</a>
+          </nav>
+          <p class="sidebar-note" data-i18n-html="learn.sample-intro-html">The sample used throughout is <code>FBL_APP_combined.dat</code>: 8 Intel HEX records, 7 of which verify.</p>
+          <div class="sidebar-foot">
+            <span>6 sections</span>
+            <span>v0.1</span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-scroll">
+        <div class="learn-shell">
+          <div class="learn-hero">
+            <div class="eyebrow" data-i18n="learn.reference">Reference</div>
+            <h1 data-i18n="learn.reference-sub">The rules behind the view.</h1>
+            <p data-i18n="learn.intro">Nothing in Bitsmith is magic: a record is a text line with a small arithmetic contract, and an address is either in the file or assumed by you. These six sections cover the difference.</p>
+          </div>
+
+          <section class="learn-section" id="anatomy" aria-labelledby="anatomyTitle">
+            <h2 id="anatomyTitle" data-i18n="learn.s1">01 · What a record actually is</h2>
+            <p class="section-intro" data-i18n="learn.s1-intro">One Intel HEX line is a complete, self-describing packet. Count tells you how many data bytes follow; address says where they load; type says what the line means; checksum closes the packet.</p>
+
+            <div class="anatomy-card">
+              <div class="anatomy-head">
+                <span class="eyebrow">Intel HEX</span>
+                <h3 data-i18n="learn.failing-field-by-field">The failing record, field by field</h3>
+              </div>
+              <div class="anatomy-body">
+                <div class="record-anatomy" id="intelAnatomy" aria-label="Intel HEX byte fields"></div>
+                <div class="field-key">
+                  <div class="field-key-item"><span class="field-key-swatch count"></span><div><strong data-i18n="learn.f1-title">Count · 04</strong><span data-i18n="learn.f1-body">Four data bytes follow. A line is not a row of hex; the count defines its shape.</span></div></div>
+                  <div class="field-key-item"><span class="field-key-swatch address"></span><div><strong data-i18n="learn.f2-title">Address · 8020</strong><span data-i18n="learn.f2-body">Offset inside the current 64 KiB page. The type 04 record above supplies the upper bits.</span></div></div>
+                  <div class="field-key-item"><span class="field-key-swatch type"></span><div><strong data-i18n="learn.f3-title">Type · 00</strong><span data-i18n="learn.f3-body">00 is data. 01 ends the file, 02 and 04 extend the address, 03 and 05 are start addresses.</span></div></div>
+                  <div class="field-key-item"><span class="field-key-swatch data"></span><div><strong data-i18n="learn.f4-title">Data · 48 B1 08 47</strong><span data-i18n="learn.f4-body">The four payload bytes are preserved exactly; their instruction meaning depends on the target architecture.</span></div></div>
+                  <div class="field-key-item"><span class="field-key-swatch checksum"></span><div><strong data-i18n="learn.f5-title">Checksum · 00</strong><span data-i18n="learn.f5-body">Stored value. This one is wrong: arithmetic says 14. That is the single failing record in the sample.</span></div></div>
+                </div>
+                <p class="anatomy-note" data-i18n-html="learn.absolute-note-html">The record occupies absolute address <code>0x08008020</code> because a preceding <code>:020000040800F2</code> line set the upper 16 bits to <code>0x0800</code>. Without that line the address would only be <code>0x8020</code>.</p>
+              </div>
+            </div>
+            <div class="anatomy-card" style="margin-top:var(--space-4)">
+              <div class="anatomy-head"><span class="eyebrow">Motorola S-record</span><h3 data-i18n="learn.s7-title">S7 termination · byte by byte</h3></div>
+              <div class="anatomy-body"><div class="record-anatomy" id="srecAnatomy" aria-label="S-record byte fields"></div>
+                <div class="field-key">
+                  <div class="field-key-item"><span class="field-key-swatch type"></span><div><strong data-i18n="learn.s7-f1-title">Type · S7</strong><span data-i18n="learn.s7-f1-body">Terminates an S3 stream and carries a 32-bit execution address.</span></div></div>
+                  <div class="field-key-item"><span class="field-key-swatch count"></span><div><strong data-i18n="learn.s7-f2-title">Count · 05</strong><span data-i18n="learn.s7-f2-body">Five bytes follow: four address bytes plus one checksum byte.</span></div></div>
+                  <div class="field-key-item"><span class="field-key-swatch address"></span><div><strong data-i18n="learn.s7-f3-title">Address · 00 00 00 00</strong><span data-i18n="learn.s7-f3-body">The execution address is 0x00000000; this is metadata, not a data write.</span></div></div>
+                  <div class="field-key-item"><span class="field-key-swatch data"></span><div><strong data-i18n="learn.s7-f4-title">Data · none</strong><span data-i18n="learn.s7-f4-body">S7 has no payload; S1, S2 and S3 carry data with 16-, 24- and 32-bit addresses.</span></div></div>
+                  <div class="field-key-item"><span class="field-key-swatch checksum"></span><div><strong data-i18n="learn.s7-f5-title">Checksum · FA</strong><span data-i18n="learn.s7-f5-body">The one's complement of count plus address bytes closes this record.</span></div></div>
+                </div>
+                <p class="anatomy-note" data-i18n-html="learn.hover-hint-html">Hover or focus any byte for its role. The exact input is <code>S70500000000FA</code>.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="learn-section" id="checksum" aria-labelledby="checksumTitle">
+            <h2 id="checksumTitle" data-i18n="learn.s2">02 · How the checksum is computed</h2>
+            <p class="section-intro" data-i18n="learn.s2-intro">Intel HEX uses a two's complement checksum. Add every byte after the colon except the checksum itself, keep the low byte, then complement and add one. The result must equal the stored byte.</p>
+
+            <div class="field" style="margin-block:var(--space-4)"><label for="checksumInput" data-i18n="learn.intel-playground">Intel HEX record · edit a byte to recompute</label><input class="input" id="checksumInput" value=":0480200048B1084700" spellcheck="false" aria-describedby="checksumFeedback"></div>
+            <div class="checksum-steps" id="intelSteps"></div><p class="callout" id="checksumFeedback" aria-live="polite"></p>
+            <h3 style="margin-block:var(--space-4)" data-i18n="learn.srec-playground">S-record · one's complement</h3>
+            <div class="checksum-steps" id="srecSteps"></div>
+            <p class="anatomy-note" data-i18n="learn.s2-outro">Bitsmith recomputes this for every line on every load. A failing checksum does not hide the data: the record stays in the table so you can decide whether to repair the byte or reject the file.</p>
+          </section>
+
+          <section class="learn-section" id="gaps" aria-labelledby="gapsTitle">
+            <h2 id="gapsTitle" data-i18n="learn.s3">03 · Gaps are not bytes</h2>
+            <p class="section-intro" data-i18n-html="learn.s3-intro-html">A missing range in the record stream is not the same as a range filled with <code>0xFF</code>. One is an absence of information; the other is an explicit claim about the device.</p>
+
+            <div class="learn-row">
+              <div class="learn-card">
+                <h3 data-i18n="learn.gap-title">Gap</h3>
+                <p data-i18n-html="learn.gap-body-html">No record covers the range. The map draws it as an empty striped band, and the tool refuses to pretend it knows what the flash holds there. In the sample, 32,736 bytes sit between the bootloader and the application.</p>
+              </div>
+              <div class="learn-card">
+                <h3 data-i18n="learn.ff-title">Explicit 0xFF</h3>
+                <p data-i18n-html="learn.ff-body-html">A record actually contains 0xFF bytes. The sample has 16 such bytes at <code>0x08009FF0</code>. They can be verified, edited, and compared, because they exist in the file.</p>
+              </div>
+            </div>
+            <p class="anatomy-note" data-i18n="learn.s3-outro">An erase operation turns covered bytes into explicit 0xFF records. A fill operation can also materialise a gap. Both are writes, and both go through the same conflict gate as any other staged change.</p>
+          </section>
+
+          <section class="learn-section" id="formats" aria-labelledby="formatsTitle">
+            <h2 id="formatsTitle" data-i18n="learn.s4">04 · HEX, S-record, BIN</h2>
+            <p class="section-intro" data-i18n-html="learn.s4-intro-html">The container decides how much the file can prove. Content is sniffed rather than trusted from the extension, because a firmware renamed <code>.bin</code> is still text records.</p>
+
+            <div class="compare-table-wrap">
+              <table class="compare-table">
+                <thead>
+                  <tr><th data-i18n="learn.tbl.property">Property</th><th data-i18n="learn.tbl.intel-h">Intel HEX</th><th data-i18n="learn.tbl.srec-h">S19 / S-record</th><th data-i18n="learn.tbl.bin-h">Raw BIN</th></tr>
+                </thead>
+                <tbody>
+                  <tr><th data-i18n="learn.tbl.address">Address in file</th><td data-i18n="learn.tbl.address-hex">Yes — 16-bit plus type 02/04 extension</td><td data-i18n="learn.tbl.address-srec">Yes — 16, 24 or 32-bit in the record</td><td data-i18n="learn.tbl.address-bin">No — nothing but bytes</td></tr>
+                  <tr><th data-i18n="learn.tbl.checksum">Per-line checksum</th><td data-i18n="learn.tbl.checksum-hex">Two's complement, low byte</td><td data-i18n="learn.tbl.checksum-srec">One's complement, low byte</td><td data-i18n="learn.tbl.checksum-bin">None</td></tr>
+                  <tr><th data-i18n="learn.tbl.eof">End of file</th><td><code>:00000001FF</code></td><td data-i18n="learn.tbl.eof-srec">Termination record <code>S7/S8/S9</code></td><td data-i18n="learn.tbl.eof-bin">EOF only</td></tr>
+                  <tr><th data-i18n="learn.tbl.overhead">ASCII overhead</th><td data-i18n="learn.tbl.overhead-text">Typically ~3× at short line widths; varies with data length</td><td data-i18n="learn.tbl.overhead-text">Typically ~3× at short line widths; varies with address width</td><td data-i18n="learn.tbl.overhead-bin">1× payload; padding may increase size</td></tr>
+                  <tr><th data-i18n="learn.tbl.use">Typical use</th><td data-i18n="learn.tbl.use-hex">MCU tools and sparse flash images</td><td data-i18n="learn.tbl.use-srec">Automotive / FBL image exchange; .s19 is a common extension</td><td data-i18n="learn.tbl.use-bin">Contiguous flash dumps and direct programming</td></tr>
+                  <tr><th data-i18n="learn.tbl.risk">Primary risk</th><td data-i18n="learn.tbl.risk-hex">Ignoring extended-address records or overlap</td><td data-i18n="learn.tbl.risk-srec">Wrong S1/S2/S3 width or count interpretation</td><td data-i18n="learn.tbl.risk-bin">Wrong base, silent gap padding, no per-record checksum</td></tr>
+                  <tr><th data-i18n="learn.tbl.editable">Editable as text</th><td data-i18n="learn.tbl.editable-yes">Yes</td><td data-i18n="learn.tbl.editable-yes">Yes</td><td data-i18n="learn.tbl.editable-no">No</td></tr>
+                  <tr><th data-i18n="learn.tbl.base">Base required</th><td>No</td><td>No</td><td data-i18n="learn.tbl.base-yes">Yes — an assumption</td></tr>
+                  <tr><th data-i18n="learn.tbl.session">In this session</th><td data-i18n="learn.tbl.session-hex">Sample file · recorded</td><td data-i18n="learn.tbl.session-srec">Supported · recorded</td><td data-i18n="learn.tbl.session-bin">Supported · assumed base</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="anatomy-note" data-i18n-html="learn.s4-outro-html">S-record counts include the address and checksum bytes, unlike Intel HEX where the count covers data only. The checksum is also complemented differently: one's complement instead of two's. Do not reuse the same arithmetic across formats.</p>
+          </section>
+
+<details class="learn-section"><summary>Supplied source records · preserved verbatim</summary><h3 data-i18n="learn.tbl.intel">Intel HEX</h3><pre class="sample-source">:020000040800F2
+:200000000010020009590108FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7B
+:10001000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0
+:088000000050002001598A081C
+:088010002DE9F0470DF080F8A6
+:109FF000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF71
+:00000001FF</pre><h3 data-i18n="learn.tbl.srec">Motorola S-record</h3><pre class="sample-source">S0120000496D61676542656E63682D44454D4FD8
+S31D004000000050002001598A08FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF56
+S31D004000182DE9F0470DF080F800000000000000000000000000000000C8
+S3150054FFF0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFB7
+S70500000000FA</pre></details>
+          <section class="learn-section" id="base" aria-labelledby="baseTitle">
+            <h2 id="baseTitle" data-i18n="learn.s5">05 · Why a BIN needs a base</h2>
+            <p class="section-intro" data-i18n="learn.s5-intro">A raw binary has no idea where it belongs in memory. Bitsmith does not guess quietly: it asks for a base and marks every address downstream of that choice.</p>
+
+            <div class="assumption-banner" style="margin-top:12px">
+              <svg class="od-icon banner-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3.5 21 20H3z"></path>
+                <path d="M12 9v5M12 17.2v.1"></path>
+              </svg>
+              <div>
+                <strong data-i18n="learn.s5-example">With base 0x08000000, the APP writes at 0x08008000. With base 0x00000000, the same bytes write to 0x00008000.</strong>
+                <p data-i18n="learn.s5-outro">The bytes never move; the interpretation does. That is why the assumed base is shown on every screen and why changing it re-draws the whole map instead of silently relabelling a few rows.</p>
+              </div>
+              <a class="btn btn-sm btn-quiet banner-action" href="image.html" data-i18n="learn.s5-see-bin">See the BIN state</a>
+            </div>
+            <p class="anatomy-note" data-i18n="learn.s5-note">The sample is Intel HEX, so no base is invented. The BIN state exists to make the assumption visible: it is a working choice, not a property of the file.</p>
+          </section>
+
+          <section class="learn-section" id="before-write" aria-labelledby="beforeTitle">
+            <h2 id="beforeTitle" data-i18n="learn.s6">06 · Before you write</h2>
+            <p class="section-intro" data-i18n="learn.s6-intro">Reading is cheap; writing is not. These are the checks Bitsmith keeps in front of you, in the order they matter.</p>
+
+            <div class="before-list">
+              <div class="before-row">
+                <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m4.5 12.5 4.3 4.3L19.5 6.8"></path></svg>
+                <div><strong data-i18n="learn.s6-1-title">Every record verifies, or you know why not</strong><span data-i18n="learn.s6-1-body">The sample has seven verified records and one failure with its arithmetic shown. A failing record is never silently repaired.</span></div>
+              </div>
+              <div class="before-row">
+                <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m4.5 12.5 4.3 4.3L19.5 6.8"></path></svg>
+                <div><strong data-i18n="learn.s6-2-title">You know which addresses are recorded</strong><span data-i18n="learn.s6-2-body">Intel HEX and S-record supply addresses. A BIN base is an assumption and stays labelled as one.</span></div>
+              </div>
+              <div class="before-row is-warn">
+                <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 21 20H3z"></path><path d="M12 9v5M12 17.2v.1"></path></svg>
+                <div><strong data-i18n="learn.s6-3-title">Every overlap has an order</strong><span data-i18n="learn.s6-3-body">Staged operations that claim the same bytes produce a conflict. Choosing a resolution records which intent wins; it never hides the overlap.</span></div>
+              </div>
+              <div class="before-row">
+                <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m4.5 12.5 4.3 4.3L19.5 6.8"></path></svg>
+                <div><strong data-i18n="learn.s6-4-title">Nothing is written until you apply</strong><span data-i18n="learn.s6-4-body">Operations change a working copy in this browser. The source file on disk stays untouched, and the gate stays closed while a conflict is open.</span></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <footer class="statusbar">
+      <span class="status-item"><span class="status-dot ok"></span><strong>Reference</strong> · 6 sections</span>
+      <span class="status-item hide-sm" data-i18n="learn.foot.sample">Sample · 8 records · 7 verify</span>
+      <span class="status-item hide-sm" data-i18n="learn.foot.hex">Intel HEX · recorded addresses</span>
+      <span class="status-item push" data-i18n="learn.foot.hint">Content first · extensions are only a hint</span>
+      <span class="status-item hide-sm"><span class="kbd">1</span>–<span class="kbd">4</span> views</span>
+    </footer>
+  </div>
+
+  <script src="bridge.js"></script>
+  <script src="i18n.js"></script>
+  <script src="learn.js"></script>
+</body>
+</html>

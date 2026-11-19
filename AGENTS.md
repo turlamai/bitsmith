@@ -13,6 +13,17 @@ before merging an API change.
 - 引擎真源 = `shared/engine/`；范围与格式矩阵 = `shared/spec.md`。
 - 改界面先改原型再改代码（tlai-prototype-flow）；动共享层先 issue 声明。
 
+## Verification floor
+
+- `raco test shared/engine/` — engine unit tests; every checksum/CRC claim
+  is round-trip verified against `shared/spec.md` samples (synthetic only).
+- `raco glaze schema check --json` before merging an API change.
+- `raco glaze verify` — native-window acceptance: opens the real WebView,
+  asserts the workspace contract, walks all four views, captures PNGs.
+- Frontend chrome strings live in `public/i18n.js` (en + zh tables keyed by
+  `data-i18n`); engine-side explanation strings live in `shared/i18n/`.
+  Both tables must stay key-aligned (中英同源).
+
 ## Domain rules
 
 - 嵌入样例一律合成（`shared/spec.md` 有已验证清单），零公司/项目信息进仓。

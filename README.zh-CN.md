@@ -8,7 +8,7 @@
 
 [产品主页](https://jrtx.site/products/bitsmith/) · [源码](https://github.com/turlamai/bitsmith) · [问题与反馈](https://github.com/turlamai/bitsmith/issues)
 
-> **开发预览——原型阶段。** Bitsmith 尚不是可用于生产的编辑器，也没有经过验证的安装包。生产固件必须独立复核后才能使用。目前不规划收费、试用到期或付费功能门禁。
+> **开发预览。** 引擎与桌面工作台已实现并有测试覆盖，但尚无经过验证的安装包。生产固件必须独立复核后才能使用。目前不规划收费、试用到期或付费功能门禁。
 
 ## 解决什么问题
 
@@ -19,7 +19,7 @@ Intel HEX、Motorola S-record（S19/SREC）和原始 BIN 文件，应按**地址
 3. 进行语义化修改，保存时重新生成记录与校验和。
 4. 支持填充、偏移、裁剪、合并、转换和 CRC 等常见操作。
 
-**交付状态：** 上述是产品方向，仓库仍在早期原型阶段，不能据此断言所有操作或三平台宿主已实现。
+**交付状态：** 四个工作台视图（记录、镜像、操作、学习）已通过类型化桥接接到 Racket 引擎——解析、实时校验和、语义操作、格式转换、CRC 预设与文件打开/保存均已实现；打包与各平台发布验证尚未完成。
 
 ## 平台与使用
 
@@ -32,6 +32,17 @@ Intel HEX、Motorola S-record（S19/SREC）和原始 BIN 文件，应按**地址
 ## 相关产品
 
 [FlashPilot](https://github.com/turlamai/flashpilot) 负责声明式 ECU 刷写。Bitsmith 负责检查、准备镜像，FlashPilot 负责通过总线与 ECU 通信。
+
+## 从源码构建
+
+需要 [Racket](https://racket-lang.org/) 9.0+ 与 `glaze` 包（`raco pkg install --auto glaze`）。
+
+```bash
+raco test shared/engine/   # 引擎单元测试（round-trip 已验证样例）
+raco glaze schema check    # API 契约对照已评审基线
+raco glaze verify          # 原生窗口验收：加载、断言、截图
+racket main.rkt            # 运行桌面工作台
+```
 
 ## 开发与反馈
 

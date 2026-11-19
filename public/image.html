@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Image view — Bitsmith</title>
+  <script>
+    (function () {
+      try {
+        var saved = (localStorage.getItem('bitsmith-theme') || localStorage.getItem('imagebench-theme'));
+        if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+      } catch (error) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .image-toolbar-form {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .image-toolbar-form .input {
+      width: 116px;
+      height: 28px;
+      font-size: 10px;
+    }
+    .image-toolbar-form .btn {
+      min-height: 28px;
+    }
+    .toolbar-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding-left: 10px;
+      border-left: 1px solid var(--border);
+    }
+    .image-content {
+      padding: 14px 16px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .image-content .assumption-banner {
+      margin-bottom: 0;
+    }
+    .byte-inspector-hero {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--inset);
+    }
+    .byte-inspector-hero .byte-value {
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 32px;
+      font-weight: 650;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+    .byte-inspector-hero .byte-base {
+      color: var(--faint);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      line-height: 1.4;
+      padding-bottom: 2px;
+    }
+    .byte-inspector-hero .byte-base strong {
+      display: block;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .byte-inspector-hero .byte-ascii {
+      margin-left: auto;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 18px;
+      line-height: 1;
+      padding-bottom: 1px;
+    }
+    .selection-bar {
+      height: 4px;
+      margin-top: 8px;
+      border-radius: 2px;
+      background: var(--surface-3);
+      overflow: hidden;
+    }
+    .selection-bar span {
+      display: block;
+      height: 100%;
+      width: 1.2%;
+      min-width: 3px;
+      margin-left: 2%;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    .mini-segment-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .mini-segment-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 9.5px;
+    }
+    .mini-segment-row .mini-swatch {
+      width: 7px;
+      height: 7px;
+      border-radius: 2px;
+      background: var(--gap);
+      flex: none;
+    }
+    .mini-segment-row .mini-swatch.fbl { background: var(--fbl); }
+    .mini-segment-row .mini-swatch.app { background: var(--app); }
+    .mini-segment-row .mini-swatch.ff { background: var(--ff); }
+    .mini-segment-row .mini-swatch.gap {
+      background: repeating-linear-gradient(135deg, var(--gap) 0 1px, transparent 1px 3px);
+      border: 1px solid var(--border);
+    }
+    .mini-segment-row .mini-name { color: var(--muted); }
+    .mini-segment-row .mini-addr {
+      margin-left: auto;
+      color: var(--faint);
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      white-space: nowrap;
+    }
+    .image-legend-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px 14px;
+      padding: 8px 11px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+      color: var(--faint);
+      font-size: 9.5px;
+    }
+    .image-legend-bar .legend-key {
+      gap: 6px;
+    }
+    .image-legend-bar .legend-swatch {
+      width: 7px;
+      height: 7px;
+    }
+    .image-legend-bar .legend-note {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      color: var(--faint);
+    }
+    .pop-byte-hero {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--inset);
+    }
+    .pop-byte-hero .pop-value {
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 28px;
+      line-height: 1;
+      font-weight: 650;
+      letter-spacing: -0.04em;
+    }
+    .pop-byte-hero .pop-caption {
+      color: var(--faint);
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      line-height: 1.45;
+      padding-bottom: 1px;
+    }
+    .pop-byte-hero .pop-caption strong {
+      display: block;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .pop-byte-hero .pop-ascii {
+      margin-left: auto;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 17px;
+      line-height: 1;
+    }
+    .hex-byte.is-in-selection {
+      background: color-mix(in srgb, var(--accent) 15%, transparent);
+      border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+      color: var(--text);
+    }
+    .hex-ascii .is-in-selection {
+      color: var(--accent);
+    }
+    .hex-byte.is-missing {
+      color: var(--faint);
+      opacity: 0.48;
+      cursor: default;
+    }
+    .hex-byte.is-missing:hover {
+      background: transparent;
+      border-color: transparent;
+    }
+    .empty-side {
+      padding: 18px 14px;
+      color: var(--faint);
+      font-size: 10.5px;
+      line-height: 1.55;
+    }
+    .ascii-off .hex-ascii { display: none; }
+    .ascii-off .hex-row { grid-template-columns: 88px minmax(470px, 1fr); }
+    @media (max-width: 640px) {
+      .image-toolbar-form { display: none; }
+      .image-content { padding-inline: 11px; }
+      .ascii-off .hex-row { grid-template-columns: 76px minmax(470px, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="records.html" aria-label="Bitsmith home">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+        </span>
+        <span class="brand-name">Bitsmith</span>
+        <span class="brand-version">v0.1</span>
+      </a>
+      <a class="file-tab" href="records.html" id="topFileTab" aria-label="Current file: FBL_APP_combined.bin">
+        <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true" style="--od-icon-size:15px">
+          <path d="M6 3.5h8l4 4v13H6z"></path>
+          <path d="M14 3.5v4h4"></path>
+          <path d="M9 12h6M9 15.5h6"></path>
+        </svg>
+        <span class="file-name" id="topFileName">FBL_APP_combined.bin</span>
+        <span class="format-chip" id="topFormat">BIN</span>
+      </a>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-actions">
+        <span class="local-state" data-i18n="topbar.local">Local only</span>
+        <button class="btn btn-primary btn-sm" id="openFirmware" type="button">
+          <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3.5 7.5h6l2 2h9v9.5h-17z"></path>
+            <path d="M3.5 7.5V5h6l2 2"></path>
+          </svg>
+          <span data-i18n="btn.open">Open firmware</span>
+        </button>
+        <button class="btn btn-sm btn-quiet" id="saveFirmware" type="button">
+          <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 5h11l3 3v11H5z"></path>
+            <path d="M8 5v5h7V5M8 19v-6h8v6"></path>
+          </svg>
+          <span data-i18n="btn.save">Save</span>
+        </button>
+        <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Switch to light theme">
+          <svg class="od-icon icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 15.2A8.2 8.2 0 0 1 8.8 4a8.4 8.4 0 1 0 11.2 11.2Z"></path>
+          </svg>
+          <svg class="od-icon icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="3.5"></circle>
+            <path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="sidebar">
+        <nav class="side-nav" aria-label="Workbench sections">
+          <a class="side-nav-item" href="records.html">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 6.5h14M5 12h14M5 17.5h9"></path>
+            </svg>
+            <span data-i18n="nav.records">Records</span> <span class="side-nav-key">1</span>
+          </a>
+          <a class="side-nav-item" href="image.html" aria-current="page">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="4" y="4" width="16" height="16" rx="1.5"></rect>
+              <path d="M4 10h16M4 15h16M9 4v16M15 4v16"></path>
+            </svg>
+            <span data-i18n="nav.image">Image</span> <span class="side-nav-key">2</span>
+          </a>
+          <a class="side-nav-item" href="operations.html">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7h10M18 7h2M4 17h3M11 17h9"></path>
+              <circle cx="16" cy="7" r="2"></circle>
+              <circle cx="9" cy="17" r="2"></circle>
+            </svg>
+            <span data-i18n="nav.operations">Operations</span> <span class="side-nav-key">3</span>
+          </a>
+          <a class="side-nav-item" href="learn.html">
+            <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4.5 5.5h6a2 2 0 0 1 2 2v11a2 2 0 0 0-2-2h-6z"></path>
+              <path d="M19.5 5.5h-4a2 2 0 0 0-2 2v11a2 2 0 0 1 2-2h4z"></path>
+            </svg>
+            <span data-i18n="nav.learn">Learn</span> <span class="side-nav-key">4</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-scroll">
+          <div class="file-summary">
+            <div class="file-summary-head">
+              <div class="eyebrow" style="margin-bottom:6px" data-i18n="source.eyebrow-image">Source · address basis</div>
+              <div class="file-name-row">
+                <svg class="od-icon file-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M6 3.5h8l4 4v13H6z"></path>
+                  <path d="M14 3.5v4h4"></path>
+                </svg>
+                <h2 id="fileName">FBL_APP_combined.bin</h2>
+              </div>
+              <p class="file-subline" id="fileFormatLine">Raw BIN — no address records; base is an assumption</p>
+            </div>
+            <dl class="file-meta-grid">
+              <div class="meta-row"><dt data-i18n="meta.detected">Detected</dt><dd id="formatValue">BIN</dd></div>
+              <div class="meta-row"><dt data-i18n="meta.base">Base</dt><dd id="baseValue">0x08000000</dd></div>
+              <div class="meta-row"><dt data-i18n="meta.recorded">Recorded</dt><dd id="recordedValue">80 B / 5 rows</dd></div>
+              <div class="meta-row"><dt data-i18n="meta.span">Span</dt><dd>0x08000000–0x08009FFF</dd></div>
+            </dl>
+            <div style="padding:10px 12px 12px">
+              <div class="section-label" data-i18n="segments.label">Segments</div>
+              <div class="mini-segment-bars">
+                <div class="mini-segment-row"><span class="mini-swatch fbl"></span><span class="mini-name">FBL</span><span class="mini-addr">0x08000000 +0x20</span></div>
+                <div class="mini-segment-row"><span class="mini-swatch gap"></span><span class="mini-name">GAP</span><span class="mini-addr">0x08000020–0x08007FFF</span></div>
+                <div class="mini-segment-row"><span class="mini-swatch app"></span><span class="mini-name">APP</span><span class="mini-addr">0x08008000–0x08009FFF</span></div>
+                <div class="mini-segment-row"><span class="mini-swatch ff"></span><span class="mini-name">Explicit 0xFF</span><span class="mini-addr">0x08009FF0–0x08009FFF</span></div>
+              </div>
+              <p class="sidebar-note" id="basisNote" data-i18n="sidebar.bin-note">A BIN cannot prove its load address. The base below is the current working assumption for this session.</p>
+              <div class="field" style="margin-top:11px">
+                <label for="baseReadout" data-i18n="field.base-readout">Assumed base address</label>
+                <input class="input" id="baseReadout" value="0x08000000" readonly aria-readonly="true">
+                <span class="help" data-i18n="field.base-help">BIN base is explicit. Intel HEX records supply their own absolute addresses.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sidebar-foot">
+            <span data-i18n="sidebar.foot.absolute">Addresses are absolute</span>
+            <span>v0.1</span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-pane">
+        <div class="main-toolbar">
+          <h1 data-i18n="view.image">Image view</h1>
+          <span class="toolbar-sub">Address-true hex dump · 0x08000000–0x08009FFF</span>
+          <div class="toolbar-spacer"></div>
+          <form class="image-toolbar-form" id="gotoForm">
+            <label class="sr-only" for="gotoInput" data-i18n="goto.label">Go to address</label>
+            <input class="input" id="gotoInput" value="0x08008000" spellcheck="false" autocomplete="off">
+            <button class="btn btn-sm" type="submit" data-i18n="btn.go">Go</button>
+          </form>
+          <div class="toolbar-switch">
+            <span class="switch-label" id="binSwitchLabel" data-i18n="switch.bin-label">BIN state</span>
+            <button class="switch" id="binToggle" type="button" role="switch" aria-checked="true" aria-labelledby="binSwitchLabel"></button>
+          </div>
+        </div>
+
+        <div class="main-scroll">
+          <div class="image-content">
+            <div class="assumption-banner" id="binBanner">
+              <svg class="od-icon banner-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3.5 21 20H3z"></path>
+                <path d="M12 9v5M12 17.2v.1"></path>
+              </svg>
+              <div>
+                <strong data-i18n="banner.bin-title">BIN carries no address information — base 0x08000000 is an assumption you set</strong>
+                <p data-i18n="banner.bin-detail">No address records were found. Bitsmith is displaying the bytes at the working base. Check this base against the device memory map before writing.</p>
+              </div>
+              <button class="btn btn-sm btn-quiet banner-action" id="focusBase" type="button" data-i18n="btn.base-details">Base details</button>
+            </div>
+
+            <section class="map-card" aria-labelledby="segmentMapTitle">
+              <div class="map-card-head">
+                <h2 id="segmentMapTitle" data-i18n="map.segment-map">Segment map</h2>
+                <div class="map-legend">
+                  <span class="legend-key"><span class="legend-swatch fbl"></span><span data-i18n="legend.fbl">FBL</span></span>
+                  <span class="legend-key"><span class="legend-swatch app"></span><span data-i18n="legend.app">APP</span></span>
+                  <span class="legend-key"><span class="legend-swatch gap"></span><span data-i18n="legend.gap">Gap</span></span>
+                  <span class="legend-key"><span class="legend-swatch ff"></span><span data-i18n="legend.ff">Explicit 0xFF</span></span>
+                </div>
+              </div>
+              <div class="map-body">
+                <div class="map-shell">
+                  <div class="map-scale-labels" aria-hidden="true">
+                    <span class="map-callout fbl-callout"><span class="co-kind">FBL</span><strong>0x08000000</strong> · 32 B</span>
+                    <span class="map-callout gap-callout"><span class="co-kind">GAP</span><strong>0x7FE0</strong> · 32,736 B</span>
+                    <span class="map-callout app-callout"><span class="co-kind">APP</span><strong>0x08008000</strong> · 8 KiB</span>
+                    <span class="map-callout ff-callout"><span class="co-kind">0xFF</span><strong>16 B</strong></span>
+                  </div>
+
+                  <div class="segment-track" aria-label="Address map from 0x08000000 to 0x08009FFF">
+                    <button class="segment-block fbl" type="button" style="left:0;width:0.08%;min-width:4px"
+                      data-name="FBL" data-range="0x08000000–0x0800001F" data-size="32 bytes" data-kind="FBL segment"
+                      data-note="Flash bootloader. Contiguous data records; checksums verify.">
+                      <span class="block-label"></span>
+                    </button>
+                    <div class="segment-block gap" style="left:0.08%;width:79.92%"
+                      data-name="GAP" data-range="0x08000020–0x08007FFF" data-size="32,736 bytes" data-kind="Address gap"
+                      data-note="No data records in this range. Not the same as an explicit 0xFF fill.">
+                      <span class="block-label">GAP · no records · 0x7FE0</span>
+                    </div>
+                    <button class="segment-block app" type="button" style="left:80%;width:20%"
+                      data-name="APP" data-range="0x08008000–0x08009FFF" data-size="8 KiB" data-kind="APP segment"
+                      data-note="Application image. Includes an explicitly written 0xFF tail.">
+                      <span class="block-label">APP · 8 KiB</span>
+                    </button>
+                    <button class="segment-block ff" type="button" style="left:calc(100% - 4px);width:4px"
+                      data-name="Explicit 0xFF" data-range="0x08009FF0–0x08009FFF" data-size="16 bytes" data-kind="Explicit fill"
+                      data-note="These bytes are present and equal 0xFF; they are not a gap.">
+                      <span class="block-label"></span>
+                    </button>
+                  </div>
+
+                  <div class="axis" aria-hidden="true">
+                    <span class="axis-tick" style="left:0">0x08000000</span>
+                    <span class="axis-tick" style="left:12.5%">0x08002000</span>
+                    <span class="axis-tick" style="left:25%">0x08004000</span>
+                    <span class="axis-tick" style="left:37.5%">0x08006000</span>
+                    <span class="axis-tick" style="left:50%">0x08008000</span>
+                    <span class="axis-tick" style="left:100%">0x08009FFF</span>
+                  </div>
+                </div>
+                <p class="map-note" id="mapNote">
+                  <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="8.5"></circle>
+                    <path d="M12 11v5M12 8v.1"></path>
+                  </svg>
+                  True scale: 40 KiB span. FBL is 32 bytes and is deliberately drawn as a minimum-width marker; hover it for exact extents. The hatched range is a gap, not erased data.
+                </p>
+              </div>
+            </section>
+
+            <section class="hex-shell" aria-labelledby="hexTitle">
+              <div class="hex-head">
+                <h2 id="hexTitle" data-i18n="hex.title">Hex dump · absolute addresses</h2>
+                <span class="badge" style="margin-left:auto" data-i18n="hex.rows-badge">16 bytes / row</span>
+              </div>
+              <div class="hex-scroll" id="hexScroll">
+                <div class="hex-grid" id="hexGrid">
+                  <div class="hex-header">
+                    <div class="hex-row">
+                      <span data-i18n="hex.address">Address</span>
+                      <div class="hex-bytes" aria-hidden="true">
+                        <span>00</span><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span><span>06</span><span>07</span>
+                        <span>08</span><span>09</span><span>0A</span><span>0B</span><span>0C</span><span>0D</span><span>0E</span><span>0F</span>
+                      </div>
+                      <span class="hex-ascii" data-i18n="hex.ascii">ASCII</span>
+                    </div>
+                  </div>
+                  <div id="hexRows"></div>
+                </div>
+              </div>
+            </section>
+
+            <div class="image-legend-bar">
+              <span class="legend-key"><span class="legend-swatch fbl"></span><span data-i18n="legend.fbl-data">FBL data</span></span>
+              <span class="legend-key"><span class="legend-swatch app"></span><span data-i18n="legend.app-data">APP data</span></span>
+              <span class="legend-key"><span class="legend-swatch gap"></span><span data-i18n="legend.gap-nr">Gap / no records</span></span>
+              <span class="legend-key"><span class="legend-swatch ff"></span><span data-i18n="legend.ff">Explicit 0xFF</span></span>
+              <span class="legend-key" style="color:var(--muted)"><span style="display:inline-block;width:7px;height:7px;border-radius:1px;background:var(--accent)"></span><span data-i18n="legend.cursor">Cursor / selection</span></span>
+              <span class="legend-note" id="legendBasis">BIN · base assumed</span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <aside class="inspector" aria-label="Byte inspector">
+        <div class="pane-head">
+          <h2 data-i18n="inspector.byte-title">Byte inspector</h2>
+          <span class="pane-count" id="inspectorOffset">APP +0x0002</span>
+        </div>
+        <div class="inspector-scroll" id="inspectorBody"></div>
+      </aside>
+    </div>
+
+    <footer class="statusbar">
+      <span class="status-item"><span data-i18n="status.cursor">Cursor</span> <strong id="statusCursor">0x08008002</strong></span>
+      <span class="status-item"><span data-i18n="status.selection">Selection</span> <strong id="statusSelection">0x08008002–0x08008002 (1 B)</strong></span>
+      <span class="status-item hide-sm" id="statusEncoding" data-i18n="status.encoding">8-bit · ASCII gutter · 16 B/row</span>
+      <span class="status-item push" id="statusBasis">BIN · base 0x08000000 assumed</span>
+    </footer>
+  </div>
+
+  <div class="inspector-pop" id="bytePop" role="dialog" aria-labelledby="bytePopTitle" hidden>
+    <div class="pop-head">
+      <div>
+        <h3 id="bytePopTitle">Byte at 0x08008002</h3>
+        <p data-i18n="pop.byte-sub">Read from the image at its absolute address.</p>
+      </div>
+      <button class="icon-btn" id="closeBytePop" type="button" aria-label="Close byte inspector">
+        <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 6l12 12M18 6 6 18"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="pop-body">
+      <div class="pop-byte-hero">
+        <span class="pop-value" id="popValue">50</span>
+        <span class="pop-caption"><strong data-i18n="pop.byte-hero">hex byte</strong><span id="popDec">80 dec</span></span>
+        <span class="pop-ascii" id="popAscii">P</span>
+      </div>
+      <dl class="pop-kv">
+        <dt>Absolute</dt><dd id="popAddress">0x08008002</dd>
+        <dt>Segment</dt><dd id="popSegment">APP</dd>
+        <dt>Offset</dt><dd id="popOffset">+0x0002</dd>
+        <dt>Row</dt><dd id="popRow">0x08008000 +0x02</dd>
+      </dl>
+      <p style="margin-top:8px" data-i18n="pop.byte-note">The byte value is exact. Its address is only as exact as the current base assumption for a BIN import.</p>
+    </div>
+    <div class="pop-foot"><span class="kbd">Esc</span> <span data-i18n="pop.byte-foot-suffix">close · shift-click to select a range</span></div>
+  </div>
+
+  <div class="map-hover-tip" id="mapTip" hidden></div>
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+  <script src="bridge.js"></script>
+  <script src="i18n.js"></script>
+  <script src="image.js"></script>
+</body>
+</html>

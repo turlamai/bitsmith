@@ -8,7 +8,7 @@
 
 [Product homepage](https://jrtx.site/products/bitsmith/) · [Source](https://github.com/turlamai/bitsmith) · [Issues and feedback](https://github.com/turlamai/bitsmith/issues)
 
-> **Development preview — prototype stage.** Bitsmith is not a production-ready editor and has no verified installers. Do not use it to prepare production firmware without independent verification. No purchase, trial expiry or paid feature gate is planned during this development phase.
+> **Development preview.** The engine and the desktop workbench are implemented and covered by tests, but there are no verified installers yet. Do not use it to prepare production firmware without independent verification. No purchase, trial expiry or paid feature gate is planned during this development phase.
 
 ## What it is for
 
@@ -19,7 +19,7 @@ Firmware engineers handling Intel HEX, Motorola S-record (S19/SREC) and raw BIN 
 3. Make semantic changes, then regenerate valid records and checksums on save.
 4. Perform routine operations: fill, offset, crop, merge, convert and CRC.
 
-**Status:** these describe the product direction; the repository is an early prototype. Do not infer that all operations or cross-platform hosts are working from the list above.
+**Status:** the four workbench views (records, image, operations, learn) run against the Racket engine through the typed bridge — parsing, live checksum verification, semantic operations, format conversion, CRC presets and file open/save are implemented; packaging and per-platform release verification are not done yet.
 
 ## Platforms and getting started
 
@@ -32,6 +32,17 @@ The intended workflow is fully local. Firmware contents must not be sent to onli
 ## Related tools
 
 [FlashPilot](https://github.com/turlamai/flashpilot) consumes firmware images during a declared ECU flashing workflow. Bitsmith prepares or inspects an image; FlashPilot owns communication with the ECU.
+
+## Building from source
+
+Requires [Racket](https://racket-lang.org/) 9.0+ with the `glaze` package installed (`raco pkg install --auto glaze`).
+
+```bash
+raco test shared/engine/   # engine unit tests (round-trip verified samples)
+raco glaze schema check    # API contract against the reviewed baseline
+raco glaze verify          # native-window acceptance: loads, asserts, screenshots
+racket main.rkt            # run the desktop workbench
+```
 
 ## Development and feedback
 
