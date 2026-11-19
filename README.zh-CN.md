@@ -1,6 +1,6 @@
 # Bitsmith
 
-**产品：**[产品主页](https://jrtx.site/products/bitsmith/) · **支持：**[问题与反馈](https://github.com/turlamai/bitsmith/issues) · [当前交付策略](https://github.com/turlamai/turlamai.github.io/blob/master/PORTFOLIO.zh-CN.md)
+**产品：**[产品主页](https://bitsmith.jrtx.site/) · **支持：**[问题与反馈](https://github.com/turlamai/bitsmith/issues) · [当前交付策略](https://github.com/turlamai/turlamai.github.io/blob/master/PORTFOLIO.zh-CN.md)
 
 > Formerly **ImageBench**, then briefly **Binlet** and **Ingot**. The repository slug is now `turlamai/bitsmith`.
 
