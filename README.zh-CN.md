@@ -6,6 +6,8 @@
 
 [English](README.md) · **简体中文**
 
+[产品主页](https://jrtx.site/products/bitsmith/) · [源码](https://github.com/turlamai/bitsmith) · [问题与反馈](https://github.com/turlamai/bitsmith/issues)
+
 > **开发预览——原型阶段。** Bitsmith 尚不是可用于生产的编辑器，也没有经过验证的安装包。生产固件必须独立复核后才能使用。目前不规划收费、试用到期或付费功能门禁。
 
 ## 解决什么问题
