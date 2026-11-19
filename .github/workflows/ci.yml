@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  engine:
+    # Pure-Racket engine: no display needed. Both CI platforms guard the
+    # arithmetic so a platform-specific integer/bytes regression cannot
+    # land on main.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: Bogdanp/setup-racket@v1.15
+        with:
+          version: stable
+          distribution: full
+
+      # Family pin: the tagged glaze release this slice was built against
+      # (local checkout at v0.19.0).
+      - name: Install glaze
+        run: raco pkg install --auto --no-docs --skip-installed git+https://github.com/turlamai/glaze.git#v0.19.0
+
+      - name: Engine tests
+        run: raco test shared/engine/
+
+      - name: App module tests
+        run: raco test main.rkt shared/engine/main.rkt
+
+      - name: Schema check (zero breaking)
+        run: raco glaze schema check --json
+
+      - name: Entry module compiles
+        run: raco make main.rkt
