@@ -1,12 +1,12 @@
 # Bitsmith
 
+**Product:** [Website](https://jrtx.site/products/bitsmith/) · **Support:** [Issues & feedback](https://github.com/turlamai/bitsmith/issues) · [Development policy](https://github.com/turlamai/turlamai.github.io/blob/master/PORTFOLIO.md)
+
 > Formerly **ImageBench**, then briefly **Binlet** and **Ingot**. The repository slug is now `turlamai/bitsmith`.
 
 **A local workbench for understanding and editing firmware images.**
 
 **English** · [简体中文](README.zh-CN.md)
-
-[Product homepage](https://jrtx.site/products/bitsmith/) · [Source](https://github.com/turlamai/bitsmith) · [Issues and feedback](https://github.com/turlamai/bitsmith/issues)
 
 > **Development preview — prototype stage.** Bitsmith is not a production-ready editor and has no verified installers. Do not use it to prepare production firmware without independent verification. No purchase, trial expiry or paid feature gate is planned during this development phase.
 
