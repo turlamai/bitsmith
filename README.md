@@ -6,6 +6,8 @@
 
 **English** · [简体中文](README.zh-CN.md)
 
+[Product homepage](https://jrtx.site/products/bitsmith/) · [Source](https://github.com/turlamai/bitsmith) · [Issues and feedback](https://github.com/turlamai/bitsmith/issues)
+
 > **Development preview — prototype stage.** Bitsmith is not a production-ready editor and has no verified installers. Do not use it to prepare production firmware without independent verification. No purchase, trial expiry or paid feature gate is planned during this development phase.
 
 ## What it is for
