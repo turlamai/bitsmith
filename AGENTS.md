@@ -1,5 +1,11 @@
 # Bitsmith agent contract
 
+## 家族设计（必读入口）
+
+- 设计/UI 任务先加载 `tlai-product`，必读 `references/policy.md` 与 `references/design-standard.md`（理念、决策规则、UI 验收）。技能缺失时读取 ZCode 真源：macOS/Linux `~/Sync/ZCode/skills/tlai-product/`；Windows `D:/ZCode/skills/tlai-product/`。无法读取须报告规范未核验，不凭记忆跳过。
+- 家族规范管共性；本仓现有设计、行为与 token 真源管具体值和产品差异。例外记回原契约，不复制家族规则或新增数值表；已有界面按下一次相关切片渐进对齐。
+- 改界面先改原型、落账后实现；按家族 UI 清单与本仓当前技术线的既有门禁验收，原型对照和真实交互证据都要保留；对外宣传使用验收后的实物截图。
+
 Professional firmware-image workbench, glaze line. Local by design.
 
 Start with `raco glaze inspect --json`; run `raco glaze schema check --json`
@@ -11,7 +17,7 @@ before merging an API change.
 - Token/几何值真源 = `design/prototype/shared.css`；`design/DESIGN.md` 只记
   语义名、用途与决策。
 - 引擎真源 = `shared/engine/`；范围与格式矩阵 = `shared/spec.md`。
-- 改界面先改原型再改代码（tlai-prototype-flow）；动共享层先 issue 声明。
+- 改界面先改原型再改代码（tlai-product）；动共享层先 issue 声明。
 
 ## Verification floor
 
