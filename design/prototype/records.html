@@ -116,6 +116,23 @@
     .banner-row {
       padding: 12px 16px 0;
     }
+    .foot-link {
+      border: 0;
+      padding: 0;
+      background: none;
+      color: var(--muted);
+      font-size: 10.5px;
+      font-family: inherit;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+    .foot-link:hover { color: var(--text); }
+    .foot-link:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
   </style>
 </head>
 <body>
@@ -1115,6 +1132,11 @@
         elements.fileInput.click();
       });
       document.getElementById('restoreSample').addEventListener('click', function () { loadSample(true); });
+      // Update check (interaction contract): the engine answers a verdict;
+      // the toast never claims an install happened.
+      document.getElementById('checkUpdates').addEventListener('click', function () {
+        toast('You are on the latest version', 'ok');
+      });
       document.getElementById('jumpFail').addEventListener('click', function () {
         const failedIndex = state.records.findIndex(function (record) { return !record.ok; });
         if (failedIndex < 0) {

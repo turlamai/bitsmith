@@ -65,6 +65,10 @@
     },
     {
       "method": "POST",
+      "path": "/api/app/update-check"
+    },
+    {
+      "method": "POST",
       "path": "/api/workspace/load-source"
     }
   ],
@@ -73,6 +77,23 @@
       {
         "errors": [],
         "name": "appMeta",
+        "parameters": [
+          {
+            "name": "lang",
+            "type": {
+              "kind": "scalar",
+              "name": "String"
+            }
+          }
+        ],
+        "result": {
+          "kind": "scalar",
+          "name": "Value"
+        }
+      },
+      {
+        "errors": [],
+        "name": "appUpdateCheck",
         "parameters": [
           {
             "name": "lang",

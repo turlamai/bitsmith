@@ -30,7 +30,8 @@
          "image.rkt"
          "ops.rkt"
          "srec.rkt"
-         "serialize.rkt")
+         "serialize.rkt"
+         "updater.rkt")
 
 (provide api
          bitsmith-app-id
@@ -665,6 +666,21 @@
                           (hasheq 'label (s (norm-lang lang) 'learn-intel-step-4)
                                   'value (string-append "FA = " (hex-str expected 2))
                                   'note (s (norm-lang lang) 'learn-intel-step-4-note))))))]
+
+  [(POST "api/app/update-check" #:returns GValue)
+   (app-update-check [lang GString "en"])
+   (guard (norm-lang lang) (lambda ()
+     (define l (norm-lang lang))
+     ;; Family notify-and-open semantics: a failed check degrades to
+     ;; "up to date", never to a less-verified claim.
+     (define candidate (check-update-signed app-version))
+     (if candidate
+         (hasheq 'ok #t 'update-available #t
+                 'version (hash-ref candidate 'version)
+                 'url (hash-ref candidate 'url)
+                 'phrase (format (s l 'update-available) (hash-ref candidate 'version)))
+         (hasheq 'ok #t 'update-available #f
+                 'phrase (s l 'update-uptodate)))))]
 
   [(POST "api/workspace/load-source" #:returns GValue)
    (workspace-load-source [source GString] [name GString "pasted.txt"] [lang GString "en"])

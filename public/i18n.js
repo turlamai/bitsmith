@@ -427,6 +427,8 @@
     'anatomy.srec.addr-3': '执行地址字节 3',
     'anatomy.srec.addr-4': '执行地址字节 4',
     'anatomy.srec.checksum': '存储的校验字节',
+    'update.check': '检查更新',
+    'update.failed': '更新检查失败',
     'theme.to-light': '切换浅色主题',
     'theme.to-dark': '切换深色主题',
     'lang.switch': '语言'
@@ -848,6 +850,8 @@
     'anatomy.srec.addr-3': 'Execution address byte 3',
     'anatomy.srec.addr-4': 'Execution address byte 4',
     'anatomy.srec.checksum': 'Stored checksum',
+    'update.check': 'Check for updates',
+    'update.failed': 'Update check failed',
     'theme.to-light': 'Switch to light theme',
     'theme.to-dark': 'Switch to dark theme',
     'lang.switch': 'Language'

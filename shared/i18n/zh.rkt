@@ -155,6 +155,11 @@
    'learn-pass "通过 · 校验和从当前输入计算得出。"
    'learn-fail "不通过 · 存储值与计算值不同。输入保持原样；不做任何修复。"
 
+   ;; ---- update check ----
+   'update-check "检查更新"
+   'update-available "有新版本可用：v~a"
+   'update-uptodate "已是最新版本"
+
    ;; ---- save format chooser ----
    'save-format "格式"
    'save-format-current "当前格式"))

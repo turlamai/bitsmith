@@ -1,7 +1,5 @@
 # Bitsmith
 
-> Formerly **ImageBench**, then briefly **Binlet** and **Ingot**. The repository slug is now `turlamai/bitsmith`.
-
 **A local workbench for understanding and editing firmware images.**
 
 **English** · [简体中文](README.zh-CN.md)

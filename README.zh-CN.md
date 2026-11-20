@@ -1,7 +1,5 @@
 # Bitsmith
 
-> Formerly **ImageBench**, then briefly **Binlet** and **Ingot**. The repository slug is now `turlamai/bitsmith`.
-
 **看懂、检查并编辑固件镜像的本地工作台。**
 
 [English](README.md) · **简体中文**

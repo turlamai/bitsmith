@@ -521,6 +521,23 @@
   });
 
   $('closeType04').addEventListener('click', function () { closeExplain(true); });
+
+  // Update check: engine verifies the signed feed; the toast reports the
+  // verdict (notify — the upgrade itself stays the user's hands).
+  $('checkUpdates').addEventListener('click', async function () {
+    try {
+      const result = await api('api/app/update-check', { lang: window.BitsmithI18n.lang() });
+      if (result && result.ok && result['update-available']) {
+        toast(result.phrase + ' · ' + (result.url || ''), 'warn');
+      } else if (result && result.ok) {
+        toast(result.phrase, 'ok');
+      } else {
+        toast(result && result.error ? result.error : t('update.failed'), 'fail');
+      }
+    } catch (error) {
+      toast(t('update.failed'), 'fail');
+    }
+  });
   $('type04Pop').addEventListener('click', function (event) { event.stopPropagation(); });
 
   // Drag-and-drop open (bytes ride the bridge; dialogs stay the primary path).

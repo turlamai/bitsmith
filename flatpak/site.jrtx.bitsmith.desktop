@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Bitsmith
+GenericName=Firmware image workbench
+Comment=Understand and edit Intel HEX, S-record and BIN images locally
+Exec=Bitsmith
+Icon=site.jrtx.bitsmith
+Terminal=false
+Categories=Development;Electronics;

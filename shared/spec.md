@@ -77,6 +77,14 @@ batch recipes / CI.
   BIN models — extracting a shared family parsing library is the preferred
   path when implementation starts (check catalog first).
 
+- 2026-11-20 infrastructure-first (owner decision): release / install /
+  update shipped at implementation time, not deferred to first release —
+  Ed25519 key (bitsmith-2026-11), signed update feed, release.yml with
+  fail-closed secret gate, version-consistency gate, Flatpak manifest.
+  Family policy now mandates this at project creation.
+- 2026-11-20 naming narrative: past names (ImageBench/Binlet/Ingot) are
+  dropped from user-facing READMEs; the decision log keeps the history.
+
 ## Sample-data policy
 
 Samples embedded in prototypes, tests and docs are **synthetic** and every

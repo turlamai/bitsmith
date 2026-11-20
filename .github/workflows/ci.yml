@@ -28,6 +28,14 @@ jobs:
       - name: Install glaze
         run: raco pkg install --auto --no-docs --skip-installed git+https://github.com/turlamai/glaze.git#v0.19.0
 
+      # the updater verifies manifests through the crypto package (libcrypto
+      # FFI bundled with the Racket distribution)
+      - name: Install crypto
+        run: raco pkg install --auto --no-docs --skip-installed crypto
+
+      - name: Version consistency
+        run: bash scripts/check-release-version.sh
+
       - name: Engine tests
         run: raco test shared/engine/
 

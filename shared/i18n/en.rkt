@@ -157,6 +157,11 @@
    'learn-pass "PASS · checksum computed from the current input."
    'learn-fail "FAIL · stored value differs from the computed one. Input is preserved; no repair is applied."
 
+   ;; ---- update check ----
+   'update-check "Check for updates"
+   'update-available "A new version is available: v~a"
+   'update-uptodate "You are on the latest version"
+
    ;; ---- save format chooser ----
    'save-format "Format"
    'save-format-current "Current format"))
