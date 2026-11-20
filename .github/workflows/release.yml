@@ -430,7 +430,9 @@ jobs:
         run: |
           set -euo pipefail
           VERSION="${GITHUB_REF_NAME#v}"
-          mkdir -p public
+          # NB: public/ is the app's frontend in this repo — stage the
+          # release payloads in release-assets/ instead.
+          mkdir -p release-assets
           for suffix in \
             linux-x64.tar.gz linux-x64.deb linux-x64.rpm linux-x64.AppImage linux-x64.flatpak \
             linux-arm64.tar.gz linux-arm64.deb linux-arm64.rpm linux-arm64.AppImage linux-arm64.flatpak \
@@ -439,13 +441,13 @@ jobs:
             windows-x64.msi windows-x64.zip; do
             name="bitsmith-$VERSION-$suffix"
             test -s "artifacts/$name" || { echo "::error::Missing or empty $name"; exit 1; }
-            cp "artifacts/$name" public/
+            cp "artifacts/$name" release-assets/
           done
           expected=16
-          found="$(find public -maxdepth 1 -type f | wc -l)"
-          test "$found" -eq "$expected" || { echo "::error::public/ holds $found files, expected $expected"; exit 1; }
-          (cd public && sha256sum bitsmith-* | LC_ALL=C sort -k2 > SHA256SUMS && sha256sum --check SHA256SUMS)
-          test "$(grep -c '^' public/SHA256SUMS)" -eq "$expected"
+          found="$(find release-assets -maxdepth 1 -type f | wc -l)"
+          test "$found" -eq "$expected" || { echo "::error::release-assets/ holds $found files, expected $expected"; exit 1; }
+          (cd release-assets && sha256sum bitsmith-* | LC_ALL=C sort -k2 > SHA256SUMS && sha256sum --check SHA256SUMS)
+          test "$(grep -c '^' release-assets/SHA256SUMS)" -eq "$expected"
 
       # The signed update feed is a release asset (the app reads
       # releases/latest/download/update-manifest.json) whose signature the
@@ -470,8 +472,8 @@ jobs:
             echo "::error::Signed update manifest missing; refusing to publish"
             exit 1
           }
-          cp artifacts/update-manifest.json public/
-          test "$(find public -maxdepth 1 -type f | wc -l)" -eq 18
+          cp artifacts/update-manifest.json release-assets/
+          test "$(find release-assets -maxdepth 1 -type f | wc -l)" -eq 18
 
       - name: Extract changelog section
         run: |
@@ -491,27 +493,27 @@ jobs:
           # 0.x (family baseline: GitHub's "latest" release semantics only
           # count non-prerelease tags, and the update feed reads "latest").
           # Assets are listed explicitly — never a directory dump — so the
-          # published set is exactly the verified public/ payload
+          # published set is exactly the verified release-assets/ payload
           # (sixteen payloads + SHA256SUMS + the signed update manifest).
           gh release create "v$VERSION" \
-            public/bitsmith-"$VERSION"-linux-x64.tar.gz \
-            public/bitsmith-"$VERSION"-linux-x64.deb \
-            public/bitsmith-"$VERSION"-linux-x64.rpm \
-            public/bitsmith-"$VERSION"-linux-x64.AppImage \
-            public/bitsmith-"$VERSION"-linux-x64.flatpak \
-            public/bitsmith-"$VERSION"-linux-arm64.tar.gz \
-            public/bitsmith-"$VERSION"-linux-arm64.deb \
-            public/bitsmith-"$VERSION"-linux-arm64.rpm \
-            public/bitsmith-"$VERSION"-linux-arm64.AppImage \
-            public/bitsmith-"$VERSION"-linux-arm64.flatpak \
-            public/bitsmith-"$VERSION"-macos-arm64.dmg \
-            public/bitsmith-"$VERSION"-macos-arm64.zip \
-            public/bitsmith-"$VERSION"-macos-x64.dmg \
-            public/bitsmith-"$VERSION"-macos-x64.zip \
-            public/bitsmith-"$VERSION"-windows-x64.msi \
-            public/bitsmith-"$VERSION"-windows-x64.zip \
-            public/SHA256SUMS \
-            public/update-manifest.json \
+            release-assets/bitsmith-"$VERSION"-linux-x64.tar.gz \
+            release-assets/bitsmith-"$VERSION"-linux-x64.deb \
+            release-assets/bitsmith-"$VERSION"-linux-x64.rpm \
+            release-assets/bitsmith-"$VERSION"-linux-x64.AppImage \
+            release-assets/bitsmith-"$VERSION"-linux-x64.flatpak \
+            release-assets/bitsmith-"$VERSION"-linux-arm64.tar.gz \
+            release-assets/bitsmith-"$VERSION"-linux-arm64.deb \
+            release-assets/bitsmith-"$VERSION"-linux-arm64.rpm \
+            release-assets/bitsmith-"$VERSION"-linux-arm64.AppImage \
+            release-assets/bitsmith-"$VERSION"-linux-arm64.flatpak \
+            release-assets/bitsmith-"$VERSION"-macos-arm64.dmg \
+            release-assets/bitsmith-"$VERSION"-macos-arm64.zip \
+            release-assets/bitsmith-"$VERSION"-macos-x64.dmg \
+            release-assets/bitsmith-"$VERSION"-macos-x64.zip \
+            release-assets/bitsmith-"$VERSION"-windows-x64.msi \
+            release-assets/bitsmith-"$VERSION"-windows-x64.zip \
+            release-assets/SHA256SUMS \
+            release-assets/update-manifest.json \
             --title "Bitsmith v$VERSION" \
             --notes-file RELEASE-NOTES.md
 
@@ -521,4 +523,4 @@ jobs:
       - name: Attest build provenance (16 versioned payloads)
         uses: actions/attest-build-provenance@v4
         with:
-          subject-path: public/bitsmith-*
+          subject-path: release-assets/bitsmith-*
