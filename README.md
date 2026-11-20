@@ -21,7 +21,21 @@ Firmware engineers handling Intel HEX, Motorola S-record (S19/SREC) and raw BIN 
 
 ## Platforms and getting started
 
-Designed for macOS, Windows and Linux, using a Racket domain engine and a system-WebView UI via [Glaze](https://github.com/turlamai/glaze). **No tested native installer or clean-install guide is available yet.** Explore the [repository](https://github.com/turlamai/bitsmith) and [design](design/) instead of downloading an unverified package.
+Designed for macOS, Windows and Linux, using a Racket domain engine and a system-WebView UI via [Glaze](https://github.com/turlamai/glaze).
+
+### Install from a release
+
+Release assets (deb/rpm/AppImage/Flatpak/tar.gz, DMG/zip, MSI/zip) ship with each [tagged release](https://github.com/turlamai/bitsmith/releases). Verify the download before running it:
+
+```bash
+gh release download v<version> --repo turlamai/bitsmith --pattern 'bitsmith-<version>-macos-arm64.dmg'
+gh release download v<version> --repo turlamai/bitsmith --pattern SHA256SUMS
+shasum -a 256 -c SHA256SUMS --ignore-missing
+```
+
+The built-in **Check for updates** (records view, sidebar foot) only *notifies*: it verifies an Ed25519-signed update manifest and opens nothing by itself; the download and install stay in your hands.
+
+**No installer has passed the family install-smoke gate yet**, so treat every package as a development build until the first verified release notes say otherwise.
 
 ## Data and privacy
 
@@ -31,9 +45,9 @@ The intended workflow is fully local. Firmware contents must not be sent to onli
 
 [FlashPilot](https://github.com/turlamai/flashpilot) consumes firmware images during a declared ECU flashing workflow. Bitsmith prepares or inspects an image; FlashPilot owns communication with the ECU.
 
-## Building from source
+### Building from source
 
-Requires [Racket](https://racket-lang.org/) 9.0+ with the `glaze` package installed (`raco pkg install --auto glaze`).
+Requires [Racket](https://racket-lang.org/) 9.0+ with the `glaze` package installed (`raco pkg install --auto glaze`) and `crypto` (`raco pkg install --auto crypto`, needed by the update check).
 
 ```bash
 raco test shared/engine/   # engine unit tests (round-trip verified samples)

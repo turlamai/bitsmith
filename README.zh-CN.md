@@ -19,9 +19,23 @@ Intel HEX、Motorola S-record（S19/SREC）和原始 BIN 文件，应按**地址
 
 **交付状态：** 四个工作台视图（记录、镜像、操作、学习）已通过类型化桥接接到 Racket 引擎——解析、实时校验和、语义操作、格式转换、CRC 预设与文件打开/保存均已实现；打包与各平台发布验证尚未完成。
 
-## 平台与使用
+## 平台与安装
 
-目标平台为 macOS、Windows 和 Linux，使用 Racket 领域引擎及 [Glaze](https://github.com/turlamai/glaze) 系统 WebView UI。**当前没有完成验证的原生安装包和干净安装流程。** 请查看[源码](https://github.com/turlamai/bitsmith)与[设计资料](design/)，不要将未验证的构建用于正式固件。
+面向 macOS、Windows、Linux，Racket 领域引擎 + [Glaze](https://github.com/turlamai/glaze) 提供的系统 WebView UI。
+
+### 从 release 安装
+
+每个 [tagged release](https://github.com/turlamai/bitsmith/releases) 附带安装产物（deb/rpm/AppImage/Flatpak/tar.gz、DMG/zip、MSI/zip）。运行前先校验：
+
+```bash
+gh release download v<version> --repo turlamai/bitsmith --pattern 'bitsmith-<version>-macos-arm64.dmg'
+gh release download v<version> --repo turlamai/bitsmith --pattern SHA256SUMS
+shasum -a 256 -c SHA256SUMS --ignore-missing
+```
+
+内置的 **检查更新**（记录视图侧栏底部）只做**通知**：它验证 Ed25519 签名的更新清单，自身不下载、不安装——下载与安装始终在你手里。
+
+**尚未有安装包通过家族实装冒烟门禁**——在首个经过验证的 release notes 声明之前，一律按开发构建对待。
 
 ## 数据与隐私
 
@@ -33,7 +47,7 @@ Intel HEX、Motorola S-record（S19/SREC）和原始 BIN 文件，应按**地址
 
 ## 从源码构建
 
-需要 [Racket](https://racket-lang.org/) 9.0+ 与 `glaze` 包（`raco pkg install --auto glaze`）。
+需要 [Racket](https://racket-lang.org/) 9.0+ 与 `glaze` 包（`raco pkg install --auto glaze`），以及 `crypto`（`raco pkg install --auto crypto`，更新检查需要）。
 
 ```bash
 raco test shared/engine/   # 引擎单元测试（round-trip 已验证样例）
