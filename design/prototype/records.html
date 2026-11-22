@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Record view — Bitsmith</title>
+  <title>Record view — bitsmith</title>
   <script>
     (function () {
       try {
-        var saved = (localStorage.getItem('bitsmith-theme') || localStorage.getItem('imagebench-theme'));
+        var saved = localStorage.getItem('imagebench-theme');
         if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
       } catch (error) {}
     })();
@@ -18,17 +18,17 @@
       display: flex;
       align-items: center;
       flex-wrap: wrap;
-      gap: 8px 18px;
-      padding: 10px 16px;
+      gap:8px 16px;
+      padding:8px 16px;
       border-bottom: 1px solid var(--border);
       background: var(--surface-1);
     }
     .summary-stat {
       display: inline-flex;
       align-items: baseline;
-      gap: 6px;
+      gap:4px;
       color: var(--faint);
-      font-size: 9.5px;
+      font-size: var(--text-xs);
       letter-spacing: 0.04em;
       text-transform: uppercase;
       white-space: nowrap;
@@ -36,7 +36,7 @@
     .summary-stat strong {
       color: var(--text);
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 600;
       letter-spacing: 0;
       text-transform: none;
@@ -45,20 +45,20 @@
       display: flex;
       align-items: center;
       flex-wrap: wrap;
-      gap: 5px;
-      margin-left: auto;
+      gap:4px;
+      margin-left:auto;
     }
     .record-legend .type-chip {
-      font-size: 8.5px;
-      padding: 1px 5px;
+      font-size: var(--text-xs);
+      padding:1px 4px;
     }
     .table-note {
       display: flex;
       align-items: center;
-      gap: 7px;
-      padding: 8px 16px 18px;
+      gap:8px;
+      padding:8px 16px 16px;
       color: var(--faint);
-      font-size: 9.5px;
+      font-size: var(--text-xs);
       line-height: 1.5;
     }
     .table-note .od-icon {
@@ -85,66 +85,52 @@
       opacity: 0.85;
     }
     .gap-block {
-      margin-top: 13px;
+      margin-top:12px;
     }
     .gap-row {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
-      gap: 10px;
-      padding: 5px 7px;
+      gap:8px;
+      padding:4px 8px;
       color: var(--faint);
       font-family: var(--font-mono);
-      font-size: 9px;
+      font-size: var(--text-xs);
       border-bottom: 1px solid var(--border);
     }
     .gap-row:last-child { border-bottom: 0; }
     .gap-row .gap-range { color: var(--muted); }
     .gap-row .gap-len { white-space: nowrap; }
     .empty-side {
-      padding: 18px 14px;
+      padding:16px 12px;
       color: var(--faint);
-      font-size: 10.5px;
+      font-size: var(--text-xs);
       line-height: 1.55;
     }
     .empty-side strong {
       display: block;
       color: var(--text);
-      font-size: 11px;
-      margin-bottom: 3px;
+      font-size: var(--text-xs);
+      margin-bottom:4px;
     }
     .banner-row {
-      padding: 12px 16px 0;
+      padding:12px 16px 0;
     }
-    .foot-link {
-      border: 0;
-      padding: 0;
-      background: none;
-      color: var(--muted);
-      font-size: 10.5px;
-      font-family: inherit;
-      text-decoration: underline;
-      text-underline-offset: 3px;
-      cursor: pointer;
-    }
-    .foot-link:hover { color: var(--text); }
-    .foot-link:focus-visible {
-      outline: 2px solid var(--focus-ring);
-      outline-offset: 2px;
-      border-radius: 2px;
-    }
+  
+    .record-summary-bar {gap:var(--space-2) var(--space-4);padding:var(--space-3) var(--space-4)}
+.summary-stat, .summary-stat strong {font-size:var(--text-xs);line-height:1.5}
   </style>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <a class="brand" href="../index.html" aria-label="Bitsmith home">
+      <a class="brand" href="../index.html" aria-label="bitsmith home">
         <span class="brand-mark" aria-hidden="true">
           <span></span><span></span><span></span><span></span>
           <span></span><span></span><span></span><span></span>
           <span></span><span></span><span></span><span></span>
         </span>
-        <span class="brand-name">Bitsmith</span>
+        <span class="brand-name">bitsmith</span>
         <span class="brand-version">v0.1</span>
       </a>
       <a class="file-tab" href="records.html" id="topFileTab" aria-label="Current file: FBL_APP_combined.dat">
@@ -215,7 +201,7 @@
           <div id="fileSummary">
             <div class="file-summary">
               <div class="file-summary-head">
-                <div class="eyebrow" style="margin-bottom:6px">Source file · content detected</div>
+                <div class="eyebrow" style="margin-bottom:4px">Source file · content detected</div>
                 <div class="file-name-row">
                   <svg class="od-icon file-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M6 3.5h8l4 4v13H6z"></path>
@@ -223,7 +209,7 @@
                   </svg>
                   <h2 id="fileName">FBL_APP_combined.dat</h2>
                   <button class="icon-btn" id="closeFile" type="button" aria-label="Close file" style="margin-left:auto;width:24px;height:24px;margin-right:-4px">
-                    <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true" style="--od-icon-size:13px">
+                    <svg class="od-icon" viewBox="0 0 24 24" aria-hidden="true" style="--od-icon-size:12px">
                       <path d="M6 6l12 12M18 6 6 18"></path>
                     </svg>
                   </button>
@@ -362,7 +348,7 @@
               <span></span><span></span><span></span><span></span>
             </div>
             <h2 id="emptyTitle">Open a firmware image</h2>
-            <p id="emptyCopy">Drop an Intel HEX, Motorola S-record, or raw BIN file here. Bitsmith sniffs the content — extensions lie, and real-world files often arrive extensionless.</p>
+            <p id="emptyCopy">Drop an Intel HEX, Motorola S-record, or raw BIN file here. bitsmith sniffs the content — extensions lie, and real-world files often arrive extensionless.</p>
             <div class="drop-actions">
               <button class="btn btn-primary" id="emptyOpen" type="button">Choose file…</button>
               <button class="btn" id="restoreSample" type="button">Restore sample image</button>
@@ -411,7 +397,7 @@
         <span>0800</span>
         <span class="is-checksum">F2</span>
       </div>
-      <p style="margin-top:7px"><span class="mono" style="color:var(--text)">0x0800 &lt;&lt; 16 = 0x08000000</span>. The next data record at low address <span class="mono" style="color:var(--text)">0x0000</span> becomes absolute address <span class="mono" style="color:var(--text)">0x08000000</span>.</p>
+      <p style="margin-top:8px"><span class="mono" style="color:var(--text)">0x0800 &lt;&lt; 16 = 0x08000000</span>. The next data record at low address <span class="mono" style="color:var(--text)">0x0000</span> becomes absolute address <span class="mono" style="color:var(--text)">0x08000000</span>.</p>
       <dl class="pop-kv">
         <dt>Affects</dt><dd>All following data records</dd>
         <dt>Until</dt><dd>Another 02 / 04 or EOF</dd>
@@ -891,11 +877,11 @@
         const expected = record.expected === null || record.expected === undefined ? '—' : '0x' + hex(record.expected);
         let verdictCopy = '';
         if (!record.ok && !record.malformed) {
-          verdictCopy = '<div class="callout is-fail" style="margin-top:10px"><strong>Checksum mismatch.</strong> The bytes sum to <span class="mono">0x' + record.sum.toString(16).toUpperCase() + '</span>; two’s complement gives <span class="mono">0x' + hex(record.expected) + '</span>, but the line stores <span class="mono">0x' + hex(record.stored) + '</span>. The row stays visible so you can decide whether to repair or reject it.</div>';
+          verdictCopy = '<div class="callout is-fail" style="margin-top:8px"><strong>Checksum mismatch.</strong> The bytes sum to <span class="mono">0x' + record.sum.toString(16).toUpperCase() + '</span>; two’s complement gives <span class="mono">0x' + hex(record.expected) + '</span>, but the line stores <span class="mono">0x' + hex(record.stored) + '</span>. The row stays visible so you can decide whether to repair or reject it.</div>';
         } else if (record.type === 4 && state.format === 'intel') {
-          verdictCopy = '<div class="callout" style="margin-top:10px"><strong>This record sets a base.</strong> It writes no flash bytes. Its <span class="mono">0800</span> payload becomes the upper 16 bits <span class="mono">0x08000000</span> for the records that follow.</div>';
+          verdictCopy = '<div class="callout" style="margin-top:8px"><strong>This record sets a base.</strong> It writes no flash bytes. Its <span class="mono">0800</span> payload becomes the upper 16 bits <span class="mono">0x08000000</span> for the records that follow.</div>';
         } else if (record.ok) {
-          verdictCopy = '<div class="callout" style="margin-top:10px"><strong>Checksum verified.</strong> The stored check byte matches the two’s complement of the preceding bytes.</div>';
+          verdictCopy = '<div class="callout" style="margin-top:8px"><strong>Checksum verified.</strong> The stored check byte matches the two’s complement of the preceding bytes.</div>';
         }
         const checks = [
           { ok: record.ok, label: record.ok ? 'This record verifies' : 'This record fails checksum' },
@@ -906,7 +892,7 @@
           '<div class="inspector-section">' +
             '<div class="inspector-title"><span>Record ' + number + '</span><span class="' + (record.ok ? 'badge-ok' : 'badge-fail') + ' badge">' + (record.ok ? 'verified' : 'failed') + '</span></div>' +
             '<div class="raw-line-box">' + esc(record.raw) + '</div>' +
-            '<dl class="kv-list" style="margin-top:10px">' +
+            '<dl class="kv-list" style="margin-top:8px">' +
               '<dt>Type</dt><dd>' + esc(record.typeHex) + ' · ' + esc(record.typeName) + '</dd>' +
               '<dt>Byte count</dt><dd>' + (record.malformed ? '—' : '0x' + hex(record.count)) + '</dd>' +
               '<dt>Record address</dt><dd>' + (record.malformed ? '—' : '0x' + hex(record.address, 4)) + '</dd>' +
@@ -928,7 +914,7 @@
                   (check.ok ? '<path d="m5 12.5 4.2 4.2L19 7"></path>' : '<path d="M6 6l12 12M18 6 6 18"></path>') +
                 '</svg><span>' + check.label + '</span></div>';
             }).join('') + '</div>' +
-            '<div class="callout" style="margin-top:9px">Live verification recomputes every record from its bytes. No verdict is hard-coded in the interface.</div>' +
+            '<div class="callout" style="margin-top:8px">Live verification recomputes every record from its bytes. No verdict is hard-coded in the interface.</div>' +
           '</div>';
       }
 
@@ -1005,7 +991,7 @@
         elements.emptyTitle.textContent = binMode ? 'This BIN has no records' : 'Open a firmware image';
         elements.emptyCopy.innerHTML = binMode
           ? 'Binary images carry no address or record structure. The bytes can still be viewed in Image view, where the base address is explicitly treated as an assumption.'
-          : (message || 'Drop an Intel HEX, Motorola S-record, or raw BIN file here. Bitsmith sniffs the content — extensions lie, and real-world files often arrive extensionless.');
+          : (message || 'Drop an Intel HEX, Motorola S-record, or raw BIN file here. bitsmith sniffs the content — extensions lie, and real-world files often arrive extensionless.');
         if (state.openExplain) closeExplain();
       }
 
@@ -1017,7 +1003,7 @@
         elements.recordActions.style.visibility = 'visible';
         elements.binMode = false;
         elements.emptyTitle.textContent = 'Open a firmware image';
-        elements.emptyCopy.textContent = 'Drop an Intel HEX, Motorola S-record, or raw BIN file here. Bitsmith sniffs the content — extensions lie, and real-world files often arrive extensionless.';
+        elements.emptyCopy.textContent = 'Drop an Intel HEX, Motorola S-record, or raw BIN file here. bitsmith sniffs the content — extensions lie, and real-world files often arrive extensionless.';
       }
 
       function loadRecords(records, format, fileName, options) {
@@ -1115,7 +1101,7 @@
         button.addEventListener('click', function () {
           const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
           document.documentElement.dataset.theme = next;
-          try { localStorage.setItem('bitsmith-theme', next); } catch (error) {}
+          try { localStorage.setItem('imagebench-theme', next); } catch (error) {}
           updateThemeLabel();
         });
       });
@@ -1132,11 +1118,6 @@
         elements.fileInput.click();
       });
       document.getElementById('restoreSample').addEventListener('click', function () { loadSample(true); });
-      // Update check (interaction contract): the engine answers a verdict;
-      // the toast never claims an install happened.
-      document.getElementById('checkUpdates').addEventListener('click', function () {
-        toast('You are on the latest version', 'ok');
-      });
       document.getElementById('jumpFail').addEventListener('click', function () {
         const failedIndex = state.records.findIndex(function (record) { return !record.ok; });
         if (failedIndex < 0) {
@@ -1212,5 +1193,13 @@
       loadSample(false);
     })();
   </script>
+<script>
+(() => {
+  const button=document.querySelector('[data-theme-toggle]');
+  if (!button) return;
+  const sync=()=>{const dark=document.documentElement.dataset.theme==='dark';button.setAttribute('aria-pressed',String(dark));button.title=dark?'Switch to light theme':'Switch to dark theme';};
+  new MutationObserver(sync).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});sync();
+})();
+</script>
 </body>
 </html>
