@@ -363,6 +363,7 @@ jobs:
             --entry main.rkt \
             --name Bitsmith \
             --version "$VERSION" \
+            --publisher 'Turing Lambda' \
             --icon dist/Bitsmith.ico \
             --installer \
             --out dist
