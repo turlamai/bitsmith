@@ -11,9 +11,15 @@ this file's release section.
 
 - Patch operation: write hexadecimal bytes at an absolute address onto the working copy (`48 B1 08 47` or `48B10847`). Bytes that land in an unmapped range are reported as new data, and a patch that would change nothing blocks the apply. Designed into the prototype first; closes the MVP Edit gap left when the prototype shipped seven operation cards.
 
+### Changed
+
+- The interface follows the current design baseline: no text smaller than 12px, and on narrower windows the inspector moves below the main pane instead of squeezing the three columns. The brand reads **bitsmith** in lowercase in titles and copy.
+- CI now fails when the product styles drift from the design prototype or reintroduce type under 12px.
+
 ### Fixed
 
 - CRC with the *Reject gaps* policy showed a raw error key instead of the localized message.
+- The theme button (◐) did nothing, which left the light theme unreachable. It now switches between dark and light, and the choice is kept while the app is open.
 
 ## [0.1.0] - 2026-11-19
 

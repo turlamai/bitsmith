@@ -44,7 +44,7 @@
                  (cond
                    [(>= (current-inexact-milliseconds) deadline) #f]
                    [(and (webview-title wv)
-                         (regexp-match? "Bitsmith" (webview-title wv))) #t]
+                         (regexp-match? "bitsmith" (webview-title wv))) #t]
                    [else (sleep 0.1) (loop)])))
              (printf "[verify] title = ~a url = ~a\n" (webview-title wv) (webview-url wv))
              (when loaded? (sleep 1.0))

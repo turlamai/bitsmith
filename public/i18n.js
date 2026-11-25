@@ -56,7 +56,7 @@
     'empty.no-file': '未打开文件',
     'empty.copy': '打开一个 Intel HEX、S-record 或 BIN 文件来查看记录。格式由内容识别决定；扩展名只是提示。',
     'empty.title': '打开固件镜像',
-    'empty.drop-copy': '把 Intel HEX、Motorola S-record 或 raw BIN 文件拖到这里。Bitsmith 按内容识别——扩展名会说谎，真实文件常常没有扩展名。',
+    'empty.drop-copy': '把 Intel HEX、Motorola S-record 或 raw BIN 文件拖到这里。bitsmith 按内容识别——扩展名会说谎，真实文件常常没有扩展名。',
     'empty.bin-title': '这个 BIN 没有记录',
     'empty.bin-copy': '二进制镜像不携带地址或记录结构。字节仍可在镜像视图中查看，基址在其中被显式当作假设处理。',
     'empty.formats': 'Intel HEX · S-record · BIN',
@@ -208,7 +208,7 @@
     'pop.byte-foot': 'Esc 关闭 · Shift 点击选择范围',
 
     'banner.bin-title': 'BIN 不携带地址信息——下方基址是你设定的假设',
-    'banner.bin-detail': '未找到地址记录。Bitsmith 按当前工作基址显示字节。写入前请对照设备内存映射核对该基址。',
+    'banner.bin-detail': '未找到地址记录。bitsmith 按当前工作基址显示字节。写入前请对照设备内存映射核对该基址。',
 
     'switch.bin-label': 'BIN 状态',
     'goto.label': '前往地址',
@@ -276,7 +276,7 @@
     'learn.sample-intro-html': '贯穿全页的样例是 <code>FBL_APP_combined.dat</code>：8 条 Intel HEX 记录，其中 7 条通过校验。',
     'learn.reference': '参考',
     'learn.reference-sub': '视图背后的规则。',
-    'learn.intro': 'Bitsmith 里没有任何魔法：记录就是一条带小型算术契约的文本行，地址要么写在文件里，要么由你来假设。以下六节把这两个事实展开成你能亲手验证的算术。',
+    'learn.intro': 'bitsmith 里没有任何魔法：记录就是一条带小型算术契约的文本行，地址要么写在文件里，要么由你来假设。以下六节把这两个事实展开成你能亲手验证的算术。',
     'learn.s1': '01 · 记录到底是什么',
     'learn.s1-intro': '一条 Intel HEX 行是一个完整、自描述的包。Count 说明后面跟多少个数据字节；address 说明它们加载到哪里；type 说明这一行是什么性质；末尾一个字节把前面的算术封口。',
     'learn.failing-field-by-field': '失败记录逐字段拆解',
@@ -307,7 +307,7 @@
     'learn.s2-intro': 'Intel HEX 使用二进制补码校验。把冒号之后、校验字节之前的每个字节相加，保留低字节，取补码再加一。结果与行尾字节相等则校验通过。',
     'learn.intel-playground': 'Intel HEX 记录 · 修改字节实时重算',
     'learn.srec-playground': 'S-record · 反码',
-    'learn.s2-outro': 'Bitsmith 在每次加载时对每一行重算。校验失败不会隐藏数据：记录保留在表格中，由你决定修复还是拒绝。',
+    'learn.s2-outro': 'bitsmith 在每次加载时对每一行重算。校验失败不会隐藏数据：记录保留在表格中，由你决定修复还是拒绝。',
     'learn.s3': '03 · 间隙不是字节',
     'learn.s3-intro': '记录流中缺失的范围与被 0xFF 填充的范围不是一回事。一个是信息的缺失；另一个是对设备的显式陈述。',
     'learn.gap-title': '间隙',
@@ -354,13 +354,13 @@
     'learn.s4-outro-html': 'S-record 的计数包含地址与校验字节，而 Intel HEX 的计数只覆盖数据。补码方式也不同：反码对补码。打开学习页的实时算术即可亲手验证两者。',
     'learn.sources-title': '样例源记录 · 原样保留',
     'learn.s5': '05 · BIN 为什么需要基址',
-    'learn.s5-intro': '裸二进制不知道自己属于内存的哪个位置。Bitsmith 不悄悄猜：它要求一个基址，并把下游每个地址都标记为该选择的产物。',
+    'learn.s5-intro': '裸二进制不知道自己属于内存的哪个位置。bitsmith 不悄悄猜：它要求一个基址，并把下游每个地址都标记为该选择的产物。',
     'learn.s5-example': '基址 0x08000000 时，APP 写到 0x08008000。基址 0x00000000 时，同样的字节写到 0x00008000。',
     'learn.s5-outro': '字节从未移动；移动的是解读。这就是假定基址显示在每一屏上的原因，也是为什么更改它会重画整张地图而不是悄悄偏移。',
     'learn.s5-see-bin': '查看 BIN 状态',
     'learn.s5-note': '样例是 Intel HEX，因此没有发明基址。BIN 状态的存在是为了让假设可见：它是一个工作选择，不是文件的属性。',
     'learn.s6': '06 · 写入之前',
-    'learn.s6-intro': '读取是廉价的；写入不是。这些是 Bitsmith 按重要性顺序摆在你面前的检查。',
+    'learn.s6-intro': '读取是廉价的；写入不是。这些是 bitsmith 按重要性顺序摆在你面前的检查。',
     'learn.s6-1-title': '每条记录都通过校验，或者你清楚原因',
     'learn.s6-1-body': '样例有七条通过校验的记录和一条带算术展示的失败记录。失败的记录永远不会被悄悄修复。',
     'learn.s6-2-title': '你清楚哪些地址是记录在案的',
@@ -481,7 +481,7 @@
     'empty.no-file': 'No file open',
     'empty.copy': 'Open an Intel HEX, S-record, or BIN file to inspect its records. Content sniffing decides the format; the extension is only a hint.',
     'empty.title': 'Open a firmware image',
-    'empty.drop-copy': 'Drop an Intel HEX, Motorola S-record, or raw BIN file here. Bitsmith sniffs the content — extensions lie, and real-world files often arrive extensionless.',
+    'empty.drop-copy': 'Drop an Intel HEX, Motorola S-record, or raw BIN file here. bitsmith sniffs the content — extensions lie, and real-world files often arrive extensionless.',
     'empty.bin-title': 'This BIN has no records',
     'empty.bin-copy': 'Binary images carry no address or record structure. The bytes can still be viewed in Image view, where the base address is explicitly treated as an assumption.',
     'empty.formats': 'Intel HEX · S-record · BIN',
@@ -632,7 +632,7 @@
     'pop.byte-foot': 'Esc close · shift-click to select a range',
 
     'banner.bin-title': 'BIN carries no address information — the base below is an assumption you set',
-    'banner.bin-detail': 'No address records were found. Bitsmith is displaying the bytes at the working base. Check this base against the device memory map before writing.',
+    'banner.bin-detail': 'No address records were found. bitsmith is displaying the bytes at the working base. Check this base against the device memory map before writing.',
 
     'switch.bin-label': 'BIN state',
     'goto.label': 'Go to address',
@@ -700,7 +700,7 @@
     'learn.sample-intro-html': 'The sample used throughout is <code>FBL_APP_combined.dat</code>: 8 Intel HEX records, 7 of which verify.',
     'learn.reference': 'Reference',
     'learn.reference-sub': 'The rules behind the view.',
-    'learn.intro': 'Nothing in Bitsmith is magic: a record is a text line with a small arithmetic contract, and an address is either in the file or assumed by you. These six sections turn those two facts into arithmetic you can check by hand.',
+    'learn.intro': 'Nothing in bitsmith is magic: a record is a text line with a small arithmetic contract, and an address is either in the file or assumed by you. These six sections turn those two facts into arithmetic you can check by hand.',
     'learn.s1': '01 · What a record actually is',
     'learn.s1-intro': 'One Intel HEX line is a complete, self-describing packet. Count tells you how many data bytes follow; address says where they load; type says what the line means; one trailing byte seals the arithmetic.',
     'learn.failing-field-by-field': 'The failing record, field by field',
@@ -731,7 +731,7 @@
     'learn.s2-intro': 'Intel HEX uses a two\'s complement checksum. Add every byte after the colon except the checksum itself, keep the low byte, then complement and add one. The result matches the stored byte when the record verifies.',
     'learn.intel-playground': 'Intel HEX record · edit a byte to recompute',
     'learn.srec-playground': 'S-record · one\'s complement',
-    'learn.s2-outro': 'Bitsmith recomputes this for every line on every load. A failing checksum does not hide the data: the record stays in the table so you can decide whether to repair or reject it.',
+    'learn.s2-outro': 'bitsmith recomputes this for every line on every load. A failing checksum does not hide the data: the record stays in the table so you can decide whether to repair or reject it.',
     'learn.s3': '03 · Gaps are not bytes',
     'learn.s3-intro': 'A missing range in the record stream is not the same as a range filled with 0xFF. One is an absence of information; the other is an explicit claim about the device.',
     'learn.gap-title': 'Gap',
@@ -778,13 +778,13 @@
     'learn.s4-outro-html': 'S-record counts include the address and checksum bytes, unlike Intel HEX where the count covers data only. The checksum is also complemented differently: one\'s complement versus two\'s complement. The live arithmetic on this page lets you verify both by hand.',
     'learn.sources-title': 'Supplied source records · preserved verbatim',
     'learn.s5': '05 · Why a BIN needs a base',
-    'learn.s5-intro': 'A raw binary has no idea where it belongs in memory. Bitsmith does not guess quietly: it asks for a base and marks every address downstream of that choice.',
+    'learn.s5-intro': 'A raw binary has no idea where it belongs in memory. bitsmith does not guess quietly: it asks for a base and marks every address downstream of that choice.',
     'learn.s5-example': 'With base 0x08000000, the APP writes at 0x08008000. With base 0x00000000, the same bytes write to 0x00008000.',
     'learn.s5-outro': 'The bytes never move; the interpretation does. That is why the assumed base is shown on every screen and why changing it re-draws the whole map instead of silently shifting.',
     'learn.s5-see-bin': 'See the BIN state',
     'learn.s5-note': 'The sample is Intel HEX, so no base is invented. The BIN state exists to make the assumption visible: it is a working choice, not a property of the file.',
     'learn.s6': '06 · Before you write',
-    'learn.s6-intro': 'Reading is cheap; writing is not. These are the checks Bitsmith keeps in front of you, in the order they matter.',
+    'learn.s6-intro': 'Reading is cheap; writing is not. These are the checks bitsmith keeps in front of you, in the order they matter.',
     'learn.s6-1-title': 'Every record verifies, or you know why not',
     'learn.s6-1-body': 'The sample has seven verified records and one failure with its arithmetic shown. A failing record is never silently repaired.',
     'learn.s6-2-title': 'You know which addresses are recorded',
@@ -886,13 +886,39 @@
       node.setAttribute('aria-label', t(node.dataset.i18nAria));
     });
     document.documentElement.lang = current === 'zh' ? 'zh-CN' : 'en';
+    // The theme button's accessible name is localized, so it follows too.
+    if (syncThemeButton) syncThemeButton();
   }
+
+  // Set once the theme button is bound (see bindThemeButton).
+  let syncThemeButton = null;
 
   function setLang(next) {
     current = next === 'zh' ? 'zh' : 'en';
     try { localStorage.setItem('bitsmith-lang', current); } catch (error) { /* keep session choice */ }
     apply();
     window.dispatchEvent(new CustomEvent('bitsmith-lang-changed', { detail: current }));
+  }
+
+  /** Theme rides the shared topbar button on every page (design contract:
+      target-theme name, pressed state, local preference). The preference is
+      read before first paint by each page's boot snippet. */
+  function bindThemeButton() {
+    const button = document.querySelector('[data-theme-toggle]');
+    if (!button || button.dataset.themeBound) return;
+    button.dataset.themeBound = '1';
+    syncThemeButton = function () {
+      const dark = document.documentElement.dataset.theme === 'dark';
+      button.setAttribute('aria-pressed', String(dark));
+      button.setAttribute('aria-label', t(dark ? 'theme.to-light' : 'theme.to-dark'));
+    };
+    button.addEventListener('click', function () {
+      const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+      document.documentElement.dataset.theme = next;
+      try { localStorage.setItem('bitsmith-theme', next); } catch (error) { /* keep session choice */ }
+      syncThemeButton();
+    });
+    syncThemeButton();
   }
 
   /** Injects the language toggle into every page's topbar actions. */
@@ -982,6 +1008,7 @@
   function boot() {
     apply();
     injectToggle();
+    bindThemeButton();
     bindSaveButton();
     bindOpenButton();
     booted = true;

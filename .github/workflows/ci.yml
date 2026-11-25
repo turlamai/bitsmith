@@ -47,3 +47,13 @@ jobs:
 
       - name: Entry module compiles
         run: raco make main.rkt
+
+  design:
+    # The UI in public/ must not drift from the prototype in design/ (the
+    # single source of truth): same stylesheet, same page rules, 12px floor.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Design sync
+        run: python3 scripts/check-design-sync.py

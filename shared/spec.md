@@ -89,6 +89,14 @@ batch recipes / CI.
   prototype shipped seven cards. Policy: bytes landing in an unmapped range
   are explicit new data (marked `+`, named in the preview note) — a gap is
   never treated as 0xFF; a patch that changes nothing blocks apply.
+- 2026-11-25 product UI alignment: `public/` follows design pass `f9fe410`
+  (12px type floor, responsive rules, lowercase brand) and is held to it by
+  `scripts/check-design-sync.py` in CI. The theme button, shipped without a
+  handler in v0.1.0, now toggles and stores `bitsmith-theme`. Open: on
+  Windows the theme and language choices last for the session only, because
+  glaze gives each window launch a fresh WebView2 profile unless
+  `GLAZE_WEBVIEW2_DATA_DIR` is set; a fixed path is not adopted yet because a
+  locked profile aborts the second window.
 
 ## Sample-data policy
 

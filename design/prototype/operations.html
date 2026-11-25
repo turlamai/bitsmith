@@ -7,7 +7,7 @@
   <script>
     (function () {
       try {
-        var saved = localStorage.getItem('imagebench-theme');
+        var saved = (localStorage.getItem('bitsmith-theme') || localStorage.getItem('imagebench-theme'));
         if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
       } catch (error) {}
     })();
@@ -363,7 +363,7 @@
     $('cancelApply').addEventListener('click',()=>dialog.close());
     $('commitApply').addEventListener('click',()=>{if(pending&&pending.revision===revision){working=new Map(pending.after);format=pending.outFormat;revision++;dialog.close();render();$('statusGate').textContent='Applied to working copy';$('applyBtn').focus();}pending=null;});
     dialog.addEventListener('close',()=>{const b=$('applyBtn');if(b)b.focus();});
-    const theme=document.querySelector('[data-theme-toggle]');function themeLabel(){theme.setAttribute('aria-label',document.documentElement.dataset.theme==='light'?'Switch to dark theme':'Switch to light theme');}theme.addEventListener('click',()=>{const t=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=t;try{localStorage.setItem('imagebench-theme',t);}catch(e){}themeLabel();});themeLabel();
+    const theme=document.querySelector('[data-theme-toggle]');function themeLabel(){theme.setAttribute('aria-label',document.documentElement.dataset.theme==='light'?'Switch to dark theme':'Switch to light theme');}theme.addEventListener('click',()=>{const t=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=t;try{localStorage.setItem('bitsmith-theme',t);}catch(e){}themeLabel();});themeLabel();
     document.addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey||e.target.matches('input,select,textarea')||dialog.open)return;const route={'1':'records.html','2':'image.html','3':'operations.html','4':'learn.html'}[e.key];if(route)location.href=route;});
     render();
   })();
