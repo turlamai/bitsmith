@@ -29,8 +29,8 @@ exactly as the Racket distribution ships them:
 
 ## crypto (Racket package)
 
-Update-feed signature verification uses the `crypto` Racket package
-(version 2.0), Apache License 2.0. It binds to libcrypto through FFI: the
+Update-feed signature verification uses the `crypto` Racket package,
+Apache License 2.0. It binds to libcrypto through FFI: the
 OpenSSL libraries listed above on macOS and Windows, the system (or Flatpak
 runtime) library on Linux.
 
