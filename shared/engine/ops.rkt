@@ -1,6 +1,6 @@
 #lang racket/base
 
-;; The seven operations behind the Operations screen. Each takes the
+;; The operations behind the Operations screen. Each takes the
 ;; working image plus validated integer parameters and returns
 ;; (values image note-key extra) — or raises exn:fail:bitsmith with a
 ;; stable key the API layer localizes.
@@ -19,6 +19,7 @@
          op-apply
          op-crc
          parse-address-text
+         parse-bytes-text
          parse-signed-text)
 
 (define preview-bound 1048576) ; 1 MiB
@@ -51,6 +52,26 @@
     (raise-bitsmith-error 'err-address-out-of-range))
   (if negative (- n) n))
 
+;; Patch payload: hexadecimal byte pairs. Separators (whitespace, comma,
+;; semicolon, colon, hyphen) and 0x prefixes are optional, so "48 B1 08 47",
+;; "48B10847" and "0x48, 0xB1" all parse. A byte pair can never contain
+;; "0x" (x is not a hex digit), which is why stripping the prefix first is
+;; safe: anything left that is not an even run of hex digits is malformed.
+(define (parse-bytes-text text)
+  (define compact
+    (regexp-replace* #rx"[ \t\r\n\f,;:-]+"
+                     (regexp-replace* #rx"0[xX]" (string-trim text) "")
+                     ""))
+  (cond
+    [(string=? compact "") (raise-bitsmith-error 'err-bytes-empty)]
+    ;; #rx has no {n} repetition: spell the pair out.
+    [(not (regexp-match? #rx"^(?:[0-9a-fA-F][0-9a-fA-F])+$" compact))
+     (raise-bitsmith-error 'err-bytes-format)]
+    [else
+     (list->bytes
+      (for/list ([i (in-range 0 (string-length compact) 2)])
+        (string->number (substring compact i (+ i 2)) 16)))]))
+
 ;; ---- range validation ------------------------------------------------------
 
 (define (checked-range start end)
@@ -66,6 +87,7 @@
 (define (op-apply op img params)
   (case op
     [(fill) (op-fill img params)]
+    [(patch) (op-patch img params)]
     [(pad) (op-pad img params)]
     [(offset) (op-offset img params)]
     [(crop) (op-crop img params)]
@@ -82,6 +104,25 @@
   (values (image-fill-range img s e value)
           'note-fill
           (hasheq 'start s 'end e 'value value)))
+
+;; Patch: write the given bytes at one absolute address. Bytes that land
+;; in an unmapped range are new data, not a silent 0xFF substitution: the
+;; count of such bytes decides the note, and the API diff marks them "+".
+;; A patch that changes nothing blocks — there is nothing to confirm.
+(define (op-patch img params)
+  (define start (hash-ref params 'address))
+  (define bs (hash-ref params 'bytes))
+  (define count (bytes-length bs))
+  (define end (+ start count -1))
+  (when (> end 4294967295) (raise-bitsmith-error 'err-address-out-of-range))
+  (define-values (s e) (checked-range start end))
+  (define after (image-set-run img s bs))
+  (define-values (added removed changed changes) (image-diff img after 0))
+  (when (and (zero? added) (zero? changed))
+    (raise-bitsmith-error 'err-patch-nochange))
+  (values after
+          (if (zero? added) 'note-patch 'note-patch-gap)
+          (hasheq 'start s 'end e 'count count 'added added 'changed changed)))
 
 (define (op-pad img params)
   (define alignment (hash-ref params 'alignment))
@@ -189,7 +230,8 @@
       (cond
         [b (set! bytes-out (cons b bytes-out))]
         [(eq? policy 'reject)
-         (raise-bitsmith-error 'crc-unmapped-at (hasheq 'address a))]
+         ;; Key must match the string tables (err- prefix).
+         (raise-bitsmith-error 'err-crc-unmapped-at (hasheq 'address a))]
         [else
          (set! gaps (add1 gaps))
          (set! bytes-out (cons (if (eq? policy 'FF) 255 0) bytes-out))])

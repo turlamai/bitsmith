@@ -79,6 +79,13 @@
              (record! 'learn-capture (and learn-shot (file-exists? learn-shot) (> (file-size learn-shot) 0)))
              (when image-shot (printf "[verify] image-screenshot = ~a\n" image-shot))
              (when ops-shot (printf "[verify] ops-screenshot = ~a\n" ops-shot))
+             ;; The Patch card through its #patch link; the title does not
+             ;; change on this hop, so give the page time to settle.
+             (webview-navigate wv (string-append base-url "operations.html#patch"))
+             (sleep 1.2)
+             (define patch-shot (webview-capture! wv))
+             (record! 'patch-capture (and patch-shot (file-exists? patch-shot) (> (file-size patch-shot) 0)))
+             (when patch-shot (printf "[verify] patch-screenshot = ~a\n" patch-shot))
              (when learn-shot (printf "[verify] learn-screenshot = ~a\n" learn-shot))
              (webview-close wv))))
 

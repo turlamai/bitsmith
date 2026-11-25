@@ -238,6 +238,9 @@
     [(fill)
      (hasheq 'start (addr 'start) 'end (addr 'end)
              'value (param-byte (hash-ref raw 'value)))]
+    [(patch)
+     (hasheq 'address (addr 'address)
+             'bytes (parse-bytes-text (hash-ref raw 'bytes)))]
     [(pad)
      (hasheq 'alignment (addr 'alignment) 'value (param-byte (hash-ref raw 'value)))]
     [(offset) (hasheq 'delta (parse-signed-text (hash-ref raw 'delta)))]
@@ -443,12 +446,20 @@
 (define (field-select key label options default)
   (hasheq 'key (symbol->string key) 'label label 'kind "select" 'options options 'default default))
 
-(define (op-spec lang id name-key desc-key badge fields)
+;; Free-form hexadecimal payload; `placeholder` is an example, not a value.
+(define (field-bytes key label default placeholder)
+  (hasheq 'key (symbol->string key) 'label label 'kind "bytes"
+          'default default 'placeholder placeholder))
+
+;; `help` replaces the generic range note under the form when the
+;; operation's input rules differ (optional).
+(define (op-spec lang id name-key desc-key badge fields [help #f])
   (hasheq
    'id (symbol->string id)
    'name (s lang name-key)
    'desc (s lang desc-key)
    'badge badge
+   'help (and help (s lang help))
    'fields fields))
 
 (define (ops-spec-response lang)
@@ -459,6 +470,11 @@
                   (list (field-text 'start (s lang 'field-start) "0x08000020")
                         (field-text 'end (s lang 'field-end) "0x08007FFF")
                         (field-select 'value (s lang 'field-value) (list "0x00" "0xFF") "0xFF")))
+         (op-spec lang 'patch 'op-patch-name 'op-patch-desc (s lang 'op-badge-edit)
+                  (list (field-text 'address (s lang 'field-address) "0x08008010")
+                        (field-bytes 'bytes (s lang 'field-bytes) "00 BF"
+                                     (s lang 'field-bytes-placeholder)))
+                  'field-help-patch)
          (op-spec lang 'pad 'op-pad-name 'op-pad-desc (s lang 'op-badge-edit)
                   (list (field-text 'alignment (s lang 'field-alignment) "0x1000")
                         (field-select 'value (s lang 'field-value) (list "0x00" "0xFF") "0xFF")))
@@ -747,4 +763,66 @@
   (check-equal? (hash-ref learn 'expected) 20)
   ;; Reset restores revision 0.
   (reset-workspace)
-  (check-equal? (workspace-revision (current)) 0))
+  (check-equal? (workspace-revision (current)) 0)
+  ;; Patch through the typed API: preview reports, apply commits.
+  (define patch-preview
+    (guard "en"
+           (lambda ()
+             (ops-preview "patch" (hasheq 'address "0x08008010" 'bytes "00 BF") "en"))))
+  (check-true (hash-ref patch-preview 'ok))
+  (check-equal? (hash-ref patch-preview 'changed) 2)
+  (check-equal? (hash-ref patch-preview 'added) 0)
+  (check-equal? (hash-ref patch-preview 'note) (hash-ref en-strings 'note-patch))
+  (check-equal? (workspace-revision (current)) 0) ; preview never commits
+  (define patch-applied
+    (guard "en"
+           (lambda ()
+             (ops-apply "patch" (hasheq 'address "0x08008010" 'bytes "00BF") 0 "en"))))
+  (check-true (hash-ref patch-applied 'ok))
+  (check-equal? (workspace-revision (current)) 1)
+  (check-equal? (image-ref (workspace-image (current)) 134250512) 0)
+  (check-equal? (image-ref (workspace-image (current)) 134250513) 191)
+  (check-equal? (length (workspace-records (current))) 8) ; source records stay verbatim
+  ;; Bytes landing in a hole are reported as new data, localized.
+  (define patch-gap
+    (guard "zh"
+           (lambda ()
+               (ops-preview "patch" (hasheq 'address "0x08008020" 'bytes "48 B1 08 47") "zh"))))
+  (check-equal? (hash-ref patch-gap 'added) 4)
+  (check-equal? (hash-ref patch-gap 'note) (hash-ref zh-strings 'note-patch-gap))
+  ;; No-change patch, malformed payload, and the CRC reject-gap message.
+  (define patch-same
+    (guard "en"
+           (lambda ()
+             (ops-preview "patch" (hasheq 'address "0x08008010" 'bytes "00 BF") "en"))))
+  (check-equal? (hash-ref patch-same 'error-key) 'err-patch-nochange)
+  (check-equal? (hash-ref patch-same 'error) (hash-ref en-strings 'err-patch-nochange))
+  (define patch-bad
+    (guard "en"
+           (lambda ()
+             (ops-preview "patch" (hasheq 'address "0x08008010" 'bytes "GG") "en"))))
+  (check-equal? (hash-ref patch-bad 'error-key) 'err-bytes-format)
+  (define crc-reject
+    (guard "en"
+           (lambda ()
+             (ops-preview "crc"
+                          (hasheq 'preset "CRC-32/MPEG-2"
+                                  'start "0x08008000" 'end "0x08009FFF" 'value "reject")
+                          "en"))))
+  (check-equal? (hash-ref crc-reject 'error-key) 'err-crc-unmapped-at)
+  (check-true (string-prefix? (hash-ref crc-reject 'error)
+                              (hash-ref en-strings 'err-crc-unmapped-at)))
+  ;; Specs: patch is the second card, with a bytes field and its own help.
+  (define specs (hash-ref (ops-specs "en") 'ops))
+  (check-equal? (map (lambda (o) (hash-ref o 'id)) specs)
+                '("fill" "patch" "pad" "offset" "crop" "merge" "convert" "crc"))
+  (define patch-spec (list-ref specs 1))
+  (check-equal? (map (lambda (f) (hash-ref f 'kind)) (hash-ref patch-spec 'fields))
+                '("address" "bytes"))
+  (check-equal? (hash-ref patch-spec 'help) (hash-ref en-strings 'field-help-patch))
+  (check-false (hash-ref (car specs) 'help))
+  ;; Key parity: en and zh carry the same keys (中英同源), so no message
+  ;; can fall back to its raw key in one language.
+  (check-equal? (sort (hash-keys en-strings) symbol<?)
+                (sort (hash-keys zh-strings) symbol<?))
+  (reset-workspace))

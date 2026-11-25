@@ -10,6 +10,8 @@
 
   const state = {
     specs: [],
+    // A #<op-id> hash opens a card directly (also lets the acceptance
+    // script reach a specific operation).
     selected: 'fill',
     values: {},
     summary: null,
@@ -72,6 +74,14 @@
     if (field.kind === 'note') {
       return '<p class="help">' + esc(field.label) + '</p>';
     }
+    if (field.kind === 'bytes') {
+      // Free-form hex payload: the engine validates; the placeholder is an
+      // example, never a value.
+      return '<div class="field"><label for="param-' + esc(field.key) + '">' + esc(field.label) + '</label>' +
+        '<input class="input" id="param-' + esc(field.key) + '" data-param="' + esc(field.key) + '" value="' + esc(value) + '"' +
+        (field.placeholder ? ' placeholder="' + esc(field.placeholder) + '"' : '') +
+        ' spellcheck="false" autocomplete="off"></div>';
+    }
     return '<div class="field"><label for="param-' + esc(field.key) + '">' + esc(field.label) + '</label>' +
       '<input class="input" id="param-' + esc(field.key) + '" data-param="' + esc(field.key) + '" value="' + esc(value) + '" spellcheck="false" autocomplete="off"></div>';
   }
@@ -98,7 +108,7 @@
       '<span class="mini-note">' + esc(t('ops.absolute-addresses')) + '</span></div>' +
       '<div class="form-section-body"><div class="form-grid">' +
       spec.fields.map(fieldHtml).join('') +
-      '</div><p class="help">' + esc(engineString('field-help')) + '</p></div></section>' +
+      '</div><p class="help">' + esc(spec.help || engineString('field-help')) + '</p></div></section>' +
       '<section class="preview-section"><div class="preview-section-head"><h3>' + esc(t('ops.preview-title')) + '</h3>' +
       '<span class="mini-note">' + esc(t('ops.preview-note')) + '</span></div>' +
       '<div class="preview-body" id="previewContent" aria-live="polite"></div></section></div>' +
@@ -353,17 +363,29 @@
       });
       state.values[spec.id] = entry;
     });
+    const wanted = window.location.hash.replace('#', '');
+    if (state.specs.some(function (spec) { return spec.id === wanted; })) {
+      state.selected = wanted;
+    }
+    // The top-bar count follows the engine's card list, never a typed number.
+    $('stagedCount').textContent = state.specs.length + ' ' + t('ops.operations-count');
+
+    function select(id) {
+      state.selected = id;
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, '', '#' + id);
+      }
+      render();
+    }
 
     $('opList').addEventListener('click', function (event) {
       const button = event.target.closest('[data-op]');
       if (button) {
-        state.selected = button.dataset.op;
-        render();
+        select(button.dataset.op);
       }
     });
     $('compactOperation').addEventListener('change', function (event) {
-      state.selected = event.target.value;
-      render();
+      select(event.target.value);
     });
     $('cancelApply').addEventListener('click', function () { $('confirmApply').close(); });
     $('commitApply').addEventListener('click', applyPending);

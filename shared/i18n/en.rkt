@@ -21,6 +21,8 @@
    ;; ---- operation names / descriptions ----
    'op-fill-name "Fill"
    'op-fill-desc "Materialise a missing range"
+   'op-patch-name "Patch"
+   'op-patch-desc "Write bytes at an absolute address"
    'op-pad-name "Pad to alignment"
    'op-pad-desc "Extend the final segment"
    'op-offset-name "Offset"
@@ -40,6 +42,10 @@
    'field-start "Start address"
    'field-end "End address · inclusive"
    'field-value "Fill value"
+   'field-address "Address"
+   'field-bytes "Bytes · hex pairs"
+   'field-bytes-placeholder "48 B1 08 47"
+   'field-help-patch "Bytes are hexadecimal pairs, e.g. 48 B1 08 47 or 48B10847. Preview is bounded to 1 MiB. Apply commits to the working copy."
    'field-alignment "Alignment · bytes"
    'field-delta "Signed offset"
    'field-base "Destination base"
@@ -51,6 +57,8 @@
 
    ;; ---- operation note keys (preview copy) ----
    'note-fill "Fill the range with the chosen value. Addresses stay absolute; existing bytes inside the range are overwritten."
+   'note-patch "Write the bytes at the address. Every byte overwrites populated data; addresses stay absolute."
+   'note-patch-gap "Write the bytes at the address. Some of them land in an unmapped range: they are new data, marked + below. A gap is never read as 0xFF."
    'note-pad-aligned "Already aligned; no bytes added."
    'note-pad "Append bytes through the alignment boundary. The pad is data: it is written on save like any other byte."
    'note-offset "Relocate every populated address by the signed delta; payload stays unchanged."
@@ -86,6 +94,9 @@
    'err-start-above-end "Start must be at or below end."
    'err-range-too-large "Keep this operation to 1 MiB or less."
    'err-value-out-of-range "Fill value must be a byte (0x00-0xFF)."
+   'err-bytes-empty "Enter at least one byte to patch."
+   'err-bytes-format "Enter bytes as hexadecimal pairs, e.g. 48 B1 08 47 or 48B10847; 0x prefixes are optional."
+   'err-patch-nochange "Nothing to patch: the working copy already holds these bytes at this address."
    'err-alignment-invalid "Alignment must be a power of two, from 1 through 1048576."
    'err-empty-image "No image is loaded."
    'err-crop-empty "This crop would produce an empty image. Choose a range containing data."

@@ -136,7 +136,8 @@ Semantic roles: `--bg`/`--text` form the canvas pair; `--surface-1/2/3` and `--i
 ## Interaction baseline
 
 - **Hover-explain:** existing record explain popovers stay intact; teaching bytes expose field labels on hover and keyboard focus.
-- **Edit-preview:** Fill, Pad to alignment, Offset, Crop, Merge, Convert and CRC have live parameter-driven previews. Changes report additions, removals and modified bytes with a bounded first-12-byte diff. Before/after canonical HEX record counts are computed; source text remains unchanged. Canonical records are newly generated output previews and may differ from the supplied line grouping.
+- **Edit-preview:** Fill, Patch, Pad to alignment, Offset, Crop, Merge, Convert and CRC have live parameter-driven previews. Changes report additions, removals and modified bytes with a bounded first-12-byte diff. Before/after canonical HEX record counts are computed; source text remains unchanged. Canonical records are newly generated output previews and may differ from the supplied line grouping.
+- **Patch:** an absolute address plus hexadecimal byte pairs (`48 B1 08 47` or `48B10847`; separators and `0x` prefixes are optional). Bytes overwrite populated data. A byte that lands in an unmapped range is new data: it is counted as added, marked `+` in the diff and named in the preview note — a gap is never treated as `0xFF`. A patch whose bytes are already present blocks Apply. `operations.html#<operation-id>` opens a card directly and the hash follows the selection, so a card can be reached by link and by the acceptance script.
 - **Apply:** confirmation snapshots the preview and revision. Commit updates the current page's byte map, format, map, totals and gate. Reset restores the supplied sample. No write-back to disk or cross-view session sharing is claimed.
 - **Merge:** source segments are the supplied FBL and APP. Separate placement succeeds; “Overlap FBL · error” demonstrates a blocked collision. Resolve through an explicit non-overlapping APP base; never silently overwrite.
 - **Convert strategy:** HEX/SREC/BIN target, S1/S2/S3 address width, 16/32 data bytes per line, 0x00/0xFF gap fill, BIN base. Width loss blocks conversion; S3 is needed for the supplied 32-bit absolute addresses. Sparse text output retains gaps. BIN materialises gaps and carries an explicit base assumption. No download/export is added.
@@ -173,7 +174,7 @@ Professional firmware tooling targets desktop macOS/Windows/Linux; no mobile pro
 
 ## Out of scope — phase 2
 
-Header templates, vector table tooling, and a dedicated image-to-image diff workspace belong to phase 2. The required operation preview diff remains in scope. Native RPC integration, production file writing, shared multi-view sessions, large-file processing, persistence across reloads and standalone export are not represented as implemented engine features.
+Header templates, vector table tooling, and a dedicated image-to-image diff workspace belong to phase 2. The required operation preview diff remains in scope. Starting a patch from a byte selection in the Image view, and marking source records that no longer match the working copy after a patch, are not designed yet. Native RPC integration, production file writing, shared multi-view sessions, large-file processing, persistence across reloads and standalone export are not represented as implemented engine features.
 
 
 ## 2026-11-15 navigation repair
@@ -205,3 +206,18 @@ Implemented files: `prototype/shared.css` and all four screen HTML files; this c
 ### Verification constraint
 
 The installed headless browser exited during launch (SIGABRT); the browser-access host was unavailable, and native OpenDesign preview access was not approved. No screenshots were captured and no theme-click or operation-flow test completed in this pass. These are concrete verification gaps, not evidence that the layouts pass. The layout exit condition and final user acceptance remain open.
+
+
+## Patch operation — 2026-11-25
+
+Added prototype-first (issue #5): a Patch card on the Operations screen, second in the list after Fill. Contract is the Patch bullet under Interaction baseline. No new token, component or layout was introduced; the card reuses the operation form, and the byte field is a plain text input with an example placeholder.
+
+| Check | Result | Evidence / limit |
+| --- | --- | --- |
+| Prototype script syntax | Passed | All inline scripts on `prototype/operations.html` parse with Node 22. |
+| Prototype patch logic | Passed in a stubbed DOM | Default patch (`0x08008010` ← `00 BF`) changes 2 bytes; bytes landing in a hole are reported as added; identical bytes, malformed pairs, empty input and address overflow each block with a specific message. Not a browser rendering test. |
+| Product implementation | Passed on Windows | Rendered in the real WebView (2000×1100 window at 150%, about 1300 CSS px): Patch card from `api/ops/specs`, diff reports 2 changed bytes, gate ready, zh copy intact. Screenshots stay outside the repo (the CLI cannot attach images to issues). macOS and Linux WebView rendering not inspected. |
+| Operation-list grid | Fixed in prototype and product | The native screenshot showed card names wrapping two characters per line: `.op-item` reserved a 26px icon column that the markup no longer fills, so the name landed in it. The template is now `minmax(0, 1fr) auto`, re-checked in both renderings on Windows. |
+| Top-bar operation count | Fixed | The badge was typed as "7 operations"; it now follows the engine's card list and is localized. |
+| Known gap left open | Open | `public/shared.css` does not yet carry the responsive rules and 12px type floor of design pass `f9fe410`: at the same width the product keeps three columns where the prototype moves the inspector below the main pane. A separate alignment slice, not part of the Patch change. |
+| User acceptance | Open | Only the user can close this condition. |

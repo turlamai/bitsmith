@@ -141,7 +141,7 @@
       <div class="topbar-spacer"></div>
       <div class="topbar-actions">
         <span class="local-state">Local only</span>
-        <span class="badge" id="stagedCount">7 operations</span>
+        <span class="badge" id="stagedCount">8 operations</span>
         <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Switch to light theme">
           <svg class="od-icon icon-moon" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M20 15.2A8.2 8.2 0 0 1 8.8 4a8.4 8.4 0 1 0 11.2 11.2Z"></path>
@@ -219,7 +219,7 @@
             <div class="check-list" id="gateChecks"></div>
           </div>
           <div class="inspector-section">
-            <div class="inspector-title"><span>Scope</span><span class="mono" id="scopeRecords">7 operations</span></div>
+            <div class="inspector-title"><span>Scope</span><span class="mono" id="scopeRecords">8 operations</span></div>
             <dl class="kv-list" id="scopeList">
               <dt>Source</dt><dd>FBL_APP_combined.dat</dd>
               <dt>Format</dt><dd>Intel HEX</dd>
@@ -276,6 +276,7 @@
     const original=loadSample(); let working=new Map(original), format='HEX', revision=0, selected='fill', candidate=null, pending=null;
     const specs=[
       {id:'fill',name:'Fill',desc:'Materialise a missing range',fields:[['start','Start address','0x08000020'],['end','End address · inclusive','0x08007FFF'],['value','Fill value','0xFF',['0x00','0xFF']]]},
+      {id:'patch',name:'Patch',desc:'Write bytes at an absolute address',help:'Bytes are hexadecimal pairs — 48 B1 08 47 or 48B10847; separators are optional. Preview is bounded to 1 MiB. Apply affects this page only.',fields:[['address','Address','0x08008010'],['bytes','Bytes · hex pairs','00 BF',null,'bytes']]},
       {id:'pad',name:'Pad to alignment',desc:'Extend the final segment',fields:[['alignment','Alignment · bytes','0x1000'],['value','Pad value','0xFF',['0x00','0xFF']]]},
       {id:'offset',name:'Offset',desc:'Relocate absolute addresses',fields:[['delta','Signed offset','0x8000']]},
       {id:'crop',name:'Crop',desc:'Keep an inclusive address range',fields:[['start','First address to keep','0x08008000'],['end','Last address to keep','0x08009FFF']]},
@@ -284,6 +285,9 @@
       {id:'crc',name:'CRC',desc:'Compute from actual working bytes',fields:[['preset','Preset','CRC-32/MPEG-2',['CRC-32/MPEG-2','CRC-32/ISO-HDLC','CRC-16/XMODEM','sum8']],['start','Start address','0x08008000'],['end','End address · inclusive','0x08009FFF'],['value','Unmapped-byte policy','0xFF',['0xFF','0x00','Reject gaps']]]}
     ];
     const values=Object.fromEntries(specs.map(op=>[op.id,Object.fromEntries(op.fields.map(f=>[f[0],f[2]]))]));
+    // #<operation-id> opens a card directly; the hash follows the selection.
+    const wanted=location.hash.slice(1); if(specs.some(o=>o.id===wanted)) selected=wanted;
+    $('stagedCount').textContent=specs.length+' operations';;
     const presets={
       'CRC-32/MPEG-2':{bits:32,poly:0x04C11DB7,init:0xFFFFFFFF,xor:0xFFFFFFFF,reflect:false,note:'Automotive project preset · xorout follows the supplied brief (0xFFFFFFFF). Conventional MPEG-2 uses xorout 0x00000000.'},
       'CRC-32/ISO-HDLC':{bits:32,poly:0x04C11DB7,init:0xFFFFFFFF,xor:0xFFFFFFFF,reflect:true,note:'zlib-compatible · reflected input and output.'},
@@ -293,6 +297,8 @@
     function ranges(map){const keys=[...map.keys()].sort((a,b)=>a-b),out=[];for(const a of keys){const last=out.at(-1);if(last&&a===last[1]+1)last[1]=a;else out.push([a,a]);}return out;}
     function bounds(map){const r=ranges(map);return r.length?[r[0][0],r.at(-1)[1]]:[0,0];}
     function rangeInput(v){const a=parse(v.start),b=parse(v.end);if(a>b)throw Error('Start must be at or below end.');if(b>0xFFFFFFFF)throw Error('Address exceeds 0xFFFFFFFF.');if(b-a+1>1048576)throw Error('Keep this local preview to 1 MiB or less.');return[a,b];}
+    // Patch payload: hex pairs; separators (space, comma, semicolon, colon, hyphen) and 0x prefixes are optional.
+    function patchBytes(text){const compact=String(text).replace(/0[xX]/g,'').replace(/[\s,;:\-]+/g,'');if(!compact)throw Error('Enter at least one byte to patch.');if(!/^(?:[0-9a-fA-F]{2})+$/.test(compact))throw Error('Enter bytes as hexadecimal pairs, e.g. 48 B1 08 47 or 48B10847.');if(compact.length/2>1048576)throw Error('Keep this local preview to 1 MiB or less.');return compact.match(/../g).map(x=>parseInt(x,16));}
     function digest(bytes,p){if(p.bits===8)return bytes.reduce((a,b)=>(a+b)&255,0);let c=p.init;for(const b of bytes){if(p.reflect){c^=b;for(let k=0;k<8;k++)c=(c>>>1)^((c&1)?0xEDB88320:0);}else if(p.bits===16){c^=b<<8;for(let k=0;k<8;k++)c=((c<<1)^((c&0x8000)?p.poly:0))&65535;}else{c^=b<<24;for(let k=0;k<8;k++)c=((c<<1)^((c&0x80000000)?p.poly:0))>>>0;}}return (c^p.xor)>>>0;}
     function record(address,data,target,width){
       if(target==='SREC'){const n={S1:2,S2:3,S3:4}[width],a=[];for(let i=n-1;i>=0;i--)a.push(Math.floor(address/2**(i*8))&255);const b=[data.length+n+1,...a,...data];return width+b.map(x=>hex(x,2)).join('')+hex((~b.reduce((s,x)=>s+x,0))&255,2);}
@@ -302,6 +308,7 @@
     function compute(){
       const v=values[selected],after=new Map(working);let note='',outFormat=format,output='',crc=null;
       if(selected==='fill'){const[a,b]=rangeInput(v),value=parse(v.value);for(let x=a;x<=b;x++)after.set(x,value);note=`Fill ${addr(a)}–${addr(b)} with ${v.value}.`;}
+      if(selected==='patch'){const a=parse(v.address),bytes=patchBytes(v.bytes);if(a+bytes.length-1>0xFFFFFFFF)throw Error('Address exceeds 0xFFFFFFFF.');let fresh=0;bytes.forEach((b,i)=>{if(!working.has(a+i))fresh++;after.set(a+i,b);});note=fresh?`Write ${bytes.length} bytes at ${addr(a)}–${addr(a+bytes.length-1)}. ${fresh} of them land in an unmapped range: they are new data, marked + below — never a silent 0xFF.`:`Write ${bytes.length} bytes at ${addr(a)}–${addr(a+bytes.length-1)}. Every byte overwrites populated data.`;}
       if(selected==='pad'){const n=parse(v.alignment);if(!n||n>1048576||(n&(n-1)))throw Error('Alignment must be a power of two, from 1 through 1048576.');const end=bounds(working)[1],stop=Math.ceil((end+1)/n)*n;if(stop>0x100000000)throw Error('Padding exceeds the 32-bit address space.');for(let a=end+1;a<stop;a++)after.set(a,parse(v.value));note=stop===end+1?'Already aligned; no bytes added.':`Append ${stop-end-1} bytes through ${addr(stop-1)}.`;}
       if(selected==='offset'){const text=v.delta.trim(),negative=text.startsWith('-'),n=parse(negative?text.slice(1):text)*(negative?-1:1);after.clear();working.forEach((b,a)=>{if(a+n<0||a+n>0xFFFFFFFF)throw Error('Relocation would leave the 32-bit address space.');after.set(a+n,b);});note=`Relocate every populated address by ${n<0?'-':'+'}${addr(Math.abs(n))}; payload stays unchanged.`;}
       if(selected==='crop'){const[a,b]=rangeInput(v);for(const x of after.keys())if(x<a||x>b)after.delete(x);if(!after.size)throw Error('This crop would produce an empty image. Choose a range containing data.');note=`Keep ${addr(a)}–${addr(b)}; remove all other populated bytes.`;}
@@ -316,6 +323,7 @@
       let added=0,removed=0,changed=0;const changes=[];
       for(const[a,b]of working)if(!after.has(a)){removed++;if(changes.length<12)changes.push(['−',`${addr(a)}  ${hex(b,2)} → absent`]);}else if(after.get(a)!==b){changed++;if(changes.length<12)changes.push(['~',`${addr(a)}  ${hex(b,2)} → ${hex(after.get(a),2)}`]);}
       for(const[a,b]of after)if(!working.has(a)){added++;if(changes.length<12)changes.push(['+',`${addr(a)}  absent → ${hex(b,2)}`]);}
+      if(selected==='patch'&&!added&&!changed)throw Error('Nothing to patch: the working copy already holds these bytes at this address.');
       return {after,note,outFormat,output,crc,added,removed,changed,changes,revision};
     }
     function mapHTML(map,lo,hi){let parts=[],at=lo;for(const[a,b]of ranges(map)){if(a>at)parts.push([a-at,'gap',`${addr(at)}–${addr(a-1)} unmapped`]);parts.push([b-a+1,a<0x08008000?'fbl':'app',`${addr(a)}–${addr(b)} populated`]);at=b+1;}if(at<=hi)parts.push([hi-at+1,'gap',`${addr(at)}–${addr(hi)} unmapped`]);return parts.map(([n,c,title])=>`<span class="map-part ${c}" style="flex:${n}" title="${title}" aria-label="${title}"></span>`).join('');}
@@ -342,12 +350,12 @@
     function render(){const op=specs.find(o=>o.id===selected),v=values[selected];
       $('opList').innerHTML=specs.map(o=>`<button type="button" class="op-item" data-op="${o.id}" aria-current="${o.id===selected}"><span class="op-main"><span class="op-name" style="display:block">${o.name}</span><span class="op-desc" style="display:block">${o.desc}</span></span><span class="op-badge">${o.id==='crc'?'read':'edit'}</span></button>`).join('');
       $('compactOperation').innerHTML=specs.map(o=>`<option value="${o.id}" ${o.id===selected?'selected':''}>${o.name}</option>`).join('');
-      $('operationDetail').innerHTML=`<div class="op-detail-head"><div class="op-detail-title"><h2>${op.name}</h2><p>${op.desc}. Edit parameters, inspect the before/after effect, then apply to the local working copy.</p></div></div><div class="op-body"><section class="form-section"><div class="form-section-head"><h3>Parameters</h3><span class="mini-note">absolute addresses</span></div><div class="form-section-body"><div class="form-grid">${op.fields.map(([key,label,,options])=>`<div class="field"><label for="param-${key}">${label}</label>${options?`<select class="select" id="param-${key}" data-param="${key}">${options.map(x=>`<option ${x===v[key]?'selected':''}>${esc(x)}</option>`).join('')}</select>`:`<input class="input" id="param-${key}" data-param="${key}" value="${esc(v[key])}" spellcheck="false" autocomplete="off">`}</div>`).join('')}</div><p class="help">Ranges are inclusive. Preview is bounded to 1 MiB. Apply affects this page only.</p></div></section><section class="preview-section"><div class="preview-section-head"><h3>Before / after preview</h3><span class="mini-note">recomputed from parameters</span></div><div class="preview-body" id="previewContent" aria-live="polite"></div></section></div><div class="op-apply-bar"><button class="btn" id="resetBtn" type="button">Reset sample</button><span class="toolbar-spacer"></span><button class="btn btn-primary" id="applyBtn" type="button">Review and apply</button></div>`;
+      $('operationDetail').innerHTML=`<div class="op-detail-head"><div class="op-detail-title"><h2>${op.name}</h2><p>${op.desc}. Edit parameters, inspect the before/after effect, then apply to the local working copy.</p></div></div><div class="op-body"><section class="form-section"><div class="form-section-head"><h3>Parameters</h3><span class="mini-note">absolute addresses</span></div><div class="form-section-body"><div class="form-grid">${op.fields.map(([key,label,,options,kind])=>`<div class="field"><label for="param-${key}">${label}</label>${options?`<select class="select" id="param-${key}" data-param="${key}">${options.map(x=>`<option ${x===v[key]?'selected':''}>${esc(x)}</option>`).join('')}</select>`:`<input class="input" id="param-${key}" data-param="${key}" value="${esc(v[key])}"${kind==='bytes'?' placeholder="48 B1 08 47"':''} spellcheck="false" autocomplete="off">`}</div>`).join('')}</div><p class="help">${esc(op.help||'Ranges are inclusive. Preview is bounded to 1 MiB. Apply affects this page only.')}</p></div></section><section class="preview-section"><div class="preview-section-head"><h3>Before / after preview</h3><span class="mini-note">recomputed from parameters</span></div><div class="preview-body" id="previewContent" aria-live="polite"></div></section></div><div class="op-apply-bar"><button class="btn" id="resetBtn" type="button">Reset sample</button><span class="toolbar-spacer"></span><button class="btn btn-primary" id="applyBtn" type="button">Review and apply</button></div>`;
       if(selected==='convert'){ $('param-width').disabled=v.target!=='SREC';$('param-base').disabled=v.target!=='BIN';$('param-value').disabled=v.target!=='BIN';$('param-line').disabled=v.target==='BIN'; }
       preview();
     }
-    $('opList').addEventListener('click',e=>{const b=e.target.closest('[data-op]');if(b){selected=b.dataset.op;render();}});
-    $('compactOperation').addEventListener('change',e=>{selected=e.target.value;render();});
+    $('opList').addEventListener('click',e=>{const b=e.target.closest('[data-op]');if(b){selected=b.dataset.op;history.replaceState(null,'','#'+selected);render();}});
+    $('compactOperation').addEventListener('change',e=>{selected=e.target.value;history.replaceState(null,'','#'+selected);render();});
     $('operationDetail').addEventListener('input',e=>{if(e.target.dataset.param){values[selected][e.target.dataset.param]=e.target.value;preview();}});
     $('operationDetail').addEventListener('change',e=>{if(e.target.dataset.param){values[selected][e.target.dataset.param]=e.target.value;if(selected==='convert'&&e.target.dataset.param==='target'){render();$('param-target').focus();}else preview();}});
     const dialog=$('confirmApply');
