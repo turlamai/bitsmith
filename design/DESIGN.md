@@ -28,7 +28,7 @@ Owner requirement: align Bitsmith with **2026-11-20-minimal-family** while retai
 - Sub-12px text declarations and font tokens are removed. **Exceptions: none.** Interface roles are 12 / 13 / 14 / 18 / 24px; data/address/byte annotations are at least 12px in the system monospace role.
 - Spacing uses 4 / 8 / 12 / 16 / 24 / 32 / 48px. Corner roles: inset 4px, control 8px, panel 12px. Hairlines and baseline/icon geometry are not spacing roles.
 - Graphite dark is the default; the independently authored light theme uses the same semantic roles. Both themes cover canvas, surfaces, text, supporting text, borders, accent and foreground, selection, focus, success, warning, error and data-region colors.
-- The existing theme button is rendered as a monochrome ◐ icon button with an accessible target-theme name, pressed state, keyboard focus and existing local theme preference.
+- The theme control is a quiet icon button: a 16px line icon (moon while dark, sun while light) with no border or fill of its own, an accessible target-theme name, pressed state, keyboard focus and the existing local theme preference. Revised 2026-11-26; see "Prototype polish — 2026-11-26".
 - Hatch, byte-grid graphics, hairline rules and check marks are functional content and remain. No decorative gradients, glass or glow are introduced.
 - At 1024–1320px the inspector moves below the main pane, preserving access rather than shrinking text. Data tables and byte grids have intentional internal scrolling; page chrome must not clip. At wider desktop sizes the three-column workbench remains.
 - Source checkpoint: no git metadata is present in this OpenDesign project, so a starting commit SHA is unavailable.
@@ -196,7 +196,7 @@ Implemented files: `prototype/shared.css` and all four screen HTML files; this c
 | Font-size floor | Source passed | Zero sub-12px declarations across shared.css and four screens; all nine existing font-size tokens resolve to 12 / 13 / 14 / 18 / 24px. Runtime/browser-default text is not measured. |
 | Semantic contrast | Numerical passed | 42 pairings per theme: primary/supporting/faint/accent/gap text against seven neutral/selection surfaces, six status/data pairs, and the accent foreground pair. Minimum dark 5.16:1; minimum light 5.49:1. Gradients, compositing, hover/focus rendering and the full rendered DOM were not measured. |
 | Functional graphics | Source passed | Four repeating-linear-gradient declarations retained in shared.css, plus the existing page-level gap swatch; hairline rules and check marks retained. |
-| Theme mechanism | Implemented; runtime unverified | Existing preference and event handlers retained; four buttons share ◐ appearance, target-theme label, pressed state and focus styling. |
+| Theme mechanism | Implemented; runtime unverified | Existing preference and event handlers retained; four buttons share the appearance, target-theme label, pressed state and focus styling. The ◐ glyph this row first described was replaced on 2026-11-26. |
 | JavaScript syntax | Passed | All 12 inline scripts parse with Node. This is not a runtime interaction test. |
 | Dependencies and links | Source passed | No remote script/style/image/font references or imports; local href/src targets resolve. |
 | Sample content | Retained | The known corrupted HEX line and S7 termination record remain verbatim; edits target font declarations, spacing, color tokens and theme accessibility rather than firmware data. |
@@ -208,7 +208,25 @@ Implemented files: `prototype/shared.css` and all four screen HTML files; this c
 The installed headless browser exited during launch (SIGABRT); the browser-access host was unavailable, and native OpenDesign preview access was not approved. No screenshots were captured and no theme-click or operation-flow test completed in this pass. These are concrete verification gaps, not evidence that the layouts pass. The layout exit condition and final user acceptance remain open.
 
 
-## Patch operation — 2026-11-25
+## Prototype polish — 2026-11-26
+
+Owner review of the implemented product found the theme control too loud and asked for a full pass over the prototype. Base `3a02b96`. Standard revision `2026-11-20-minimal-family`. No token value, component, copy or firmware sample byte changed.
+
+- **Theme control.** The 24px `◐` glyph inside a strongly bordered square was the loudest element in the top bar. It is now a plain `.icon-btn` carrying the sun/moon line icons that the markup already held: 16px, muted colour, transparent at rest. Icon = the theme you are in; `aria-label` and `title` name the theme a click switches to.
+- **Sidebar values.** The 2026-11-22 type floor left 12px values in columns sized for 10px: addresses split mid-token (`0x08009` / `FFF`), `KiB` split, segment addresses truncated to `0x08008000–…`. `.meta-row` now wraps a too-wide value to its own line; `break-all` and `overflow-wrap: anywhere` are replaced by `break-word`, so a range breaks after its en dash and only as a last resort inside a token. `.segment-addr` and the Image view `.mini-segment-row` keep the whole address visible.
+- **Verify strip.** The copy drops below the count instead of being squeezed beside it; title and description are separated.
+- **Address axis.** Under 1200px the 12.5% label collided with the first one; that minor tick is now hidden below the breakpoint and the rest stay true to scale.
+- **Accessible names.** The two unlabelled segment-map buttons (FBL, explicit 0xFF) carry `aria-label`. The prototype stores its choice under `bitsmith-theme` on Records, Image and Learn.
+
+| Check | Result | Evidence / limit |
+| --- | --- | --- |
+| Rendered type floor and contrast | Passed | Headless Chromium, four screens at 1024×768, 1280×800 and 1600×900, both themes: zero visible text nodes under 12px, zero text pairs under 4.5:1. The contrast check compares computed colour with the composited background and skips gradients. |
+| Layout at three widths | Passed for the changed regions | Same renders: no horizontal overflow, no page error, no failed load. Sidebar crops at 2× inspected in both themes. 200% text zoom not checked. |
+| Theme control | Passed | 36×36 button, 16px icon, transparent border and background at rest in both themes; crops inspected. Click path not re-driven in the prototype; the product click was verified in 2026-11-25 and its handler is unchanged. |
+| Design sync gate | Passed | `scripts/check-design-sync.py`: stylesheet identical, page styles aligned, no type below 12px. |
+| Product rendering | Passed on macOS | `raco glaze verify`: ALL PASS, real WKWebView, engine and sample. Records and Image inspected in dark/en: quiet moon control, readable sidebar values. Windows and Linux WebView, and zh copy in the native host, not inspected. |
+| Address axis in the product | Difference noted | The product script rebuilds the axis with only the first and last label; the prototype keeps six static ticks. Unchanged here. |
+| Left open | — | `operations.html` still writes the retired `imagebench-theme` key; its handler sits inside the region of the open header-templates pull request, so it is left for that change. At 1024–1320px the inspector still takes a fixed 192px below the main pane, which leaves about 416px for the main content at 800px height: a layout decision for the owner, not changed. |
 
 Added prototype-first (issue #5): a Patch card on the Operations screen, second in the list after Fill. Contract is the Patch bullet under Interaction baseline. No new token, component or layout was introduced; the card reuses the operation form, and the byte field is a plain text input with an example placeholder.
 
@@ -222,6 +240,6 @@ Added prototype-first (issue #5): a Patch card on the Operations screen, second 
 | Product alignment with `f9fe410` | Closed in a follow-up slice | `public/shared.css` is byte-identical to the prototype stylesheet and the four product pages start from the prototype style blocks. `scripts/check-design-sync.py` runs in CI (`design` job) and fails on either drift or on any type size under 12px. Before the slice `public/` carried 119 declarations under 12px. |
 | Product rendering after alignment | Passed on Windows | Real WebView, dark/zh at about 1733 and 1200 CSS px: three columns are kept wide, and the inspector moves below the main pane at 1200 as the contract states. Light/en inspected at both widths. macOS and Linux WebView rendering not inspected. Screenshots stay outside the repo. |
 | Theme button in the product | Fixed; click verified | v0.1.0 rendered the ◐ button without any handler, so the light theme was unreachable in the product. It now toggles, stores `bitsmith-theme`, and keeps `aria-pressed` plus a target-theme label in both languages. The prototype reads `bitsmith-theme` first and falls back to the retired `imagebench-theme` key. Pressed once in the real WebView: Operations and then Records render light in the same session. Left open: on Windows the choice does not survive a relaunch, because glaze opens a fresh WebView2 profile per launch unless `GLAZE_WEBVIEW2_DATA_DIR` is set. |
-| Sidebar address range | Open | `kv-list` values wrap inside a hex token at the 12px floor (`0x08000000–0x0` / `8009FFF`) in prototype and product alike. The engine does not break after an en dash, so this needs a break opportunity in the markup or a range formatter; no CSS-only fix was found. |
+| Sidebar address range | Fixed 2026-11-26 in prototype and product CSS | The break came from `word-break: break-all` and `overflow-wrap: anywhere` on sidebar values, not from the engine: browsers already break after an en dash. Values now wrap to their own full-width line first and split only after the dash. See "Prototype polish — 2026-11-26". |
 | Brand case | Applied | Lowercase **bitsmith** in product page titles, wordmark and copy, as the contract states. The README H1 still reads `Bitsmith`. |
 | User acceptance | Open | Only the user can close this condition. |

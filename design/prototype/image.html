@@ -224,8 +224,9 @@
     .image-toolbar-form {flex-wrap:wrap;gap:var(--space-2)}
 .image-toolbar-form .input {height:auto;min-height:32px;font-size:var(--text-xs)}
 .hex-byte.is-missing {opacity:1;color:var(--faint)}
-.mini-segment-row {flex-wrap:wrap;gap:var(--space-2)}
-.mini-segment-row .mini-addr {margin-left:0;font-size:var(--text-xs)}
+/* Name on the first line, the address indented under it and wrapping after the range dash. */
+.mini-segment-row {display:grid;grid-template-columns:7px minmax(0,1fr);gap:var(--space-1) var(--space-2)}
+.mini-segment-row .mini-addr {grid-column:2;margin-left:0;font-size:var(--text-xs);white-space:normal;overflow-wrap:break-word;text-align:left}
   </style>
 </head>
 <body>
@@ -391,6 +392,7 @@
 
                   <div class="segment-track" aria-label="Address map from 0x08000000 to 0x08009FFF">
                     <button class="segment-block fbl" type="button" style="left:0;width:0.08%;min-width:4px"
+                      aria-label="FBL segment, 0x08000000–0x0800001F, 32 bytes"
                       data-name="FBL" data-range="0x08000000–0x0800001F" data-size="32 bytes" data-kind="FBL segment"
                       data-note="Flash bootloader. Contiguous data records; checksums verify.">
                       <span class="block-label"></span>
@@ -406,6 +408,7 @@
                       <span class="block-label">APP · 8 KiB</span>
                     </button>
                     <button class="segment-block ff" type="button" style="left:calc(100% - 4px);width:4px"
+                      aria-label="Explicit 0xFF fill, 0x08009FF0–0x08009FFF, 16 bytes"
                       data-name="Explicit 0xFF" data-range="0x08009FF0–0x08009FFF" data-size="16 bytes" data-kind="Explicit fill"
                       data-note="These bytes are present and equal 0xFF; they are not a gap.">
                       <span class="block-label"></span>
@@ -414,7 +417,7 @@
 
                   <div class="axis" aria-hidden="true">
                     <span class="axis-tick" style="left:0">0x08000000</span>
-                    <span class="axis-tick" style="left:12.5%">0x08002000</span>
+                    <span class="axis-tick axis-tick-minor" style="left:12.5%">0x08002000</span>
                     <span class="axis-tick" style="left:25%">0x08004000</span>
                     <span class="axis-tick" style="left:37.5%">0x08006000</span>
                     <span class="axis-tick" style="left:50%">0x08008000</span>
@@ -917,7 +920,7 @@
         button.addEventListener('click', function () {
           const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
           document.documentElement.dataset.theme = next;
-          try { localStorage.setItem('imagebench-theme', next); } catch (error) {}
+          try { localStorage.setItem('bitsmith-theme', next); } catch (error) {}
           updateThemeLabel();
         });
       });

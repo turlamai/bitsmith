@@ -884,9 +884,12 @@ html[data-theme="light"] .theme-toggle .icon-moon {
 
 .meta-row {
   display: flex;
+  /* A value too wide for the label line drops to its own full-width line instead of
+     splitting an address or a unit mid-token. */
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap:12px;
+  gap:2px 12px;
   padding:8px 0;
   border-bottom: 1px solid var(--border);
   font-size: var(--text-xs);
@@ -905,16 +908,18 @@ html[data-theme="light"] .theme-toggle .icon-moon {
   color: var(--text);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  text-align: right;
-  word-break: break-all;
+  text-align: left;
+  /* Only an unbreakable token longer than the whole row may split; ranges break after "–". */
+  overflow-wrap: break-word;
 }
 
 .verify-strip {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap:8px;
+  gap:4px var(--space-3);
   margin:8px 12px 12px;
-  padding:8px 8px;
+  padding:var(--space-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface-2);
@@ -939,14 +944,17 @@ html[data-theme="light"] .theme-toggle .icon-moon {
 }
 
 .verify-copy {
+  /* In the narrow sidebar the copy drops below the count instead of being squeezed beside it. */
+  flex: 1 1 140px;
   min-width: 0;
   color: var(--muted);
   font-size: var(--text-xs);
-  line-height: 1.35;
+  line-height: 1.5;
 }
 
 .verify-copy strong {
   display: block;
+  margin-bottom:2px;
   color: var(--text);
   font-size: var(--text-xs);
   font-weight: 600;
@@ -1011,10 +1019,9 @@ html[data-theme="light"] .theme-toggle .icon-moon {
   color: var(--faint);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  line-height: 1.35;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.4;
+  /* Keep the whole address visible: wrap after the range dash, never truncate the end address. */
+  overflow-wrap: break-word;
 }
 
 .segment-size {
@@ -3650,10 +3657,8 @@ button, input, select, textarea { font-family:var(--font-sans); }
 .input, .select { height:auto; padding:var(--space-2) var(--space-3); font-size:var(--text-sm); border-color:var(--border-strong); line-height:1.5; }
 .btn-sm { min-height:32px; }
 .icon-btn { width:36px; height:36px; flex:none; }
-.theme-toggle::before { content:"◐"; display:block; font-family:var(--font-sans); font-size:24px; line-height:1; }
-.theme-toggle svg, html[data-theme="light"] .theme-toggle svg { display:none; }
-.theme-toggle { color:var(--text); background:var(--surface-2); border-color:var(--border-strong); }
-.theme-toggle:focus-visible { outline:2px solid var(--focus-ring); outline-offset:2px; }
+/* Theme control 2026-11-26: a plain quiet .icon-btn — 16px moon while dark, sun while light
+   (the sun/moon rules sit with .icon-btn above). No glyph, border or fill of its own. */
 .btn[disabled], .btn[aria-disabled="true"] { opacity:1; background:var(--surface-2); color:var(--muted); border-color:var(--border); }
 .main-toolbar { flex-wrap:wrap; min-height:64px; gap:var(--space-2) var(--space-3); }
 .toolbar-sub { white-space:normal !important; overflow-wrap:anywhere; }
@@ -3664,7 +3669,7 @@ button, input, select, textarea { font-family:var(--font-sans); }
 .sidebar-scroll, .inspector-scroll { padding:var(--space-4); }
 .side-nav-item { min-height:36px; }
 .kv-list { grid-template-columns:minmax(0,1fr) minmax(0,1.3fr); gap:var(--space-2); }
-.kv-list dd { overflow-wrap:anywhere; }
+.kv-list dd { overflow-wrap:break-word; }
 .check-row, .file-subline, .check-row span { overflow-wrap:anywhere; }
 .segment-row { flex-wrap:wrap; row-gap:var(--space-1); }
 .segment-addr { font-size:var(--text-xs); }
@@ -3719,7 +3724,9 @@ button, input, select, textarea { font-family:var(--font-sans); }
   .data-table {min-width:960px;}
   .topbar .local-state {display:none;}
 }
-@media (max-width:1100px) {.topbar .brand-version {display:none}.axis-tick:not(:first-child):not(:last-child){max-width:72px;white-space:normal;overflow-wrap:anywhere}}
+@media (max-width:1100px) {.topbar .brand-version {display:none}}
+/* Under ~1200px the 12.5% axis label collides with the first one (true-scale ticks); drop that minor tick. */
+@media (max-width:1200px) {.axis-tick-minor {display:none}}
 @media (max-width:900px) { .statusbar {min-height:64px} .workspace>.inspector {display:flex} }
 
 /* Labels stay in flow as font sizes grow; the map and hatch keep their geometry. */
