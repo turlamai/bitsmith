@@ -58,8 +58,8 @@ racket main.rkt            # run the desktop workbench
 
 ## Development and feedback
 
-Review current work in [Issues](https://github.com/turlamai/bitsmith/issues). Please report a minimal **synthetic** sample image, expected and actual addresses/checksums, and platform information; never upload confidential production firmware.
+Review current work in [Issues](https://github.com/turlamai/bitsmith/issues). Please report a minimal **synthetic** sample image, expected and actual addresses/checksums, and platform information; never upload confidential production firmware. Contribution rules and the checks to run before pushing are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-AGPL-3.0; see [LICENSE](LICENSE). The current family decision is [delivery before monetization](https://github.com/turlamai/turlamai.github.io/blob/master/PORTFOLIO.md); it does not alter the source license.
+AGPL-3.0; see [LICENSE](LICENSE). Third-party components shipped in the packages are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The current family decision is [delivery before monetization](https://github.com/turlamai/turlamai.github.io/blob/master/PORTFOLIO.md); it does not alter the source license.

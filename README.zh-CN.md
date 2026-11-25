@@ -58,8 +58,8 @@ racket main.rkt            # 运行桌面工作台
 
 ## 开发与反馈
 
-在 [Issues](https://github.com/turlamai/bitsmith/issues) 提交**合成的**最小测试镜像，写明预期与实际地址/校验和及平台信息；不要上传保密生产固件。
+在 [Issues](https://github.com/turlamai/bitsmith/issues) 提交**合成的**最小测试镜像，写明预期与实际地址/校验和及平台信息；不要上传保密生产固件。贡献规则与推送前要跑的检查见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 许可证
 
-AGPL-3.0，见 [LICENSE](LICENSE)。[全家族质量优先决策](https://github.com/turlamai/turlamai.github.io/blob/master/PORTFOLIO.zh-CN.md)不会更改现有源码许可。
+AGPL-3.0，见 [LICENSE](LICENSE)。安装包内随附的第三方组件见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。[全家族质量优先决策](https://github.com/turlamai/turlamai.github.io/blob/master/PORTFOLIO.zh-CN.md)不会更改现有源码许可。

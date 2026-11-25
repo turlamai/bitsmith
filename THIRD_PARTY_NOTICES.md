@@ -1,0 +1,62 @@
+# Third-party notices
+
+Bitsmith builds on the components below. Each entry names where the
+component enters the shipped artifacts and the license it is distributed
+under; consult the upstream license files for full terms. Bitsmith itself is
+AGPL-3.0 (see [LICENSE](LICENSE)). The Glaze toolchain is a first-party
+TurLamAI project consumed as a pinned package — not third-party code — so it
+is not listed here.
+
+## Racket CS runtime
+
+Every platform package embeds the Racket CS runtime
+([racket/racket](https://github.com/racket/racket), 9.x). Racket is
+distributed under the MIT license and the Apache License 2.0, at your
+option; the Racket CS runtime system additionally embeds Chez Scheme,
+distributed under the Apache License 2.0 (per Racket's `LICENSE.txt`).
+
+## Libraries shipped with the Racket distribution
+
+The macOS and Windows packages carry these libraries under `lib/plt/`,
+exactly as the Racket distribution ships them:
+
+- OpenSSL 3.4.1, Apache License 2.0 — on Windows as `libeay32.dll` and
+  `ssleay32.dll` (the distribution keeps the legacy file names), on macOS as
+  `libcrypto.3.dylib` and `libssl.3.dylib`.
+- SQLite 3.36.0 (`sqlite3.dll`, Windows), public domain.
+- GNU libiconv (`libiconv-2.dll`, Windows), GNU Lesser General Public
+  License, version 2.1.
+
+## crypto (Racket package)
+
+Update-feed signature verification uses the `crypto` Racket package
+(version 2.0), Apache License 2.0. It binds to libcrypto through FFI: the
+OpenSSL libraries listed above on macOS and Windows, the system (or Flatpak
+runtime) library on Linux.
+
+## WebKitGTK and GTK (Linux)
+
+The Linux host renders in a native WebKitGTK window. WebKitGTK and GTK are
+licensed under the GNU Lesser General Public License, version 2.1 or later,
+and are not bundled: every Linux shape takes them from the distribution (or,
+for the Flatpak, from the GNOME runtime) as runtime dependencies.
+
+## WebView2 (Windows)
+
+The Windows host renders in the system's Microsoft Edge WebView2 runtime (an
+evergreen OS component, not shipped here) and packages `WebView2Loader.dll`
+from the Microsoft Windows App SDK
+([microsoft/WindowsAppSDK](https://github.com/microsoft/WindowsAppSDK)),
+licensed under the MIT license. The WiX toolset builds the MSI at release
+time and does not ship inside it.
+
+## macOS
+
+The macOS build renders in the system WebKit (WKWebView). The app bundle
+carries the Racket CS runtime and the OpenSSL libraries listed above.
+
+## Build-time tooling (not shipped)
+
+appimagetool and flatpak-builder run only at release time. Beyond the
+launcher runtime an AppImage carries by design, they contribute no code to
+the release artifacts.
