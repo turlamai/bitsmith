@@ -99,6 +99,70 @@
 (check-exn exn:fail:bitsmith?
           (lambda () (op-apply 'fill img (hasheq 'start 0 'end 1048576 'value 255))))
 
+;; ---- patch -----------------------------------------------------------------
+
+;; The stable key of a raised engine error (or #f when nothing raises).
+(define (raised-key thunk)
+  (with-handlers ([exn:fail:bitsmith? exn:fail:bitsmith-key])
+    (thunk)
+    #f))
+
+;; Byte text: separators and 0x prefixes are optional.
+(check-equal? (parse-bytes-text "48 B1 08 47") (bytes 72 177 8 71))
+(check-equal? (parse-bytes-text " 48b10847 ") (bytes 72 177 8 71))
+(check-equal? (parse-bytes-text "0x48, 0xB1;0x08:0x47") (bytes 72 177 8 71))
+(check-equal? (parse-bytes-text "00\nBF") (bytes 0 191))
+(check-equal? (raised-key (lambda () (parse-bytes-text "   "))) 'err-bytes-empty)
+(check-equal? (raised-key (lambda () (parse-bytes-text "48 B"))) 'err-bytes-format)
+(check-equal? (raised-key (lambda () (parse-bytes-text "48 BZ"))) 'err-bytes-format)
+(check-equal? (raised-key (lambda () (parse-bytes-text "x"))) 'err-bytes-format)
+
+;; Overwrite populated data: 2 bytes change, none added, layout untouched.
+(define app-head 134250496)   ; 0x08008000
+(define app-push 134250512)   ; 0x08008010: 2D E9 F0 47 0D F0 80 F8
+(define-values (patched note-patch patch-extra)
+  (op-apply 'patch img (hasheq 'address app-push 'bytes (bytes 0 191))))
+(check-equal? note-patch 'note-patch)
+(check-equal? patch-extra (hasheq 'start app-push 'end (+ app-push 1) 'count 2 'added 0 'changed 2))
+(check-equal? (image-ref patched app-push) 0)
+(check-equal? (image-ref patched (+ app-push 1)) 191)
+(check-equal? (image-ref patched (+ app-push 2)) 240) ; untouched
+(check-equal? (image-ranges patched) (image-ranges img))
+(check-equal? (image-total patched) 64)
+
+;; Straddling the hole at 0x08008008: the byte in the hole is new data.
+(define-values (straddle note-straddle straddle-extra)
+  (op-apply 'patch img (hasheq 'address (+ app-head 7) 'bytes (bytes 1 2))))
+(check-equal? note-straddle 'note-patch-gap)
+(check-equal? (hash-ref straddle-extra 'added) 1)
+(check-equal? (hash-ref straddle-extra 'changed) 1)
+(check-equal? (image-total straddle) 65)
+
+;; Landing entirely in the hole left by the bad-checksum record.
+(define-values (in-hole note-hole hole-extra)
+  (op-apply 'patch img (hasheq 'address 134250528 'bytes (bytes 72 177 8 71))))
+(check-equal? note-hole 'note-patch-gap)
+(check-equal? (hash-ref hole-extra 'added) 4)
+(check-equal? (hash-ref hole-extra 'changed) 0)
+
+;; Guards: identical bytes, address overflow, oversized payload.
+(check-equal?
+ (raised-key (lambda () (op-apply 'patch img
+                                  (hasheq 'address app-push
+                                          'bytes (bytes 45 233 240 71)))))
+ 'err-patch-nochange)
+(check-equal?
+ (raised-key (lambda () (op-apply 'patch (mkimg '(4294967295 1))
+                                  (hasheq 'address 4294967295 'bytes (bytes 0 1)))))
+ 'err-address-out-of-range)
+(check-equal?
+ (raised-key (lambda () (op-apply 'patch img
+                                  (hasheq 'address 0 'bytes (make-bytes 1048577 0)))))
+ 'err-range-too-large)
+
+;; The hole case never rewrites an existing byte to something else.
+(check-equal? (image-ref in-hole app-push) (image-ref img app-push))
+
 ;; ---- pad -------------------------------------------------------------------
 
 ;; Pad to 0x1000 alignment appends through 0x08000FFF.

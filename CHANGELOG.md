@@ -5,6 +5,16 @@ All notable changes to Bitsmith are documented here. Format follows
 semver. The signed update feed (update-manifest.json) is produced from
 this file's release section.
 
+## [Unreleased]
+
+### Added
+
+- Patch operation: write hexadecimal bytes at an absolute address onto the working copy (`48 B1 08 47` or `48B10847`). Bytes that land in an unmapped range are reported as new data, and a patch that would change nothing blocks the apply. Designed into the prototype first; closes the MVP Edit gap left when the prototype shipped seven operation cards.
+
+### Fixed
+
+- CRC with the *Reject gaps* policy showed a raw error key instead of the localized message.
+
 ## [0.1.0] - 2026-11-19
 
 ### Added

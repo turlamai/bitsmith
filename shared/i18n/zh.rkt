@@ -19,6 +19,8 @@
    ;; ---- operation names / descriptions ----
    'op-fill-name "填充"
    'op-fill-desc "把缺失区间实体化"
+   'op-patch-name "打补丁"
+   'op-patch-desc "在绝对地址写入字节"
    'op-pad-name "对齐补齐"
    'op-pad-desc "向后延伸到最后一个分段"
    'op-offset-name "偏移"
@@ -38,6 +40,10 @@
    'field-start "起始地址"
    'field-end "结束地址 · 含端点"
    'field-value "填充值"
+   'field-address "地址"
+   'field-bytes "字节 · 十六进制字节对"
+   'field-bytes-placeholder "48 B1 08 47"
+   'field-help-patch "字节写成十六进制字节对，例如 48 B1 08 47 或 48B10847。预览以 1 MiB 为限。应用即提交到工作副本。"
    'field-alignment "对齐 · 字节"
    'field-delta "有符号偏移量"
    'field-base "目标基址"
@@ -49,6 +55,8 @@
 
    ;; ---- operation note keys (preview copy) ----
    'note-fill "用所选值填充该区间。地址保持绝对；区间内已有字节会被覆盖。"
+   'note-patch "把这些字节写到该地址。每个字节都覆盖已占用数据；地址保持绝对。"
+   'note-patch-gap "把这些字节写到该地址。其中一部分落在未映射区间：它们是新增数据，下方标为 +。空洞永远不会被读作 0xFF。"
    'note-pad-aligned "已对齐，未新增字节。"
    'note-pad "向后补齐到对齐边界。补齐是真实数据：保存时与其他字节一样写入。"
    'note-offset "把全部已占用地址按有符号偏移量搬迁；字节内容不变。"
@@ -84,6 +92,9 @@
    'err-start-above-end "起始地址必须不大于结束地址。"
    'err-range-too-large "该操作请控制在 1 MiB 以内。"
    'err-value-out-of-range "填充值必须是一个字节（0x00-0xFF）。"
+   'err-bytes-empty "请至少输入一个要写入的字节。"
+   'err-bytes-format "字节请写成十六进制字节对，例如 48 B1 08 47 或 48B10847；可带 0x 前缀。"
+   'err-patch-nochange "无可打补丁：工作副本在该地址已是这些字节。"
    'err-alignment-invalid "对齐值必须是 1 到 1048576 之间的 2 的幂。"
    'err-empty-image "尚未加载镜像。"
    'err-crop-empty "该裁剪会得到空镜像。请选择一个包含数据的范围。"

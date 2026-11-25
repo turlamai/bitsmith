@@ -84,6 +84,11 @@ batch recipes / CI.
   Family policy now mandates this at project creation.
 - 2026-11-20 naming narrative: past names (ImageBench/Binlet/Ingot) are
   dropped from user-facing READMEs; the decision log keeps the history.
+- 2026-11-25 patch at address: designed into the prototype and implemented
+  as the eighth operation (issue #5), closing the MVP Edit gap left when the
+  prototype shipped seven cards. Policy: bytes landing in an unmapped range
+  are explicit new data (marked `+`, named in the preview note) — a gap is
+  never treated as 0xFF; a patch that changes nothing blocks apply.
 
 ## Sample-data policy
 
