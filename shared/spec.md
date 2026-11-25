@@ -36,9 +36,9 @@ FBL developers do daily (fill, offset, crop, merge, convert, CRC).
 
 ## Phase 2 (confirmed out of MVP)
 
-App header templates (custom magic/version/length/CRC layout: generate +
-validate), Cortex-M vector table parsing (SP/reset), two-image diff,
-batch recipes / CI.
+Cortex-M vector table parsing (SP/reset), two-image diff,
+batch recipes / CI. (App header templates were pulled forward on
+2026-11-25 — see the decision log.)
 
 ## Format matrix
 
@@ -97,6 +97,16 @@ batch recipes / CI.
   glaze gives each window launch a fresh WebView2 profile unless
   `GLAZE_WEBVIEW2_DATA_DIR` is set; a fixed path is not adopted yet because a
   locked profile aborts the second window.
+- 2026-11-25 app header templates pulled forward from phase 2 (issue #10):
+  two operation cards — Header (write) and Header check (read-only) — rather
+  than a fifth view. A template is one JSON document
+  (`bitsmith-header-template`, version 1) with magic / const / uint / crc
+  fields; the same document is what a project keeps in its repo and what a
+  later CI recipe reads. Lengths and CRCs are derived from the populated
+  block only and never cross missing bytes; CRC fields never cover
+  themselves. Built-in templates are synthetic examples. Not adopted: a
+  form-based template editor and persistence across restarts (neither
+  designed). Supersedes the 2026-11-13 "header templates → phase 2" line.
 
 ## Sample-data policy
 
