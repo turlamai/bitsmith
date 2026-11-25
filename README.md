@@ -4,7 +4,7 @@
 
 **English** · [简体中文](README.zh-CN.md)
 
-[Product homepage](https://jrtx.site/products/bitsmith/) · [Source](https://github.com/turlamai/bitsmith) · [Issues and feedback](https://github.com/turlamai/bitsmith/issues)
+[Source](https://github.com/turlamai/bitsmith) · [Issues and feedback](https://github.com/turlamai/bitsmith/issues)
 
 > **Development preview.** The engine and the desktop workbench are implemented and covered by tests, but there are no verified installers yet. Do not use it to prepare production firmware without independent verification. No purchase, trial expiry or paid feature gate is planned during this development phase.
 
