@@ -405,7 +405,7 @@ S70500000000FA</pre></details>
         button.addEventListener('click', function () {
           const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
           document.documentElement.dataset.theme = next;
-          try { localStorage.setItem('imagebench-theme', next); } catch (error) {}
+          try { localStorage.setItem('bitsmith-theme', next); } catch (error) {}
           updateThemeLabel();
         });
       });
