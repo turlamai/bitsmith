@@ -243,3 +243,10 @@ Added prototype-first (issue #5): a Patch card on the Operations screen, second 
 | Sidebar address range | Fixed 2026-11-26 in prototype and product CSS | The break came from `word-break: break-all` and `overflow-wrap: anywhere` on sidebar values, not from the engine: browsers already break after an en dash. Values now wrap to their own full-width line first and split only after the dash. See "Prototype polish — 2026-11-26". |
 | Brand case | Applied | Lowercase **bitsmith** in product page titles, wordmark and copy, as the contract states. The README H1 still reads `Bitsmith`. |
 | User acceptance | Open | Only the user can close this condition. |
+
+## 2026-11-26 Contract record: default density and scale debt
+
+Family revision `2026-11-20-minimal-family`, starting from `47291d5`. This section only adds the record required by design-standard §6 step 2; no prototype style was changed.
+
+- **Default density: **Compact**. Existing primary buttons and toolbar controls measure 24–36px (26 / 30 typical). Rationale: a print-slicing tool whose whole window is dense live data (layer table, operations, 3D view); hit targets stay ≥ 28px for pointer use.
+- **Scale debt (not changed)**: a static scan of every stylesheet under `design/` for values outside the family scale. Font sizes are all inside the family roles (12/13/14/16/18/24). Radii are inside the 4/8/12 scale apart from one 0.5px hairline, which is a border width rather than a radius value and is left as is. No scale debt recorded. Existing products align progressively in the next related slice; these were deliberately not changed inside a contrast fix.
