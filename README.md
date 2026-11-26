@@ -6,7 +6,7 @@
 
 [Source](https://github.com/turlamai/bitsmith) · [Issues and feedback](https://github.com/turlamai/bitsmith/issues)
 
-> **Development preview.** The engine and the desktop workbench are implemented and covered by tests, but there are no verified installers yet. Do not use it to prepare production firmware without independent verification. No purchase, trial expiry or paid feature gate is planned during this development phase.
+> **Development preview.** The engine and the desktop workbench are implemented and covered by tests, and development-preview installers are published. Full cross-platform installation qualification is still pending. Do not use it to prepare production firmware without independent verification. No purchase, trial expiry or paid feature gate is planned during this development phase.
 
 ## What it is for
 
@@ -17,7 +17,7 @@ Firmware engineers handling Intel HEX, Motorola S-record (S19/SREC) and raw BIN 
 3. Make semantic changes, then regenerate valid records and checksums on save.
 4. Perform routine operations: fill, offset, crop, merge, convert and CRC.
 
-**Status:** the four workbench views (records, image, operations, learn) run against the Racket engine through the typed bridge — parsing, live checksum verification, semantic operations, format conversion, CRC presets and file open/save are implemented; packaging and per-platform release verification are not done yet.
+**Status:** the four workbench views (records, image, operations, learn) run against the Racket engine through the typed bridge — parsing, live checksum verification, semantic operations, format conversion, CRC presets and file open/save are implemented; packages are published for five platform/architecture combinations; installation qualification is incomplete.
 
 ## Platforms and getting started
 
@@ -35,7 +35,7 @@ shasum -a 256 -c SHA256SUMS --ignore-missing
 
 The built-in **Check for updates** (records view, sidebar foot) only *notifies*: it verifies an Ed25519-signed update manifest and opens nothing by itself; the download and install stay in your hands.
 
-**No installer has passed the family install-smoke gate yet**, so treat every package as a development build until the first verified release notes say otherwise.
+The [v0.1.0 release](https://github.com/turlamai/bitsmith/releases/tag/v0.1.0) reports five successful build legs, signed update-manifest verification and a macOS arm64 DMG launch smoke. Its macOS packages are ad-hoc signed, not Developer ID signed or notarized; Linux and Windows real-machine installation smoke is still outstanding. Consult each release's verification status and treat unqualified packages as development builds.
 
 ## Data and privacy
 
