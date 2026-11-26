@@ -266,6 +266,7 @@ Pass requested by the owner over every product prototype against the new family 
 ### Changes in this pass
 
 - Font stacks: explicit CJK fallback before the generic family in the UI and mono stacks (§9 "Mono and CJK"); values stay in `shared.css` only.
+- The stack change reaches the product UI: `public/shared.css` is a verbatim copy of this stylesheet, so it was re-copied (`scripts/check-design-sync.py` is green).
 - Typography baseline: `body { text-autospace: normal; line-break: strict }` (§10). The existing `::selection` and custom scrollbar rules were kept, nothing was layered on top.
 - `learn.html`: body paragraphs and list items capped at 64ch (was 866px, about 120 characters a line).
 - `records.html`: the hidden file input is opened from script, so it now carries its own `aria-label` (it was an unnamed control).
