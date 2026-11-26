@@ -114,6 +114,39 @@
   
     .ops-page .op-desc {white-space:normal;overflow:visible}
 @media(min-width:901px) and (max-width:1320px){.ops-page .workspace {grid-template-columns:var(--sidebar-w) minmax(0,1fr)}.ops-page .inspector {display:flex}}
+
+    /* Header templates: one strip, one table; status is colour plus a text badge. */
+    .hdr-template-field { display:flex; gap:var(--space-2); align-items:center; }
+    .hdr-template-field .select { flex:1; min-width:0; }
+    .hdr-strip { display:flex; flex-wrap:wrap; gap:4px; margin:var(--space-3) 0 var(--space-2); }
+    .hdr-seg { flex-basis:0; min-width:0; padding:4px 8px; border:1px solid var(--border); border-radius:var(--radius-xs); background:var(--surface-2); overflow-wrap:anywhere; }
+    .hdr-seg-name { display:block; color:var(--faint); font:var(--text-xs)/var(--lh-normal) var(--font-sans); }
+    .hdr-seg-bytes { display:block; color:var(--text); font:600 var(--text-xs)/var(--lh-normal) var(--font-mono); }
+    .hdr-seg.is-ok { background:var(--ok-bg); border-color:color-mix(in srgb,var(--ok) 35%,var(--border)); }
+    .hdr-seg.is-bad { background:var(--fail-bg); border-color:color-mix(in srgb,var(--fail) 35%,var(--border)); }
+    .hdr-seg.is-info { background:var(--bg-selected); }
+    .hdr-seg.is-unmapped, .hdr-seg.is-pad { border-style:dashed; }
+    .hdr-seg.is-unmapped { background:var(--gap-bg); }
+    .hdr-seg.is-pad { background:repeating-linear-gradient(135deg,var(--inset) 0 4px,var(--surface-2) 4px 8px); }
+    .hdr-table { width:100%; border-collapse:collapse; font-family:var(--font-mono); font-size:var(--text-xs); font-variant-numeric:tabular-nums; }
+    .hdr-table th { padding:4px 8px; border-bottom:1px solid var(--border-strong); color:var(--faint); font-family:var(--font-sans); font-weight:650; letter-spacing:0.065em; text-align:left; text-transform:uppercase; white-space:nowrap; }
+    .hdr-table td { padding:4px 8px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:top; overflow-wrap:anywhere; }
+    .hdr-table tr:last-child td { border-bottom:0; }
+    .hdr-table th.num, .hdr-table td.num { text-align:right; }
+    .hdr-table .muted { color:var(--muted); font-weight:400; }
+
+    /* Template dialog: list on the left, the JSON document and its parsed layout on the right. */
+    #headerTemplates { max-width:min(920px,92vw); width:min(920px,92vw); }
+    #headerTemplates h2 { font-size:var(--text-lg); }
+    .hdr-dialog-body { display:grid; grid-template-columns:200px minmax(0,1fr); gap:var(--space-4); }
+    .hdr-dialog-group { margin:0 0 4px; color:var(--faint); font-size:var(--text-xs); font-weight:650; letter-spacing:0.09em; text-transform:uppercase; }
+    .hdr-dialog-group:not(:first-child) { margin-top:var(--space-3); }
+    .hdr-dialog-item { display:block; width:100%; min-height:32px; padding:var(--space-2); border:1px solid transparent; border-radius:var(--radius-xs); background:transparent; color:var(--muted); font:var(--text-sm)/var(--lh-normal) var(--font-sans); text-align:left; overflow-wrap:anywhere; cursor:pointer; }
+    .hdr-dialog-item[aria-selected="true"] { background:var(--bg-selected); border-color:color-mix(in srgb,var(--accent) 40%,var(--border)); color:var(--text); }
+    .hdr-dialog-editor { display:flex; flex-direction:column; gap:var(--space-3); min-width:0; }
+    .hdr-json { min-height:216px; resize:vertical; font-family:var(--font-mono); font-size:var(--text-sm); line-height:var(--lh-normal); }
+    .hdr-dialog-foot { display:flex; flex-wrap:wrap; gap:var(--space-2); align-items:center; }
+    @media(max-width:900px){.hdr-dialog-body {grid-template-columns:minmax(0,1fr)}}
   </style>
 </head>
 <body class="ops-page">
@@ -251,6 +284,19 @@
   <div class="toast-stack" id="toastStack" aria-live="polite"></div>
 
   <dialog id="confirmApply" aria-labelledby="confirmTitle"><h2 id="confirmTitle">Apply the preview?</h2><p id="confirmCopy"></p><div class="topbar-actions"><button class="btn" id="cancelApply" type="button">Back to preview</button><button class="btn btn-primary" id="commitApply" type="button">Apply to working copy</button></div></dialog>
+  <dialog id="headerTemplates" class="hdr-dialog" aria-labelledby="hdrDlgTitle">
+    <h2 id="hdrDlgTitle">Header templates</h2>
+    <div class="hdr-dialog-body">
+      <div id="hdrTplList" role="listbox" aria-label="Templates"></div>
+      <div class="hdr-dialog-editor">
+        <label class="field"><span>Template JSON</span><textarea class="input hdr-json" id="hdrTplJson" spellcheck="false" autocomplete="off" aria-describedby="hdrTplProblems"></textarea></label>
+        <div id="hdrTplProblems" aria-live="polite"></div>
+        <div id="hdrTplLayout"></div>
+      </div>
+    </div>
+    <p class="mini-note">A template is one JSON document: keep it with your project. Templates saved here stay for this session only.</p>
+    <div class="hdr-dialog-foot"><button class="btn" id="hdrTplNew" type="button">New from example</button><button class="btn" id="hdrTplCopy" type="button">Copy JSON</button><button class="btn" id="hdrTplSave" type="button">Save for this session</button><button class="btn btn-danger" id="hdrTplDelete" type="button">Delete</button><span class="toolbar-spacer"></span><button class="btn" id="hdrTplClose" type="button">Close</button><button class="btn btn-primary" id="hdrTplUse" type="button">Use this template</button></div>
+  </dialog>
   <script>
   (() => {
     'use strict';
@@ -274,6 +320,22 @@
     };
     function loadSample(){let upper=0;const map=new Map();SAMPLE.forEach(line=>{const b=line.slice(1).match(/../g).map(x=>parseInt(x,16));if(b[3]===4)upper=((b[4]<<8)|b[5])*65536;if(b[3]===0)for(let i=0;i<b[0];i++)map.set(upper+b[1]*256+b[2]+i,b[4+i]);});return map;}
     const original=loadSample(); let working=new Map(original), format='HEX', revision=0, selected='fill', candidate=null, pending=null;
+    // ---- Header templates: one JSON document describes one layout (DESIGN.md) ----
+    // Derived values are computed over the block: the populated run that holds the header.
+    // A gap ends the block; nothing is ever read as a fill value.
+    const EXAMPLE_APP={format:'bitsmith-header-template',version:1,id:'example-app-header',name:'Example app header',size:16,endian:'little',pad:'0xFF',fields:[
+      {key:'magic',label:'Magic',offset:0,size:4,kind:'magic',bytes:'42 53 4D 48'},
+      {key:'version',label:'Format version',offset:4,size:2,kind:'uint',role:'input',default:'1'},
+      {key:'flags',label:'Load flags',offset:6,size:2,kind:'uint',role:'input',default:'0'},
+      {key:'length',label:'Image length',offset:8,size:4,kind:'uint',role:'length',basis:'block'},
+      {key:'crc',label:'Image CRC',offset:12,size:4,kind:'crc',preset:'CRC-32/MPEG-2',basis:'block'}]};
+    const EXAMPLE_FBL={format:'bitsmith-header-template',version:1,id:'example-fbl-header',name:'Example FBL header',size:12,endian:'big',pad:'0x00',fields:[
+      {key:'magic',label:'Magic',offset:0,size:4,kind:'magic',bytes:'46 42 4C 21'},
+      {key:'version',label:'Header version',offset:4,size:1,kind:'uint',role:'input',default:'1'},
+      {key:'reserved',label:'Reserved',offset:5,size:1,kind:'const',bytes:'FF'},
+      {key:'length',label:'Payload length',offset:6,size:2,kind:'uint',role:'length',basis:'payload'},
+      {key:'crc',label:'Header CRC',offset:8,size:2,kind:'crc',preset:'CRC-16/XMODEM',basis:'header'}]};
+    const templates=new Map([[EXAMPLE_APP.id,{builtin:true,tpl:EXAMPLE_APP}],[EXAMPLE_FBL.id,{builtin:true,tpl:EXAMPLE_FBL}]]);
     const specs=[
       {id:'fill',name:'Fill',desc:'Materialise a missing range',fields:[['start','Start address','0x08000020'],['end','End address · inclusive','0x08007FFF'],['value','Fill value','0xFF',['0x00','0xFF']]]},
       {id:'patch',name:'Patch',desc:'Write bytes at an absolute address',help:'Bytes are hexadecimal pairs — 48 B1 08 47 or 48B10847; separators are optional. Preview is bounded to 1 MiB. Apply affects this page only.',fields:[['address','Address','0x08008010'],['bytes','Bytes · hex pairs','00 BF',null,'bytes']]},
@@ -282,7 +344,9 @@
       {id:'crop',name:'Crop',desc:'Keep an inclusive address range',fields:[['start','First address to keep','0x08008000'],['end','Last address to keep','0x08009FFF']]},
       {id:'merge',name:'Merge',desc:'FBL + APP → combined image',fields:[['base','APP destination base','0x08008000'],['scenario','Placement','Separate ranges',['Separate ranges','Overlap FBL · error']]]},
       {id:'convert',name:'Convert',desc:'Make the output strategy explicit',fields:[['target','Target format','SREC',['HEX','SREC','BIN']],['width','S-record address width','S3',['S1','S2','S3']],['line','Data bytes per line','16',['16','32']],['value','Gap fill value','0xFF',['0x00','0xFF']],['base','BIN base address','0x08000000']]},
-      {id:'crc',name:'CRC',desc:'Compute from actual working bytes',fields:[['preset','Preset','CRC-32/MPEG-2',['CRC-32/MPEG-2','CRC-32/ISO-HDLC','CRC-16/XMODEM','sum8']],['start','Start address','0x08008000'],['end','End address · inclusive','0x08009FFF'],['value','Unmapped-byte policy','0xFF',['0xFF','0x00','Reject gaps']]]}
+      {id:'crc',name:'CRC',desc:'Compute from actual working bytes',fields:[['preset','Preset','CRC-32/MPEG-2',['CRC-32/MPEG-2','CRC-32/ISO-HDLC','CRC-16/XMODEM','sum8']],['start','Start address','0x08008000'],['end','End address · inclusive','0x08009FFF'],['value','Unmapped-byte policy','0xFF',['0xFF','0x00','Reject gaps']]]},
+      {id:'header',name:'Header',desc:'Write a header from a template',fields:[['template','Header template',EXAMPLE_APP.id,null,'template'],['address','Address','0x08008000']]},
+      {id:'header-check',name:'Header check',desc:'Validate header bytes against a template',fields:[['template','Header template',EXAMPLE_APP.id,null,'template'],['address','Address','0x08008000']]}
     ];
     const values=Object.fromEntries(specs.map(op=>[op.id,Object.fromEntries(op.fields.map(f=>[f[0],f[2]]))]));
     // #<operation-id> opens a card directly; the hash follows the selection.
@@ -297,6 +361,115 @@
     function ranges(map){const keys=[...map.keys()].sort((a,b)=>a-b),out=[];for(const a of keys){const last=out.at(-1);if(last&&a===last[1]+1)last[1]=a;else out.push([a,a]);}return out;}
     function bounds(map){const r=ranges(map);return r.length?[r[0][0],r.at(-1)[1]]:[0,0];}
     function rangeInput(v){const a=parse(v.start),b=parse(v.end);if(a>b)throw Error('Start must be at or below end.');if(b>0xFFFFFFFF)throw Error('Address exceeds 0xFFFFFFFF.');if(b-a+1>1048576)throw Error('Keep this local preview to 1 MiB or less.');return[a,b];}
+    // ---- header template rules (mirrors the engine contract in DESIGN.md) ----
+    const isInt=v=>typeof v==='number'?Number.isInteger(v):(typeof v==='string'&&/^(?:0[xX][0-9a-fA-F]+|-?[0-9]+)$/.test(v)&&Number.isSafeInteger(Number(v)));
+    const intOf=v=>typeof v==='number'?v:(/^0[xX]/.test(v)?parseInt(v.slice(2),16):parseInt(v,10));
+    const hexOf=(n,w)=>'0x'+hex(n,w);
+    function bytesOf(text){const compact=String(text??'').replace(/0[xX]/g,'').replace(/[\s,;:-]+/g,'');return /^(?:[0-9a-fA-F]{2})*$/.test(compact)?compact.match(/../g)?.map(x=>parseInt(x,16))??[]:null;}
+    // Problems are reported per path so the JSON can be repaired in place.
+    function templateProblems(t){
+      const p=[];if(!t||typeof t!=='object'||Array.isArray(t))return ['template: expected one JSON object.'];
+      if(t.format!=='bitsmith-header-template'||t.version!==1)p.push('format: declare "bitsmith-header-template" and version 1.');
+      if(!/^[a-z0-9-]{1,40}$/.test(String(t.id??'')))p.push('id: 1 to 40 lower-case letters, digits or hyphens.');
+      if(!String(t.name??'').trim()||String(t.name).length>60)p.push('name: 1 to 60 characters.');
+      if(!isInt(t.size)||intOf(t.size)<1||intOf(t.size)>4096)p.push('size: an integer from 1 to 4096.');
+      if(t.endian!=='little'&&t.endian!=='big')p.push('endian: "little" or "big".');
+      if(!/^0[xX][0-9a-fA-F]{2}$/.test(String(t.pad??'')))p.push('pad: one byte, written as 0x00 to 0xFF.');
+      if(!Array.isArray(t.fields)||!t.fields.length||t.fields.length>64){p.push('fields: a list of 1 to 64 fields.');return p;}
+      const size=intOf(t.size),seen=new Set(),taken=[];
+      t.fields.forEach((f,i)=>{const at=k=>`fields[${i}]${k?'.'+k:''}`;
+        if(!f||typeof f!=='object'){p.push(at() + ': expected one object.');return;}
+        if(!/^[a-z][a-z0-9-]{0,31}$/.test(String(f.key??'')))p.push(at('key')+': lower-case letters, digits or hyphens; starts with a letter.');
+        else if(seen.has(f.key))p.push(at('key')+`: "${f.key}" is used twice.`);else seen.add(f.key);
+        if(!String(f.label??'').trim()||String(f.label).length>60)p.push(at('label')+': 1 to 60 characters.');
+        if(!isInt(f.offset)||intOf(f.offset)<0)p.push(at('offset')+': an integer from 0.');
+        if(!isInt(f.size)||intOf(f.size)<1)p.push(at('size')+': a positive integer.');
+        const w=intOf(f.size),o=intOf(f.offset);
+        if(isInt(f.offset)&&isInt(f.size)&&o+w>size)p.push(at('size')+`: the field ends at ${o+w}, beyond the header size.`);
+        if(isInt(f.offset)&&isInt(f.size)){const hit=taken.find(x=>o<=x[1]&&o+w-1>=x[0]);if(hit)p.push(at('offset')+`: overlaps "${hit[2]}"; fields must not share bytes.`);else taken.push([o,o+w-1,f.key]);}
+        if(f.kind==='magic'||f.kind==='const'){if(bytesOf(f.bytes)?.length!==w)p.push(at('bytes')+`: exactly ${isInt(f.size)?w:'?'} hexadecimal pairs.`);}
+        else if(f.kind==='uint'){if(![1,2,4].includes(w))p.push(at('size')+': a uint is 1, 2 or 4 bytes.');
+          if(f.role==='length'){if(f.basis!=='block'&&f.basis!=='payload')p.push(at('basis')+': "block" or "payload".');if(f.bias!==undefined&&!isInt(f.bias))p.push(at('bias')+': a signed integer.');}
+          else if(f.role!=='input')p.push(at('role')+': "input" or "length".');
+          if(f.default!==undefined&&(!isInt(f.default)||intOf(f.default)<0||intOf(f.default)>=256**w))p.push(at('default')+`: does not fit ${isInt(f.size)?w:'?'} byte(s).`);}
+        else if(f.kind==='crc'){const pr=presets[f.preset];if(!pr)p.push(at('preset')+': one of '+Object.keys(presets).join(', ')+'.');else if(w!==pr.bits/8)p.push(at('size')+`: equals the preset width, ${pr.bits/8} byte(s).`);
+          if(!['header','payload','block'].includes(f.basis))p.push(at('basis')+': "header", "payload" or "block".');}
+        else p.push(at('kind')+': magic, const, uint or crc.');});
+      return p;
+    }
+    // Validated template -> fields in offset order, the CRC-covered exclusion set and the padding ranges.
+    function templateLayout(t){
+      const fields=[...t.fields].sort((a,b)=>a.offset-b.offset),used=new Array(t.size).fill(false),skip=new Set();
+      fields.forEach(f=>{for(let i=0;i<f.size;i++){used[f.offset+i]=true;if(f.kind==='crc')skip.add(f.offset+i);}});
+      const padding=[];for(let i=0;i<t.size;i++)if(!used[i]){let e=i;while(e+1<t.size&&!used[e+1])e++;padding.push([i,e]);i=e;}
+      return {fields,skip,padding};
+    }
+    function blockOf(map,a){if(!map.has(a))return null;let s=a,e=a;while(map.has(s-1))s--;while(map.has(e+1))e++;return [s,e];}
+    function readUint(map,base,f,t){const b=[];for(let i=0;i<f.size;i++){if(!map.has(base+f.offset+i))return null;b.push(map.get(base+f.offset+i));}return (t.endian==='big'?b:b.reverse()).reduce((v,x)=>v*256+x,0);}
+    function putUint(bytes,f,n,big){for(let i=0;i<f.size;i++)bytes[f.offset+i]=(n>>8*(big?f.size-1-i:i))&255;}
+    function bytesText(map,base,f){return Array.from({length:f.size},(_,i)=>map.has(base+f.offset+i)?hex(map.get(base+f.offset+i),2):'--').join(' ');}
+    const complete=(map,base,f)=>Array.from({length:f.size},(_,i)=>map.has(base+f.offset+i)).every(Boolean);
+    function lengthOf(t,f,base,block){const n=block[1]-base+1-(f.basis==='payload'?t.size:0)+(f.bias?intOf(f.bias):0);if(n<0)throw Error(`"${f.label}" would be negative: check the bias.`);if(n>=256**f.size)throw Error(`"${f.label}" does not fit ${f.size} byte(s): the block is too long for this template.`);return n;}
+    // CRC coverage: the chosen basis minus every CRC field of the template.
+    function coverage(map,base,t,block,f,skip){const bytes=[],take=(from,to)=>{for(let a=from;a<=to;a++){if(skip.has(a-base))continue;if(!map.has(a))return false;bytes.push(map.get(a));}return true;};
+      if(f.basis!=='payload'&&!take(base,base+t.size-1))return null;if(f.basis!=='header'&&!take(base+t.size,block[1]))return null;return bytes;}
+    const biasText=f=>f.bias?` ${intOf(f.bias)>=0?'+':'−'} ${addr(Math.abs(intOf(f.bias)))}`:'';
+    function headerCheck(t,base){
+      const block=blockOf(working,base);if(!block)throw Error('Header start address is not populated in the working copy.');
+      if(block[1]-block[0]+1>1048576)throw Error('Keep the block to 1 MiB or less.');
+      const {fields,skip,padding}=templateLayout(t),rows=[];let fail=0,unmapped=0;
+      for(const f of fields){let status,value=null,computed=null,detail;const bytes=bytesText(working,base,f);
+        if(!complete(working,base,f)){status='unmapped';detail='Not populated in the working copy; nothing was compared.';}
+        else if(f.kind==='magic'||f.kind==='const'){const want=bytesOf(f.bytes).map(x=>hex(x,2)).join(' '),ok=want===bytes;status=ok?'match':'mismatch';
+          detail=f.kind==='magic'?(ok?'Magic matches: the image declares this header type.':`Magic differs from ${want}: this is not the image type the template describes, or the header is not at this address.`):(ok?'Holds the fixed value the template requires.':`Expected ${want}; the fixed value differs.`);}
+        else{value=hexOf(readUint(working,base,f,t),f.size*2);
+          if(f.kind==='uint'&&f.role==='input'){status='value';detail='Decoded from the image; the template sets no expectation.';}
+          else if(f.kind==='uint'){const n=lengthOf(t,f,base,block);computed=hexOf(n,f.size*2);status=value===computed?'match':'mismatch';
+            detail=`The populated ${f.basis} from the header is ${n} bytes through ${addr(block[1])}${biasText(f)}.`;}
+          else{const cov=coverage(working,base,t,block,f,skip);if(!cov){status='unmapped';detail='The coverage reaches unmapped bytes; the CRC was not computed.';}
+            else{computed=hexOf(digest(cov,presets[f.preset]),presets[f.preset].bits/4);status=value===computed?'match':'mismatch';
+              detail=`Computed over ${cov.length} bytes (${f.basis}) with ${f.preset}.`;}}}
+        if(status==='mismatch')fail++;if(status==='unmapped')unmapped++;
+        rows.push({f,bytes,value,computed,status,detail});}
+      const verdict=fail?'fail':unmapped?'incomplete':'pass',checked=rows.filter(r=>['match','mismatch'].includes(r.status)).length;
+      return {kind:'check',base,size:t.size,pad:t.pad,block,padding,rows,verdict,checked,
+        note:verdict==='pass'?`Header passes: ${checked} fields checked, none disagrees with the template.`:verdict==='fail'?`Header fails: ${fail} of ${checked} fields ${fail===1?'disagrees':'disagree'} with the template.`:'Header incomplete: '+unmapped+' field'+(unmapped>1?'s are':' is')+' not populated in the working copy.'};
+    }
+    function headerWrite(t,base,v){
+      const {fields,skip,padding}=templateLayout(t),bytes=new Array(t.size).fill(intOf(t.pad)),big=t.endian==='big';
+      for(const f of fields){
+        if(f.kind==='magic'||f.kind==='const')bytesOf(f.bytes).forEach((b,i)=>{bytes[f.offset+i]=b;});
+        else if(f.kind==='uint'&&f.role==='input'){const text=String(v[f.key]??'').trim()||String(f.default??'').trim();
+          if(!text)throw Error(`Enter a value for "${f.label}".`);
+          if(!/^(?:0[xX][0-9a-fA-F]+|[0-9]+)$/.test(text))throw Error(`"${f.label}": use a decimal number or a hexadecimal number beginning with 0x.`);
+          if(Number(text)>=256**f.size)throw Error(`"${f.label}": ${text} does not fit ${f.size} byte(s).`);putUint(bytes,f,Number(text),big);}}
+      // Length and CRC are derived from the working copy with the new header in place.
+      const after=new Map(working);bytes.forEach((b,i)=>after.set(base+i,b));
+      const block=blockOf(after,base);if(block[1]-block[0]+1>1048576)throw Error('Keep the block to 1 MiB or less.');
+      const rows=fields.map(f=>({f,bytes:'',value:null,computed:null,status:'',detail:''}));
+      const rowOf=f=>rows.find(r=>r.f===f);
+      for(const f of fields.filter(x=>x.kind==='uint'&&x.role==='length')){const n=lengthOf(t,f,base,block);putUint(bytes,f,n,big);bytes.forEach((b,i)=>after.set(base+i,b));
+        Object.assign(rowOf(f),{value:hexOf(n,f.size*2),status:'computed',detail:`Computed: the ${f.basis} is ${n} bytes through ${addr(block[1])}${biasText(f)}.`});}
+      for(const f of fields.filter(x=>x.kind==='crc')){const cov=coverage(after,base,t,block,f,skip),n=digest(cov,presets[f.preset]);putUint(bytes,f,n,big);bytes.forEach((b,i)=>after.set(base+i,b));
+        Object.assign(rowOf(f),{value:hexOf(n,f.size*2),status:'computed',detail:`Computed over ${cov.length} bytes (${f.basis}) with ${f.preset}.`});}
+      for(const r of rows){r.bytes=bytes.slice(r.f.offset,r.f.offset+r.f.size).map(x=>hex(x,2)).join(' ');
+        if(!r.status)Object.assign(r,{status:'written',detail:r.f.kind==='uint'?'Value from the form.':'Fixed bytes from the template.'});}
+      let fresh=0;bytes.forEach((b,i)=>{if(!working.has(base+i))fresh++;});
+      return {kind:'write',base,size:t.size,pad:t.pad,block,padding,rows,after,fresh,note:fresh?`Write the ${t.size}-byte header at ${addr(base)}. ${fresh} of its bytes land in an unmapped range: they are new data, marked + below.`:`Write the ${t.size}-byte header at ${addr(base)}. Every byte overwrites populated data.`};
+    }
+    function currentTemplate(v){const entry=templates.get(v.template);if(!entry)throw Error('Choose a header template.');return entry.tpl;}
+    // One strip: a segment per field (and per padding run), width = bytes.
+    // The template dialog passes a minimum basis so one-byte fields stay readable.
+    function stripOf(items,min){return `<div class="hdr-strip" role="img" aria-label="Header layout: ${esc(items.map(x=>`${x.name} ${x.bytes}`).join('; '))}">${items.sort((a,b)=>a.at-b.at).map(x=>`<div class="hdr-seg ${x.cls}" style="flex:${x.size} 1 ${min||0}px"><span class="hdr-seg-name">${esc(x.name)}</span><span class="hdr-seg-bytes">${x.bytes}</span></div>`).join('')}</div>`;}
+    function headerHTML(h){
+      const cls={match:'is-ok',mismatch:'is-bad',value:'is-info',computed:'is-info',written:'is-info',unmapped:'is-unmapped'},mark={match:['✓','is-add'],mismatch:['✗','is-remove'],value:['·',''],computed:['=','is-add'],written:['=',''],unmapped:['?','is-warn']};
+      const badge={match:'badge-ok',mismatch:'badge-fail',unmapped:'badge-warn'},word={match:'match',mismatch:'mismatch',value:'decoded',computed:'computed',written:'written',unmapped:'unmapped'};
+      const strip=stripOf(h.rows.map(r=>({at:r.f.offset,size:r.f.size,name:r.f.label,bytes:r.bytes,cls:cls[r.status]})).concat(h.padding.map(([s,e])=>({at:s,size:e-s+1,name:'padding',bytes:`${hex(intOf(h.pad),2)} × ${e-s+1}`,cls:'is-pad'}))));
+      return strip+
+        `<div class="table-scroll"><table class="hdr-table"><thead><tr><th>Field</th><th class="num">Offset</th><th>Bytes</th><th>Value</th><th>Verdict</th></tr></thead><tbody>${h.rows.map(r=>`<tr><td>${esc(r.f.label)}<span class="muted"> ${esc(r.f.key)}</span></td><td class="num">${hex(r.f.offset,2)}</td><td>${r.bytes||'<span class="muted">--</span>'}</td><td>${r.value??'<span class="muted">—</span>'}${r.computed!==null&&r.status==='mismatch'?` <span class="muted">≠ ${r.computed}</span>`:''}</td><td><span class="badge ${badge[r.status]||''}">${word[r.status]}</span></td></tr>`).join('')}</tbody></table></div>`+
+        `<div class="diff-list">${h.rows.map(r=>{const [m,c]=mark[r.status];return `<div class="diff-row ${c}"><span class="diff-mark">${m}</span><span class="diff-copy"><strong>${esc(r.f.label)}</strong> · ${esc(r.detail)}</span></div>`;}).join('')}</div>`+
+        `<p class="callout">Header ${h.size} bytes at ${addr(h.base)} · block ${addr(h.block[0])}–${addr(h.block[1])} · ${h.block[1]-h.block[0]+1} bytes${h.padding.length?` · ${h.padding.reduce((n,[s,e])=>n+e-s+1,0)} padding byte(s) not judged`:''}</p>`;
+    }
     // Patch payload: hex pairs; separators (space, comma, semicolon, colon, hyphen) and 0x prefixes are optional.
     function patchBytes(text){const compact=String(text).replace(/0[xX]/g,'').replace(/[\s,;:\-]+/g,'');if(!compact)throw Error('Enter at least one byte to patch.');if(!/^(?:[0-9a-fA-F]{2})+$/.test(compact))throw Error('Enter bytes as hexadecimal pairs, e.g. 48 B1 08 47 or 48B10847.');if(compact.length/2>1048576)throw Error('Keep this local preview to 1 MiB or less.');return compact.match(/../g).map(x=>parseInt(x,16));}
     function digest(bytes,p){if(p.bits===8)return bytes.reduce((a,b)=>(a+b)&255,0);let c=p.init;for(const b of bytes){if(p.reflect){c^=b;for(let k=0;k<8;k++)c=(c>>>1)^((c&1)?0xEDB88320:0);}else if(p.bits===16){c^=b<<8;for(let k=0;k<8;k++)c=((c<<1)^((c&0x8000)?p.poly:0))&65535;}else{c^=b<<24;for(let k=0;k<8;k++)c=((c<<1)^((c&0x80000000)?p.poly:0))>>>0;}}return (c^p.xor)>>>0;}
@@ -306,7 +479,7 @@
     }
     function records(map,target='HEX',width='S3',line=16){let out=[],upper=-1;for(const [a,b] of ranges(map)){for(let at=a;at<=b;){const size=Math.min(line,b-at+1,65536-(at%65536));if(target==='HEX'&&Math.floor(at/65536)!==upper){upper=Math.floor(at/65536);const u=[2,0,0,4,upper>>>8,upper&255];out.push(':'+u.map(x=>hex(x,2)).join('')+hex((-u.reduce((s,x)=>s+x,0))&255,2));}const bytes=Array.from({length:size},(_,i)=>map.get(at+i));out.push(record(at,bytes,target,width));at+=size;}}if(target==='HEX')out.push(':00000001FF');else out.push(({S1:'S9030000FC',S2:'S804000000FB',S3:'S70500000000FA'})[width]);return out;}
     function compute(){
-      const v=values[selected],after=new Map(working);let note='',outFormat=format,output='',crc=null;
+      const v=values[selected],after=new Map(working);let note='',outFormat=format,output='',crc=null,header=null;
       if(selected==='fill'){const[a,b]=rangeInput(v),value=parse(v.value);for(let x=a;x<=b;x++)after.set(x,value);note=`Fill ${addr(a)}–${addr(b)} with ${v.value}.`;}
       if(selected==='patch'){const a=parse(v.address),bytes=patchBytes(v.bytes);if(a+bytes.length-1>0xFFFFFFFF)throw Error('Address exceeds 0xFFFFFFFF.');let fresh=0;bytes.forEach((b,i)=>{if(!working.has(a+i))fresh++;after.set(a+i,b);});note=fresh?`Write ${bytes.length} bytes at ${addr(a)}–${addr(a+bytes.length-1)}. ${fresh} of them land in an unmapped range: they are new data, marked + below — never a silent 0xFF.`:`Write ${bytes.length} bytes at ${addr(a)}–${addr(a+bytes.length-1)}. Every byte overwrites populated data.`;}
       if(selected==='pad'){const n=parse(v.alignment);if(!n||n>1048576||(n&(n-1)))throw Error('Alignment must be a power of two, from 1 through 1048576.');const end=bounds(working)[1],stop=Math.ceil((end+1)/n)*n;if(stop>0x100000000)throw Error('Padding exceeds the 32-bit address space.');for(let a=end+1;a<stop;a++)after.set(a,parse(v.value));note=stop===end+1?'Already aligned; no bytes added.':`Append ${stop-end-1} bytes through ${addr(stop-1)}.`;}
@@ -320,18 +493,25 @@
 … ${lines.length} generated records total`:'');note=`${v.target} · ${v.line} data bytes per line${v.target==='SREC'?' · '+v.width:''}. Sparse ranges remain sparse; gap fill applies only to BIN.`;}
       }
       if(selected==='crc'){const[a,b]=rangeInput(v),bytes=[],p=presets[v.preset];let gaps=0;for(let x=a;x<=b;x++){if(!working.has(x)){gaps++;if(v.value==='Reject gaps')throw Error(`Unmapped byte at ${addr(x)}. Select an explicit fill policy or narrow the range.`);}bytes.push(working.has(x)?working.get(x):parse(v.value));}crc={value:hex(digest(bytes,p),p.bits/4),p,count:bytes.length,gaps};note=`Read-only · ${bytes.length} bytes processed; ${gaps} unmapped bytes ${gaps?'substituted with '+v.value:'encountered'}. No stored CRC is assumed.`;}
+      if(selected==='header'||selected==='header-check'){
+        const t=currentTemplate(v),problems=templateProblems(t);if(problems.length)throw Error('Template has problems: '+problems[0]);
+        const base=parse(v.address);if(base+t.size-1>0xFFFFFFFF)throw Error('Address exceeds 0xFFFFFFFF.');
+        if(selected==='header'){header=headerWrite(t,base,v);header.after.forEach((b,a)=>after.set(a,b));note=header.note;}
+        else{header=headerCheck(t,base);note=header.note;}
+      }
       let added=0,removed=0,changed=0;const changes=[];
       for(const[a,b]of working)if(!after.has(a)){removed++;if(changes.length<12)changes.push(['−',`${addr(a)}  ${hex(b,2)} → absent`]);}else if(after.get(a)!==b){changed++;if(changes.length<12)changes.push(['~',`${addr(a)}  ${hex(b,2)} → ${hex(after.get(a),2)}`]);}
       for(const[a,b]of after)if(!working.has(a)){added++;if(changes.length<12)changes.push(['+',`${addr(a)}  absent → ${hex(b,2)}`]);}
       if(selected==='patch'&&!added&&!changed)throw Error('Nothing to patch: the working copy already holds these bytes at this address.');
-      return {after,note,outFormat,output,crc,added,removed,changed,changes,revision};
+      if(selected==='header'&&!added&&!changed)throw Error('Nothing to write: the working copy already holds this header at this address.');
+      return {after,note,outFormat,output,crc,header,added,removed,changed,changes,revision};
     }
     function mapHTML(map,lo,hi){let parts=[],at=lo;for(const[a,b]of ranges(map)){if(a>at)parts.push([a-at,'gap',`${addr(at)}–${addr(a-1)} unmapped`]);parts.push([b-a+1,a<0x08008000?'fbl':'app',`${addr(a)}–${addr(b)} populated`]);at=b+1;}if(at<=hi)parts.push([hi-at+1,'gap',`${addr(at)}–${addr(hi)} unmapped`]);return parts.map(([n,c,title])=>`<span class="map-part ${c}" style="flex:${n}" title="${title}" aria-label="${title}"></span>`).join('');}
     function preview(){
       candidate=null;let error='';try{candidate=compute();}catch(e){error=e.message;}
-      const blocked=!!error,c=candidate;const [wl,wh]=bounds(working),[al,ah]=c?bounds(c.after):[wl,wh],lo=Math.min(wl,al),hi=Math.max(wh,ah);
+      const blocked=!!error,c=candidate,readOnly=selected==='crc'||selected==='header-check';const [wl,wh]=bounds(working),[al,ah]=c?bounds(c.after):[wl,wh],lo=Math.min(wl,al),hi=Math.max(wh,ah);
       let recordDiff='';
-      if(c){
+      if(c&&!readOnly){
         const beforeLines=records(working),v=values[selected];
         const afterLines=selected==='convert'&&v.target!=='BIN'?records(c.after,v.target,v.width,Number(v.line)):records(c.after);
         const beforeSet=new Set(beforeLines),afterSet=new Set(afterLines);
@@ -339,32 +519,67 @@
         const sourceDiff=removedLines.slice(0,4).map(line=>'− '+line).concat(addedLines.slice(0,4).map(line=>'+ '+line));
         recordDiff='<details class="callout"><summary>Affected records · −'+removedLines.length+' / +'+addedLines.length+'</summary><pre class="op-output">'+esc(sourceDiff.length?sourceDiff.join('\n'):'No record bytes change.')+'</pre><p class="mini-note">Canonical output comparison; up to four removed and four added lines shown. '+(selected==='convert'&&v.target==='BIN'?'BIN output has no record envelope; the canonical HEX view above describes the materialised byte changes.':'Checksums in these new records are computed from their output bytes.')+'</p></details>';
       }
-      $('previewContent').innerHTML=`<div class="mini-map">${[['Before',working],['After',c?c.after:working]].map(([label,map])=>`<div class="mini-map-row"><span class="mini-map-label">${label}</span><span class="mini-map-track" role="img" aria-label="${label}: ${map.size} populated bytes across ${ranges(map).length} segments">${mapHTML(map,lo,hi)}</span><span class="mini-map-meta">${map.size} B</span></div>`).join('')}</div><p class="mini-note mono">${addr(lo)}–${addr(hi)} · shared linear scale · gaps are unmapped</p>`+
-      (error?`<div class="conflict-callout" role="alert"><div><strong>${selected==='merge'?'FBL + APP → blocked':'Preview unavailable'}</strong><p>${esc(error)}</p></div></div>`:`<p class="callout">${esc(c.note)}</p><div class="diff-list"><div class="diff-row"><span class="diff-mark">Δ</span><span class="diff-copy">Affected bytes: +${c.added} / −${c.removed} / changed ${c.changed}</span></div>${c.changes.map(([sign,text])=>`<div class="diff-row ${sign==='+'?'is-add':sign==='−'?'is-remove':'is-warn'}"><span class="diff-mark">${sign}</span><span class="diff-copy">${text}</span></div>`).join('')}</div><p class="mini-note">${c.added+c.removed+c.changed>12?'First 12 affected bytes shown. ':''}Before: ${records(working).length} canonical HEX records. After: ${records(c.after).length} canonical HEX records. Raw input lines remain unchanged.</p>${recordDiff}${c.output?`<pre class="op-output" aria-label="Conversion output preview">${esc(c.output)}</pre>`:''}${c.crc?`<div class="crc-readout"><span class="crc-label">Computed ${esc(values.crc.preset)}</span><output class="crc-value">0x${c.crc.value}</output><span class="badge">live · no comparison</span></div><div class="crc-params"><span>poly <b>${addr(c.crc.p.poly)}</b></span><span>init <b>${addr(c.crc.p.init)}</b></span><span>xorout <b>${addr(c.crc.p.xor)}</b></span><span>refin / refout <b>${c.crc.p.reflect?'yes / yes':'no / no'}</b></span></div><p class="callout">${esc(c.crc.p.note)}</p>`:''}`);
-      $('applyBtn').disabled=blocked||selected==='crc';$('gateBadge').textContent=blocked?'Blocked':selected==='crc'?'Read-only':'Preview ready';$('gateBadge').className='badge '+(blocked?'badge-fail':'badge-ok');
-      $('gatePill').textContent=blocked?'Blocked':'Ready';$('gatePill').className='badge '+(blocked?'badge-fail':'badge-ok');
-      $('gateChecks').innerHTML=`<p class="callout ${blocked?'is-fail':''}">${blocked?esc(error):'Absolute addresses retained. Parameters previewed. Apply requires confirmation.'}</p>`;
+      const map=`<div class="mini-map">${[['Before',working],['After',c?c.after:working]].map(([label,map])=>`<div class="mini-map-row"><span class="mini-map-label">${label}</span><span class="mini-map-track" role="img" aria-label="${label}: ${map.size} populated bytes across ${ranges(map).length} segments">${mapHTML(map,lo,hi)}</span><span class="mini-map-meta">${map.size} B</span></div>`).join('')}</div><p class="mini-note mono">${addr(lo)}–${addr(hi)} · shared linear scale · gaps are unmapped</p>`;
+const body=error?`<div class="conflict-callout" role="alert"><div><strong>${selected==='merge'?'FBL + APP → blocked':'Preview unavailable'}</strong><p>${esc(error)}</p></div></div>`:`<p class="callout ${c.header?.verdict==='fail'?'is-fail':c.header?.verdict==='incomplete'?'is-warn':''}">${esc(c.note)}</p>${c.header?headerHTML(c.header):''}`+(readOnly?'':`<div class="diff-list"><div class="diff-row"><span class="diff-mark">Δ</span><span class="diff-copy">Affected bytes: +${c.added} / −${c.removed} / changed ${c.changed}</span></div>${c.changes.map(([sign,text])=>`<div class="diff-row ${sign==='+'?'is-add':sign==='−'?'is-remove':'is-warn'}"><span class="diff-mark">${sign}</span><span class="diff-copy">${text}</span></div>`).join('')}</div><p class="mini-note">${c.added+c.removed+c.changed>12?'First 12 affected bytes shown. ':''}Before: ${records(working).length} canonical HEX records. After: ${records(c.after).length} canonical HEX records. Raw input lines remain unchanged.</p>${recordDiff}`)+`${c.output?`<pre class="op-output" aria-label="Conversion output preview">${esc(c.output)}</pre>`:''}${c.crc?`<div class="crc-readout"><span class="crc-label">Computed ${esc(values.crc.preset)}</span><output class="crc-value">0x${c.crc.value}</output><span class="badge">live · no comparison</span></div><div class="crc-params"><span>poly <b>${addr(c.crc.p.poly)}</b></span><span>init <b>${addr(c.crc.p.init)}</b></span><span>xorout <b>${addr(c.crc.p.xor)}</b></span><span>refin / refout <b>${c.crc.p.reflect?'yes / yes':'no / no'}</b></span></div><p class="callout">${esc(c.crc.p.note)}</p>`:''}`;
+      $('previewContent').innerHTML=(readOnly?'':map)+body;
+      $('applyBtn').disabled=blocked||readOnly;$('gateBadge').textContent=blocked?'Blocked':readOnly?'Read-only':'Preview ready';$('gateBadge').className='badge '+(blocked?'badge-fail':'badge-ok');
+      $('gatePill').textContent=blocked?'Blocked':readOnly?'Read-only':'Ready';$('gatePill').className='badge '+(blocked?'badge-fail':readOnly?'':'badge-ok');
+      $('gateChecks').innerHTML=`<p class="callout ${blocked?'is-fail':''}">${blocked?esc(error):readOnly?'Read-only: nothing is applied to the working copy.':'Absolute addresses retained. Parameters previewed. Apply requires confirmation.'}</p>`;
       $('scopeRecords').textContent=working.size+' bytes';$('scopeList').innerHTML=`<dt>Source</dt><dd>FBL_APP_combined.dat</dd><dt>Working format</dt><dd>${esc(format)}</dd><dt>Revision</dt><dd>${revision}</dd><dt>Populated bytes</dt><dd>${working.size}</dd><dt>Span</dt><dd>${addr(wl)}–${addr(wh)}</dd>`;
-      $('statusGate').textContent=blocked?'Apply blocked':selected==='crc'?'Digest computed':'Preview ready';$('statusDot').className='status-dot '+(blocked?'fail':'ok');$('statusApplyNote').textContent=' · revision '+revision;$('statusStaged').textContent='1';$('statusConflicts').textContent=blocked?'1':'0';$('statusHint').textContent='Working copy only';$('sideFoot').textContent=working.size+' populated bytes · '+format;$('sessionNote').textContent='Revision '+revision+'. Apply commits this preview in this page; Reset restores the sample. Other views retain their independent sample sessions.';
+      $('statusGate').textContent=blocked?'Apply blocked':selected==='crc'?'Digest computed':selected==='header-check'?'Header checked':'Preview ready';$('statusDot').className='status-dot '+(blocked?'fail':'ok');$('statusApplyNote').textContent=' · revision '+revision;$('statusStaged').textContent='1';$('statusConflicts').textContent=blocked?'1':'0';$('statusHint').textContent='Working copy only';$('sideFoot').textContent=working.size+' populated bytes · '+format;$('sessionNote').textContent='Revision '+revision+'. Apply commits this preview in this page; Reset restores the sample. Other views retain their independent sample sessions.';
     }
     function render(){const op=specs.find(o=>o.id===selected),v=values[selected];
-      $('opList').innerHTML=specs.map(o=>`<button type="button" class="op-item" data-op="${o.id}" aria-current="${o.id===selected}"><span class="op-main"><span class="op-name" style="display:block">${o.name}</span><span class="op-desc" style="display:block">${o.desc}</span></span><span class="op-badge">${o.id==='crc'?'read':'edit'}</span></button>`).join('');
+      $('opList').innerHTML=specs.map(o=>`<button type="button" class="op-item" data-op="${o.id}" aria-current="${o.id===selected}"><span class="op-main"><span class="op-name" style="display:block">${o.name}</span><span class="op-desc" style="display:block">${o.desc}</span></span><span class="op-badge">${o.id==='crc'||o.id==='header-check'?'read':'edit'}</span></button>`).join('');
+    // Header cards add one input per `input` field of the selected template.
+    function formFields(op,v){const t=templates.get(v.template)?.tpl;
+      return op.fields.concat(op.id==='header'&&t&&!templateProblems(t).length?t.fields.filter(f=>f.kind==='uint'&&f.role==='input').map(f=>[f.key,f.label,String(f.default??'0'),null,'uint']):[]);}
+    function formHelp(op,v){if(op.id!=='header'&&op.id!=='header-check')return op.help||'Ranges are inclusive. Preview is bounded to 1 MiB. Apply affects this page only.';
+      const t=templates.get(v.template)?.tpl,known=t&&!templateProblems(t).length,shape=known?` Template: ${t.size} bytes, ${t.endian}-endian, pad ${t.pad}.`:'';
+      return (op.id==='header'?'Length and CRC are computed from the working copy with the new header in place. Bytes no field covers are written with the pad value.':'Read-only. Every field is compared with the template; length and CRC are computed from the populated block that contains the header.')+shape;}
       $('compactOperation').innerHTML=specs.map(o=>`<option value="${o.id}" ${o.id===selected?'selected':''}>${o.name}</option>`).join('');
-      $('operationDetail').innerHTML=`<div class="op-detail-head"><div class="op-detail-title"><h2>${op.name}</h2><p>${op.desc}. Edit parameters, inspect the before/after effect, then apply to the local working copy.</p></div></div><div class="op-body"><section class="form-section"><div class="form-section-head"><h3>Parameters</h3><span class="mini-note">absolute addresses</span></div><div class="form-section-body"><div class="form-grid">${op.fields.map(([key,label,,options,kind])=>`<div class="field"><label for="param-${key}">${label}</label>${options?`<select class="select" id="param-${key}" data-param="${key}">${options.map(x=>`<option ${x===v[key]?'selected':''}>${esc(x)}</option>`).join('')}</select>`:`<input class="input" id="param-${key}" data-param="${key}" value="${esc(v[key])}"${kind==='bytes'?' placeholder="48 B1 08 47"':''} spellcheck="false" autocomplete="off">`}</div>`).join('')}</div><p class="help">${esc(op.help||'Ranges are inclusive. Preview is bounded to 1 MiB. Apply affects this page only.')}</p></div></section><section class="preview-section"><div class="preview-section-head"><h3>Before / after preview</h3><span class="mini-note">recomputed from parameters</span></div><div class="preview-body" id="previewContent" aria-live="polite"></div></section></div><div class="op-apply-bar"><button class="btn" id="resetBtn" type="button">Reset sample</button><span class="toolbar-spacer"></span><button class="btn btn-primary" id="applyBtn" type="button">Review and apply</button></div>`;
+      $('operationDetail').innerHTML=`<div class="op-detail-head"><div class="op-detail-title"><h2>${op.name}</h2><p>${op.desc}. ${['crc','header-check'].includes(op.id)?'Read-only: the working copy is not changed.':'Edit parameters, inspect the before/after effect, then apply to the local working copy.'}</p></div></div><div class="op-body"><section class="form-section"><div class="form-section-head"><h3>Parameters</h3><span class="mini-note">absolute addresses</span></div><div class="form-section-body"><div class="form-grid">${formFields(op,v).map(([key,label,def,options,kind])=>`<div class="field"><label for="param-${key}">${label}</label>${options?`<select class="select" id="param-${key}" data-param="${key}">${options.map(x=>`<option ${x===v[key]?'selected':''}>${esc(x)}</option>`).join('')}</select>`:kind==='template'?`<div class="hdr-template-field"><select class="select" id="param-${key}" data-param="${key}">${[...templates].map(([id,e])=>`<option value="${id}" ${id===v[key]?'selected':''}>${esc(e.tpl.name)}${e.builtin?'':' · session'}</option>`).join('')}</select><button class="btn" type="button" id="tplManage" aria-haspopup="dialog">Templates…</button></div>`:`<input class="input" id="param-${key}" data-param="${key}" value="${esc(v[key]??def)}"${kind==='bytes'?' placeholder="48 B1 08 47"':''}${kind==='uint'?' inputmode="numeric"':''} spellcheck="false" autocomplete="off">`}</div>`).join('')}</div><p class="help">${esc(formHelp(op,v))}</p></div></section><section class="preview-section"><div class="preview-section-head"><h3>${selected==='header-check'?'Result':'Before / after preview'}</h3><span class="mini-note">${selected==='header-check'?'computed from the working copy':'recomputed from parameters'}</span></div><div class="preview-body" id="previewContent" aria-live="polite"></div></section></div><div class="op-apply-bar"><button class="btn" id="resetBtn" type="button">Reset sample</button><span class="toolbar-spacer"></span><button class="btn btn-primary" id="applyBtn" type="button">Review and apply</button></div>`;
       if(selected==='convert'){ $('param-width').disabled=v.target!=='SREC';$('param-base').disabled=v.target!=='BIN';$('param-value').disabled=v.target!=='BIN';$('param-line').disabled=v.target==='BIN'; }
       preview();
     }
     $('opList').addEventListener('click',e=>{const b=e.target.closest('[data-op]');if(b){selected=b.dataset.op;history.replaceState(null,'','#'+selected);render();}});
     $('compactOperation').addEventListener('change',e=>{selected=e.target.value;history.replaceState(null,'','#'+selected);render();});
     $('operationDetail').addEventListener('input',e=>{if(e.target.dataset.param){values[selected][e.target.dataset.param]=e.target.value;preview();}});
-    $('operationDetail').addEventListener('change',e=>{if(e.target.dataset.param){values[selected][e.target.dataset.param]=e.target.value;if(selected==='convert'&&e.target.dataset.param==='target'){render();$('param-target').focus();}else preview();}});
+    $('operationDetail').addEventListener('change',e=>{if(e.target.dataset.param){values[selected][e.target.dataset.param]=e.target.value;if(selected==='convert'&&e.target.dataset.param==='target'){render();$('param-target').focus();}else if(selected==='header'&&e.target.dataset.param==='template'){render();$('param-template').focus();}else preview();}});
+    // ---- template dialog: edit the JSON, read problems and the parsed layout ----
+    const tplDialog=$('headerTemplates');let tplPick=null,tplText='';
+    function toast(message){const el=document.createElement('div');el.className='toast';el.textContent=message;$('toastStack').appendChild(el);setTimeout(()=>el.remove(),3200);}
+    function tplRenderList(){
+      const group=(title,mine)=>{const ids=[...templates].filter(([,e])=>e.builtin!==mine).map(([id])=>id);return ids.length?`<p class="hdr-dialog-group">${title}</p>`+ids.map(id=>{const e=templates.get(id);return `<button type="button" class="hdr-dialog-item" role="option" data-tpl="${id}" aria-selected="${id===tplPick}">${esc(e.tpl.name)}<span class="muted"> · ${e.tpl.size} B</span></button>`;}).join(''):'';};
+      $('hdrTplList').innerHTML=group('Built-in',false)+group('This session',true);}
+    function parsed(){try{const t=JSON.parse(tplText);return templateProblems(t).length?null:t;}catch(error){return null;}}
+    const ruleOf=f=>f.kind==='magic'||f.kind==='const'?`bytes ${f.bytes}`:f.kind==='crc'?`${f.preset} over ${f.basis}`:f.role==='input'?`entered on write${f.default!==undefined?', default '+f.default:''}`:`${f.basis} length${f.bias?' '+f.bias:''}`;
+    function tplValidate(){
+      let t=null,problems=[];try{t=JSON.parse(tplText);problems=templateProblems(t);}catch(error){problems=['json: '+error.message];}
+      const builtin=t?templates.get(t.id)?.builtin:false,l=t&&!problems.length?templateLayout(t):null;
+      $('hdrTplProblems').innerHTML=problems.length?problems.map(x=>`<p class="field-error">${esc(x)}</p>`).join(''):'<p class="check-row"><strong>Template is valid.</strong></p>';
+      $('hdrTplLayout').innerHTML=l?stripOf(l.fields.map(f=>({at:f.offset,size:f.size,name:f.label,bytes:f.kind==='magic'||f.kind==='const'?bytesOf(f.bytes).map(x=>hex(x,2)).join(' '):f.size+' B',cls:'is-info'})).concat(l.padding.map(([s,e])=>({at:s,size:e-s+1,name:'padding',bytes:`${hex(intOf(t.pad),2)} × ${e-s+1}`,cls:'is-pad'}))),72)+
+        `<div class="table-scroll"><table class="hdr-table"><thead><tr><th>Field</th><th class="num">Offset</th><th class="num">Size</th><th>Kind</th><th>Rule</th></tr></thead><tbody>${t.fields.map(f=>`<tr><td>${esc(f.label)}<span class="muted"> ${esc(f.key)}</span></td><td class="num">${hex(f.offset,2)}</td><td class="num">${f.size}</td><td>${esc(f.kind)}</td><td>${esc(ruleOf(f))}</td></tr>`).join('')}</tbody></table></div>`+
+        (builtin?`<p class="mini-note">"${esc(t.id)}" is a built-in template. Change id to keep your own copy in this session.</p>`:''):'';
+      $('hdrTplUse').disabled=!l;$('hdrTplSave').disabled=!l||!!builtin;$('hdrTplDelete').disabled=!t||!!builtin||!templates.has(t.id);}
+    function tplLoad(id){tplPick=id;const e=templates.get(id);tplText=JSON.stringify(e.tpl,null,2);$('hdrTplJson').value=tplText;tplRenderList();tplValidate();}
+    function openTemplates(){tplLoad(values[selected].template||EXAMPLE_APP.id);tplDialog.showModal();$('hdrTplList').querySelector('[aria-selected="true"]')?.focus();}
+    $('hdrTplList').addEventListener('click',e=>{const b=e.target.closest('[data-tpl]');if(b)tplLoad(b.dataset.tpl);});
+    $('hdrTplJson').addEventListener('input',e=>{tplText=e.target.value;tplValidate();});
+    $('hdrTplNew').addEventListener('click',()=>{tplPick=null;tplText=JSON.stringify({...EXAMPLE_APP,id:'my-header',name:'My header'},null,2);$('hdrTplJson').value=tplText;tplRenderList();tplValidate();$('hdrTplJson').focus();});
+    $('hdrTplCopy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(tplText);toast('Template JSON copied');}catch(error){$('hdrTplJson').select();toast('JSON selected — copy it with Ctrl+C');}});
+    $('hdrTplSave').addEventListener('click',()=>{const t=parsed();if(!t)return;templates.set(t.id,{builtin:false,tpl:t});tplPick=t.id;tplRenderList();tplValidate();toast(`Saved "${t.name}" for this session`);});
+    $('hdrTplDelete').addEventListener('click',()=>{const t=parsed();if(!t||templates.get(t.id)?.builtin)return;templates.delete(t.id);['header','header-check'].forEach(op=>{if(values[op].template===t.id)values[op].template=EXAMPLE_APP.id;});toast(`Deleted "${t.name}"`);tplLoad(EXAMPLE_APP.id);if(selected==='header'||selected==='header-check')preview();});
+    $('hdrTplUse').addEventListener('click',()=>{const t=parsed();if(!t)return;const stored=templates.get(t.id);templates.set(t.id,{builtin:!!stored?.builtin&&JSON.stringify(stored.tpl)===JSON.stringify(t),tpl:t});
+      values.header.template=values['header-check'].template=t.id;tplDialog.close();render();$('param-template')?.focus();});
+    $('hdrTplClose').addEventListener('click',()=>tplDialog.close());
+    tplDialog.addEventListener('close',()=>$('tplManage')?.focus());
     const dialog=$('confirmApply');
-    $('operationDetail').addEventListener('click',e=>{if(e.target.id==='resetBtn'){working=new Map(original);format='HEX';revision++;render();$('resetBtn').focus();}if(e.target.id==='applyBtn'&&candidate){pending=candidate;$('confirmCopy').textContent=`${candidate.note} Add ${candidate.added}, remove ${candidate.removed}, change ${candidate.changed} bytes. Source files remain untouched.`;dialog.showModal();$('cancelApply').focus();}});
+    $('operationDetail').addEventListener('click',e=>{if(e.target.id==='tplManage')openTemplates();if(e.target.id==='resetBtn'){working=new Map(original);format='HEX';revision++;render();$('resetBtn').focus();}if(e.target.id==='applyBtn'&&candidate){pending=candidate;$('confirmCopy').textContent=`${candidate.note} Add ${candidate.added}, remove ${candidate.removed}, change ${candidate.changed} bytes. Source files remain untouched.`;dialog.showModal();$('cancelApply').focus();}});
     $('cancelApply').addEventListener('click',()=>dialog.close());
     $('commitApply').addEventListener('click',()=>{if(pending&&pending.revision===revision){working=new Map(pending.after);format=pending.outFormat;revision++;dialog.close();render();$('statusGate').textContent='Applied to working copy';$('applyBtn').focus();}pending=null;});
     dialog.addEventListener('close',()=>{const b=$('applyBtn');if(b)b.focus();});
     const theme=document.querySelector('[data-theme-toggle]');function themeLabel(){theme.setAttribute('aria-label',document.documentElement.dataset.theme==='light'?'Switch to dark theme':'Switch to light theme');}theme.addEventListener('click',()=>{const t=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=t;try{localStorage.setItem('bitsmith-theme',t);}catch(e){}themeLabel();});themeLabel();
-    document.addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey||e.target.matches('input,select,textarea')||dialog.open)return;const route={'1':'records.html','2':'image.html','3':'operations.html','4':'learn.html'}[e.key];if(route)location.href=route;});
+    document.addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey||e.target.matches('input,select,textarea')||dialog.open||tplDialog.open)return;const route={'1':'records.html','2':'image.html','3':'operations.html','4':'learn.html'}[e.key];if(route)location.href=route;});
     render();
   })();
   </script>

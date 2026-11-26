@@ -114,6 +114,39 @@
   
     .ops-page .op-desc {white-space:normal;overflow:visible}
 @media(min-width:901px) and (max-width:1320px){.ops-page .workspace {grid-template-columns:var(--sidebar-w) minmax(0,1fr)}.ops-page .inspector {display:flex}}
+
+    /* Header templates: one strip, one table; status is colour plus a text badge. */
+    .hdr-template-field { display:flex; gap:var(--space-2); align-items:center; }
+    .hdr-template-field .select { flex:1; min-width:0; }
+    .hdr-strip { display:flex; flex-wrap:wrap; gap:4px; margin:var(--space-3) 0 var(--space-2); }
+    .hdr-seg { flex-basis:0; min-width:0; padding:4px 8px; border:1px solid var(--border); border-radius:var(--radius-xs); background:var(--surface-2); overflow-wrap:anywhere; }
+    .hdr-seg-name { display:block; color:var(--faint); font:var(--text-xs)/var(--lh-normal) var(--font-sans); }
+    .hdr-seg-bytes { display:block; color:var(--text); font:600 var(--text-xs)/var(--lh-normal) var(--font-mono); }
+    .hdr-seg.is-ok { background:var(--ok-bg); border-color:color-mix(in srgb,var(--ok) 35%,var(--border)); }
+    .hdr-seg.is-bad { background:var(--fail-bg); border-color:color-mix(in srgb,var(--fail) 35%,var(--border)); }
+    .hdr-seg.is-info { background:var(--bg-selected); }
+    .hdr-seg.is-unmapped, .hdr-seg.is-pad { border-style:dashed; }
+    .hdr-seg.is-unmapped { background:var(--gap-bg); }
+    .hdr-seg.is-pad { background:repeating-linear-gradient(135deg,var(--inset) 0 4px,var(--surface-2) 4px 8px); }
+    .hdr-table { width:100%; border-collapse:collapse; font-family:var(--font-mono); font-size:var(--text-xs); font-variant-numeric:tabular-nums; }
+    .hdr-table th { padding:4px 8px; border-bottom:1px solid var(--border-strong); color:var(--faint); font-family:var(--font-sans); font-weight:650; letter-spacing:0.065em; text-align:left; text-transform:uppercase; white-space:nowrap; }
+    .hdr-table td { padding:4px 8px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:top; overflow-wrap:anywhere; }
+    .hdr-table tr:last-child td { border-bottom:0; }
+    .hdr-table th.num, .hdr-table td.num { text-align:right; }
+    .hdr-table .muted { color:var(--muted); font-weight:400; }
+
+    /* Template dialog: list on the left, the JSON document and its parsed layout on the right. */
+    #headerTemplates { max-width:min(920px,92vw); width:min(920px,92vw); }
+    #headerTemplates h2 { font-size:var(--text-lg); }
+    .hdr-dialog-body { display:grid; grid-template-columns:200px minmax(0,1fr); gap:var(--space-4); }
+    .hdr-dialog-group { margin:0 0 4px; color:var(--faint); font-size:var(--text-xs); font-weight:650; letter-spacing:0.09em; text-transform:uppercase; }
+    .hdr-dialog-group:not(:first-child) { margin-top:var(--space-3); }
+    .hdr-dialog-item { display:block; width:100%; min-height:32px; padding:var(--space-2); border:1px solid transparent; border-radius:var(--radius-xs); background:transparent; color:var(--muted); font:var(--text-sm)/var(--lh-normal) var(--font-sans); text-align:left; overflow-wrap:anywhere; cursor:pointer; }
+    .hdr-dialog-item[aria-selected="true"] { background:var(--bg-selected); border-color:color-mix(in srgb,var(--accent) 40%,var(--border)); color:var(--text); }
+    .hdr-dialog-editor { display:flex; flex-direction:column; gap:var(--space-3); min-width:0; }
+    .hdr-json { min-height:216px; resize:vertical; font-family:var(--font-mono); font-size:var(--text-sm); line-height:var(--lh-normal); }
+    .hdr-dialog-foot { display:flex; flex-wrap:wrap; gap:var(--space-2); align-items:center; }
+    @media(max-width:900px){.hdr-dialog-body {grid-template-columns:minmax(0,1fr)}}
   </style>
 </head>
 <body class="ops-page">

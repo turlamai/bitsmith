@@ -132,6 +132,8 @@ Semantic roles: `--bg`/`--text` form the canvas pair; `--surface-1/2/3` and `--i
 | Operation card | Parameters → before/after map → affected-byte and record summary → confirmation → local commit. |
 | Status bar | Current state and revision; derived from the same local state as the view. |
 | Assumption banner | Marks BIN base and any substituted gap fill explicitly. |
+| Header strip | One segment per template field plus one per padding run; width is the byte count, so it doubles as a scale. Status is colour plus a text badge. |
+| Template dialog | Template list on the left, the JSON document and its parsed layout on the right; one JSON document is the only template artifact. |
 
 ## Interaction baseline
 
@@ -142,6 +144,10 @@ Semantic roles: `--bg`/`--text` form the canvas pair; `--surface-1/2/3` and `--i
 - **Merge:** source segments are the supplied FBL and APP. Separate placement succeeds; “Overlap FBL · error” demonstrates a blocked collision. Resolve through an explicit non-overlapping APP base; never silently overwrite.
 - **Convert strategy:** HEX/SREC/BIN target, S1/S2/S3 address width, 16/32 data bytes per line, 0x00/0xFF gap fill, BIN base. Width loss blocks conversion; S3 is needed for the supplied 32-bit absolute addresses. Sparse text output retains gaps. BIN materialises gaps and carries an explicit base assumption. No download/export is added.
 - **CRC:** reads current populated bytes plus the explicit missing-byte policy over an inclusive range. MPEG-2 project preset uses the requested poly 0x04C11DB7, init 0xFFFFFFFF, xorout 0xFFFFFFFF, no reflection. This differs from conventional MPEG-2 xorout 0x00000000 and is labelled in the UI. ISO-HDLC uses zlib-compatible reflection; XMODEM and sum8 are available. There is no invented stored CRC or match verdict.
+- **Header / Header check:** two operation cards, not a fifth view. A template is one JSON document (`format: "bitsmith-header-template"`, `version: 1`): `id`, `name`, `size` 1–4096, `endian` little or big, `pad`, and 1–64 non-overlapping `fields` inside the header. Field kinds: `magic` (identity), `const` (a fixed value that must be held), `uint` as `role: input` (entered, optional default) or `role: length` (`basis: block | payload`, optional `bias`), and `crc` with one of the four existing presets and `basis: header | payload | block`. **Header** (edit) writes the template at an absolute address through the same preview → diff → confirm → revision gate as every edit; uncovered header bytes take `pad`. **Header check** (read-only) compares the bytes at that address with the template and leaves the working copy untouched. Every verdict is computed live from the working copy.
+- **Block and derived values:** a block is the populated run that contains the header's first address; a hole ends it. `block` lengths count from the header start, `payload` lengths start after the header. A CRC field never covers itself (or another CRC field). A derived value is never computed across missing bytes and a gap is never filled to produce one: the field is reported unmapped and the verdict is `incomplete`. `fail` outranks `incomplete`.
+- **Template storage:** two built-in synthetic examples plus templates saved for the session. The dialog validates the JSON on every keystroke, reports each problem by path and renders the parsed layout as strip plus table. A form-based template editor and persistence across restarts are not designed.
+- **Read-only result layout:** CRC and Header check share one layout — result only, no before/after map, no diff list, Apply gate says nothing is applied.
 - **Teaching:** byte-by-byte Intel HEX and S7 termination anatomy; live HEX input arithmetic and computed S-record one's-complement arithmetic; comparison covers addresses, overhead, use and risk. Supplied source samples are preserved verbatim in a disclosure.
 
 ## Invariants
@@ -153,6 +159,8 @@ Semantic roles: `--bg`/`--text` form the canvas pair; `--surface-1/2/3` and `--i
 - Stored and expected checksum bytes are separate values. The deliberately corrupted `:0480200048B1084700` is preserved; expected checksum is computed as 14.
 - All supplied source strings remain unchanged. Local operations use decoded byte maps; overlapping source addresses take the last supplied record's byte for this bounded preview.
 - Preview and CRC range processing is bounded to 1 MiB; address arithmetic is unsigned 32-bit. No large-file performance claim.
+- Header lengths and CRCs are derived from the bytes that are actually present. HEX omits erased trailing bytes, so a block may end early: materialise them with Fill or Pad to alignment before relying on a block-based value. Block length is bounded to 1 MiB.
+- Templates saved in the session are the user's own; the built-in examples are synthetic and never describe a real product header.
 
 ## HIG checklist for acceptance
 
@@ -174,7 +182,7 @@ Professional firmware tooling targets desktop macOS/Windows/Linux; no mobile pro
 
 ## Out of scope — phase 2
 
-Header templates, vector table tooling, and a dedicated image-to-image diff workspace belong to phase 2. The required operation preview diff remains in scope. Starting a patch from a byte selection in the Image view, and marking source records that no longer match the working copy after a patch, are not designed yet. Native RPC integration, production file writing, shared multi-view sessions, large-file processing, persistence across reloads and standalone export are not represented as implemented engine features.
+Vector table tooling and a dedicated image-to-image diff workspace belong to phase 2. Header templates were pulled forward and are designed under Interaction baseline (2026-11-25). The required operation preview diff remains in scope. Starting a patch from a byte selection in the Image view, and marking source records that no longer match the working copy after a patch, are not designed yet. Native RPC integration, production file writing, shared multi-view sessions, large-file processing, persistence across reloads and standalone export are not represented as implemented engine features.
 
 
 ## 2026-11-15 navigation repair
@@ -243,3 +251,21 @@ Added prototype-first (issue #5): a Patch card on the Operations screen, second 
 | Sidebar address range | Fixed 2026-11-26 in prototype and product CSS | The break came from `word-break: break-all` and `overflow-wrap: anywhere` on sidebar values, not from the engine: browsers already break after an en dash. Values now wrap to their own full-width line first and split only after the dash. See "Prototype polish — 2026-11-26". |
 | Brand case | Applied | Lowercase **bitsmith** in product page titles, wordmark and copy, as the contract states. The README H1 still reads `Bitsmith`. |
 | User acceptance | Open | Only the user can close this condition. |
+
+## App header templates — 2026-11-25
+
+Designed prototype-first (issue #10) against family spec revision `2026-11-20-minimal-family`, starting from product `a470b6a`. Contract is the Header / Header check, Block and derived values, Template storage and Read-only result layout bullets under Interaction baseline. No new token or view: two operation cards after CRC, a header strip, a template dialog. `public/operations.html` takes the new prototype style block so the design gate holds; the product gets the cards only when the engine offers them (follow-up pull request).
+
+| Check | Result | Evidence / limit |
+| --- | --- | --- |
+| Prototype script syntax | Passed | All inline scripts on `prototype/operations.html` parse with Node 22. |
+| Template validation | Passed in a stubbed DOM | Both built-in templates validate; 15 invalid documents are each rejected with the path of the problem (bad id, name, size, endian, pad, missing or excess fields, duplicate keys, zero size, field beyond the header, overlapping fields, wrong fixed-byte length, bad uint width, bad role, default out of range, bad CRC preset or width). |
+| Header check | Passed in a stubbed DOM | The untouched sample fails on magic, length and CRC; after a write and confirm it passes at revision 1; a CRC whose coverage reaches a hole is reported unmapped and the verdict is `incomplete`. |
+| Header write | Passed in a stubbed DOM | 8 bytes added and 7 changed on the sample; length 0x18 over a 24-byte block; CRC-32/MPEG-2 over 20 bytes gives `0xD7EFB972`, and the written header then passes Header check. A header equal to the bytes already present, an out-of-range, malformed or missing value, a negative or too-wide length, an address past 0xFFFFFFFF and an unpopulated start each block with a specific message. The big-endian example writes payload length 0x0C and pads its last two bytes with 0x00. |
+| Design gate | Passed | `scripts/check-design-sync.py`: stylesheet identical, page styles aligned, no type below 12px. |
+| Rendering in the real WebView | Passed on Windows | System WebView2, dark at 2000×2000 and light at 1700×2000 (150% scaling): write preview with strip, table and per-field explanation; check in fail and pass state; dialog in valid, problem and big-endian states. A one-byte field wrapped its label in the dialog; the strip now keeps a 72px basis there. Screenshots stay outside the repo. |
+| Read-only result layout | Changed for CRC too | CRC no longer shows a before/after map or a `+0 / −0` diff list; the section is titled Result. Re-rendered for Header check only; the CRC card in the prototype was not re-screenshotted. |
+| Narrow and other platforms | Open | 1700 CSS px light inspected; 1024 px, macOS and Linux rendering, screen readers, 200% text scaling and measured contrast were not inspected. |
+| Session templates on Windows | Open | Saved templates last for the session only, under the same WebView2 profile limitation recorded for the theme above. |
+| Product implementation | Not in this slice | Engine, API, i18n and `public/operations.js` follow in a second pull request. |
+| User acceptance | Open | Placing the feature in two operation cards and keeping JSON as the only template format are design decisions recorded in issue #10; the user has not confirmed them. |
