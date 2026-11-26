@@ -250,3 +250,36 @@ Family revision `2026-11-20-minimal-family`, starting from `47291d5`. This secti
 
 - **Default density: **Compact**. Existing primary buttons and toolbar controls measure 24–36px (26 / 30 typical). Rationale: a print-slicing tool whose whole window is dense live data (layer table, operations, 3D view); hit targets stay ≥ 28px for pointer use.
 - **Scale debt (not changed)**: a static scan of every stylesheet under `design/` for values outside the family scale. Font sizes are all inside the family roles (12/13/14/16/18/24). Radii are inside the 4/8/12 scale apart from one 0.5px hairline, which is a border width rather than a radius value and is left as is. No scale debt recorded. Existing products align progressively in the next related slice; these were deliberately not changed inside a contrast fix.
+
+
+## Temperament profile declaration — 2026-11-26 (family standard `2026-11-26-temperament-profiles`)
+
+Pass requested by the owner over every product prototype against the new family standard. Scope is "declare the profile + align the affected deltas + record what is left": no screen was redrawn, no information architecture changed, no second token table added. **The profile was judged by the agent and waits for the owner to confirm or correct it.**
+
+### Profile
+
+- **Primary profile**: Geek (极客). records and addresses are read as hex, checksums are verified and the learn page explains the rules; keyboard and data first.
+- **Main task**: unchanged, see the Brief above.
+- **Delta from the reading default**: the mono role extends to data, addresses and status lines; tabular digits; compact preset; the default theme follows the content (currently dark) and both themes stay paired.
+- **Borrowed profile**: the explanatory prose on `learn.html` takes the reading profile measure.
+
+### Changes in this pass
+
+- Font stacks: explicit CJK fallback before the generic family in the UI and mono stacks (§9 "Mono and CJK"); values stay in `shared.css` only.
+- The stack change reaches the product UI: `public/shared.css` is a verbatim copy of this stylesheet, so it was re-copied (`scripts/check-design-sync.py` is green).
+- Typography baseline: `body { text-autospace: normal; line-break: strict }` (§10). The existing `::selection` and custom scrollbar rules were kept, nothing was layered on top.
+- `learn.html`: body paragraphs and list items capped at 64ch (was 866px, about 120 characters a line).
+- `records.html`: the hidden file input is opened from script, so it now carries its own `aria-label` (it was an unnamed control).
+
+### Measurement
+
+Headless Edge at 1280×800 (390×844 for mobile pages), light and dark, measured per page; contrast is a script approximation (translucent highlight backgrounds, colour emoji and glyph symbols get miscounted).
+
+Over-wide prose 30→4 (the remaining 4 are `<p>` elements used as command output, not prose); unnamed controls 4→0; low-contrast text 0→0.
+
+### Left open
+
+- Inline text links whose hit area is under 24px (carried over from the previous pass, wide spread): untouched, needs a per-page ruling (padding or a button).
+- Monitoring and geek profiles need every numeric column checked for tabular digits; this pass only counted hits by script and no column was inspected.
+- Scale items already recorded above (radius, type sizes, weights) are unchanged and stay on gradual alignment.
+- §10 core-screen polish rounds need an owner ruling per round; this pass is agent measurement and self-review only and does not count as a round.
