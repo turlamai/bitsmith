@@ -328,6 +328,7 @@
     }
     function mapHTML(map,lo,hi){let parts=[],at=lo;for(const[a,b]of ranges(map)){if(a>at)parts.push([a-at,'gap',`${addr(at)}–${addr(a-1)} unmapped`]);parts.push([b-a+1,a<0x08008000?'fbl':'app',`${addr(a)}–${addr(b)} populated`]);at=b+1;}if(at<=hi)parts.push([hi-at+1,'gap',`${addr(at)}–${addr(hi)} unmapped`]);return parts.map(([n,c,title])=>`<span class="map-part ${c}" style="flex:${n}" title="${title}" aria-label="${title}"></span>`).join('');}
     function preview(){
+      const detailsOpen=$('previewContent').querySelector('details')?.open;
       candidate=null;let error='';try{candidate=compute();}catch(e){error=e.message;}
       const blocked=!!error,c=candidate;const [wl,wh]=bounds(working),[al,ah]=c?bounds(c.after):[wl,wh],lo=Math.min(wl,al),hi=Math.max(wh,ah);
       let recordDiff='';
@@ -341,6 +342,7 @@
       }
       $('previewContent').innerHTML=`<div class="mini-map">${[['Before',working],['After',c?c.after:working]].map(([label,map])=>`<div class="mini-map-row"><span class="mini-map-label">${label}</span><span class="mini-map-track" role="img" aria-label="${label}: ${map.size} populated bytes across ${ranges(map).length} segments">${mapHTML(map,lo,hi)}</span><span class="mini-map-meta">${map.size} B</span></div>`).join('')}</div><p class="mini-note mono">${addr(lo)}–${addr(hi)} · shared linear scale · gaps are unmapped</p>`+
       (error?`<div class="conflict-callout" role="alert"><div><strong>${selected==='merge'?'FBL + APP → blocked':'Preview unavailable'}</strong><p>${esc(error)}</p></div></div>`:`<p class="callout">${esc(c.note)}</p><div class="diff-list"><div class="diff-row"><span class="diff-mark">Δ</span><span class="diff-copy">Affected bytes: +${c.added} / −${c.removed} / changed ${c.changed}</span></div>${c.changes.map(([sign,text])=>`<div class="diff-row ${sign==='+'?'is-add':sign==='−'?'is-remove':'is-warn'}"><span class="diff-mark">${sign}</span><span class="diff-copy">${text}</span></div>`).join('')}</div><p class="mini-note">${c.added+c.removed+c.changed>12?'First 12 affected bytes shown. ':''}Before: ${records(working).length} canonical HEX records. After: ${records(c.after).length} canonical HEX records. Raw input lines remain unchanged.</p>${recordDiff}${c.output?`<pre class="op-output" aria-label="Conversion output preview">${esc(c.output)}</pre>`:''}${c.crc?`<div class="crc-readout"><span class="crc-label">Computed ${esc(values.crc.preset)}</span><output class="crc-value">0x${c.crc.value}</output><span class="badge">live · no comparison</span></div><div class="crc-params"><span>poly <b>${addr(c.crc.p.poly)}</b></span><span>init <b>${addr(c.crc.p.init)}</b></span><span>xorout <b>${addr(c.crc.p.xor)}</b></span><span>refin / refout <b>${c.crc.p.reflect?'yes / yes':'no / no'}</b></span></div><p class="callout">${esc(c.crc.p.note)}</p>`:''}`);
+      if(detailsOpen&&$('previewContent').querySelector('details'))$('previewContent').querySelector('details').open=true;
       $('applyBtn').disabled=blocked||selected==='crc';$('gateBadge').textContent=blocked?'Blocked':selected==='crc'?'Read-only':'Preview ready';$('gateBadge').className='badge '+(blocked?'badge-fail':'badge-ok');
       $('gatePill').textContent=blocked?'Blocked':'Ready';$('gatePill').className='badge '+(blocked?'badge-fail':'badge-ok');
       $('gateChecks').innerHTML=`<p class="callout ${blocked?'is-fail':''}">${blocked?esc(error):'Absolute addresses retained. Parameters previewed. Apply requires confirmation.'}</p>`;
@@ -354,17 +356,17 @@
       if(selected==='convert'){ $('param-width').disabled=v.target!=='SREC';$('param-base').disabled=v.target!=='BIN';$('param-value').disabled=v.target!=='BIN';$('param-line').disabled=v.target==='BIN'; }
       preview();
     }
-    $('opList').addEventListener('click',e=>{const b=e.target.closest('[data-op]');if(b){selected=b.dataset.op;history.replaceState(null,'','#'+selected);render();}});
+    $('opList').addEventListener('click',e=>{const b=e.target.closest('[data-op]');if(b){selected=b.dataset.op;history.replaceState(null,'','#'+selected);render();$('opList').querySelector('[aria-current="true"]')?.focus({preventScroll:true});}});
     $('compactOperation').addEventListener('change',e=>{selected=e.target.value;history.replaceState(null,'','#'+selected);render();});
     $('operationDetail').addEventListener('input',e=>{if(e.target.dataset.param){values[selected][e.target.dataset.param]=e.target.value;preview();}});
     $('operationDetail').addEventListener('change',e=>{if(e.target.dataset.param){values[selected][e.target.dataset.param]=e.target.value;if(selected==='convert'&&e.target.dataset.param==='target'){render();$('param-target').focus();}else preview();}});
     const dialog=$('confirmApply');
-    $('operationDetail').addEventListener('click',e=>{if(e.target.id==='resetBtn'){working=new Map(original);format='HEX';revision++;render();$('resetBtn').focus();}if(e.target.id==='applyBtn'&&candidate){pending=candidate;$('confirmCopy').textContent=`${candidate.note} Add ${candidate.added}, remove ${candidate.removed}, change ${candidate.changed} bytes. Source files remain untouched.`;dialog.showModal();$('cancelApply').focus();}});
+    $('operationDetail').addEventListener('click',e=>{if(e.target.id==='resetBtn'){working=new Map(original);format='HEX';revision++;render();$('resetBtn').focus();}if(e.target.id==='applyBtn'&&!e.target.disabled&&candidate&&selected!=='crc'){pending=candidate;$('confirmCopy').textContent=`${candidate.note} Add ${candidate.added}, remove ${candidate.removed}, change ${candidate.changed} bytes. Source files remain untouched.`;dialog.showModal();$('cancelApply').focus();}});
     $('cancelApply').addEventListener('click',()=>dialog.close());
-    $('commitApply').addEventListener('click',()=>{if(pending&&pending.revision===revision){working=new Map(pending.after);format=pending.outFormat;revision++;dialog.close();render();$('statusGate').textContent='Applied to working copy';$('applyBtn').focus();}pending=null;});
-    dialog.addEventListener('close',()=>{const b=$('applyBtn');if(b)b.focus();});
+    $('commitApply').addEventListener('click',()=>{if(pending&&pending===candidate&&pending.revision===revision&&selected!=='crc'){working=new Map(pending.after);format=pending.outFormat;revision++;dialog.close();render();$('statusGate').textContent='Applied to working copy';$('applyBtn').focus();}pending=null;});
+    dialog.addEventListener('close',()=>{pending=null;const b=$('applyBtn');(b&&!b.disabled?b:$('resetBtn'))?.focus({preventScroll:true});});
     const theme=document.querySelector('[data-theme-toggle]');function themeLabel(){theme.setAttribute('aria-label',document.documentElement.dataset.theme==='light'?'Switch to dark theme':'Switch to light theme');}theme.addEventListener('click',()=>{const t=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=t;try{localStorage.setItem('bitsmith-theme',t);}catch(e){}themeLabel();});themeLabel();
-    document.addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey||e.target.matches('input,select,textarea')||dialog.open)return;const route={'1':'records.html','2':'image.html','3':'operations.html','4':'learn.html'}[e.key];if(route)location.href=route;});
+    document.addEventListener('keydown',e=>{if(e.isComposing||e.repeat||e.metaKey||e.ctrlKey||e.altKey||e.target.closest('input,select,textarea,[contenteditable]')||dialog.open)return;const route={'1':'records.html','2':'image.html','3':'operations.html','4':'learn.html'}[e.key];if(route)location.href=route;});
     render();
   })();
   </script>
